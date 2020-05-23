@@ -6,7 +6,10 @@
     public class Keys
     {
         private readonly MatrixApi _api;
-        
-        public Keys(MatrixApi api) => _api = api;
+
+        public Keys(MatrixApi api)
+        {
+            _api = api;
+        }
     }
 }

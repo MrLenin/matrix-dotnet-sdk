@@ -15,7 +15,7 @@ namespace Matrix
 
             var apiPath = new Uri("/_matrix/client/r0/devices", UriKind.Relative);
             var res = await _matrixApiBackend.GetAsync(apiPath, true).ConfigureAwait(false);
-            
+
             if (res.Error.IsOk) return res.Result.ToObject<Device[]>();
 
             throw new MatrixException(res.Error.ToString());

@@ -6,9 +6,9 @@ using Matrix.Structures;
 
 namespace Matrix.Example.Client
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var homeserverUrl = new Uri("http://localhost:8008");
 
@@ -27,13 +27,11 @@ namespace Matrix.Example.Client
                 var login = client.LoginWithPassword(username, password);
                 File.WriteAllText("/tmp/mx_access", $"{login.AccessToken}${login.UserId}");
             }
+
             Console.WriteLine("Starting sync");
             client.StartSync();
             Console.WriteLine("Finished initial sync");
-            foreach (var room in client.GetAllRooms())
-            {
-                Console.WriteLine($"Found room: {room.Id}");
-            }
+            foreach (var room in client.GetAllRooms()) Console.WriteLine($"Found room: {room.Id}");
         }
     }
 }

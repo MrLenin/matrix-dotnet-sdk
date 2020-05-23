@@ -27,8 +27,8 @@ namespace Matrix.Client
             set => Api.SyncTimeout = value;
         }
 
-        readonly ConcurrentDictionary<string,MatrixRoom> _rooms	=
-            new ConcurrentDictionary<string,MatrixRoom>();
+        private readonly ConcurrentDictionary<string, MatrixRoom> _rooms =
+            new ConcurrentDictionary<string, MatrixRoom>();
 
         public event MatrixInviteDelegate OnInvite;
 
@@ -38,7 +38,7 @@ namespace Matrix.Client
         /// Get the underlying API that MatrixClient wraps. Here be dragons 🐲.
         /// </summary>
         public MatrixApi Api { get; }
-        
+
         public Keys Keys { get; }
 
         /// <summary>
@@ -53,14 +53,14 @@ namespace Matrix.Client
 
             Api = new MatrixApi(url);
             Keys = new Keys(Api);
-            
+
             try
             {
                 Api.ClientVersions();
                 Api.OnSyncJoinEvent += MatrixClient_OnEvent;
                 Api.OnSyncInviteEvent += MatrixClient_OnInvite;
             }
-            catch(MatrixException e)
+            catch (MatrixException e)
             {
                 throw new MatrixException("An exception occurred while trying to connect", e);
             }
@@ -74,7 +74,7 @@ namespace Matrix.Client
         /// <param name="url">URL before /_matrix/</param>
         /// <param name="applicationToken">Application token for the AS.</param>
         /// <param name="userId">Userid as the user you intend to go as.</param>
-        public MatrixClient (Uri url, string applicationToken, string userId)
+        public MatrixClient(Uri url, string applicationToken, string userId)
         {
             Api = new MatrixApi(url, applicationToken, userId);
         }
@@ -82,7 +82,7 @@ namespace Matrix.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="Matrix.Client.MatrixClient"/> class for testing.
         /// </summary>
-        public MatrixClient (MatrixApi api)
+        public MatrixClient(MatrixApi api)
         {
             Api = api ?? throw new ArgumentNullException(nameof(api));
             api.OnSyncJoinEvent += MatrixClient_OnEvent;
@@ -107,7 +107,7 @@ namespace Matrix.Client
             return Api.GetAccessToken();
         }
 
-        public MatrixLoginResponse GetCurrentLogin ()
+        public MatrixLoginResponse GetCurrentLogin()
         {
             return Api.GetCurrentLogin();
         }
@@ -117,7 +117,7 @@ namespace Matrix.Client
             OnInvite?.Invoke(roomId, joined);
         }
 
-        private void MatrixClient_OnEvent (string roomId, MatrixEventRoomJoined joined)
+        private void MatrixClient_OnEvent(string roomId, MatrixEventRoomJoined joined)
         {
             MatrixRoom matrixRoom;
             if (!_rooms.ContainsKey(roomId))
@@ -196,15 +196,15 @@ namespace Matrix.Client
         {
             userId ??= Api.UserId;
             var profile = Api.ClientProfile(userId);
-            return (profile != null) ? new MatrixUser (profile, userId) : null;
+            return profile != null ? new MatrixUser(profile, userId) : null;
         }
 
-        public void SetDisplayName (string displayName)
+        public void SetDisplayName(string displayName)
         {
             Api.ClientSetDisplayName(Api.UserId, displayName);
         }
 
-        public void SetAvatar (Uri avatarUrl)
+        public void SetAvatar(Uri avatarUrl)
         {
             Api.ClientSetAvatar(Api.UserId, avatarUrl);
         }
@@ -261,7 +261,7 @@ namespace Matrix.Client
 
             roomId = Api.ClientJoin(roomId);
 
-            if(roomId == null)
+            if (roomId == null)
                 return null;
 
             var room = new MatrixRoom(Api, roomId);
@@ -306,10 +306,10 @@ namespace Matrix.Client
         {
             var room = _rooms.Values.FirstOrDefault(
                 x =>
-                    {
-                        if(x.CanonicalAlias == alias) return true;
-                        return x.Aliases != null && x.Aliases.Contains(alias);
-                    });
+                {
+                    if (x.CanonicalAlias == alias) return true;
+                    return x.Aliases != null && x.Aliases.Contains(alias);
+                });
 
             return room;
         }
@@ -319,7 +319,7 @@ namespace Matrix.Client
         /// </summary>
         /// <param name="messageType">Message type.</param>
         /// <param name="type">Type that inherits MatrixMRoomMessage</param>
-        public void AddRoomMessageType (string messageType, Type type)
+        public void AddRoomMessageType(string messageType, Type type)
         {
             Api.AddMessageType(messageType, type);
         }
@@ -329,7 +329,7 @@ namespace Matrix.Client
         /// </summary>
         /// <param name="messageType">Message type.</param>
         /// <param name="type">Type that inherits MatrixMRoomMessage</param>
-        public void AddStateEventType (string messageType, Type type)
+        public void AddStateEventType(string messageType, Type type)
         {
             Api.AddEventType(messageType, type);
         }
@@ -343,7 +343,7 @@ namespace Matrix.Client
         {
             Api.DeleteFromRoomDirectory(alias);
         }
- 
+
         /// <summary>
         /// Releases all resource used by the <see cref="Matrix.Client.MatrixClient"/> object.
         /// In addition, this will stop the sync thread.

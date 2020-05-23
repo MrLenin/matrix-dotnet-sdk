@@ -2,6 +2,7 @@ using System;
 using Moq;
 using Matrix.Structures;
 using Matrix;
+
 namespace Matrix.Tests
 {
     public class Utils
@@ -11,11 +12,9 @@ namespace Matrix.Tests
             string stateKey = null,
             int age = 0)
         {
-            MatrixEvent ev = new MatrixEvent();
+            var ev = new MatrixEvent();
             ev.content = content;
-            if(stateKey != null) {
-                ev.state_key = stateKey;
-            }
+            if (stateKey != null) ev.state_key = stateKey;
             ev.age = age;
             return ev;
         }

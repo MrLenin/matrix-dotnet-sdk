@@ -14,10 +14,11 @@ namespace Matrix
             var apiPath = new Uri("/_matrix/media/r0/upload", UriKind.Relative);
             var error = _matrixApiBackend.Post(apiPath, true, data,
                 new Dictionary<string, string> {{"Content-Type", contentType}}, out var result);
-            
+
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
-            var mxcString = (result as JObject)?.GetValue("content_uri", StringComparison.InvariantCulture).ToObject<string>();
+            var mxcString = (result as JObject)?.GetValue("content_uri", StringComparison.InvariantCulture)
+                .ToObject<string>();
             return new Uri(mxcString, UriKind.Relative);
         }
     }

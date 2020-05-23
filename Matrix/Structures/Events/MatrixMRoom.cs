@@ -1,51 +1,58 @@
 ﻿namespace Matrix.Structures
 {
-	public enum EMatrixRoomJoinRules{
-		Public,
-		Knock,
-		Invite,
-		Private
-	}
+    public enum EMatrixRoomJoinRules
+    {
+        Public,
+        Knock,
+        Invite,
+        Private
+    }
 
-	public enum EMatrixRoomHistoryVisibility{
-		Invited,
-		Joined,
-		Shared,
-		World_Readable
-	}
+    public enum EMatrixRoomHistoryVisibility
+    {
+        Invited,
+        Joined,
+        Shared,
+        World_Readable
+    }
 
-	public class MatrixRoomStateEvent : MatrixEventContent{
+    public class MatrixRoomStateEvent : MatrixEventContent
+    {
+    }
 
-	}
+    public class MatrixMRoomAliases : MatrixRoomStateEvent
+    {
+        public string[] aliases;
+    }
 
-	public class MatrixMRoomAliases : MatrixRoomStateEvent
-	{
-		public string[] aliases;
-	}
+    public class MatrixMRoomCanonicalAlias : MatrixRoomStateEvent
+    {
+        public string alias;
+    }
 
-	public class MatrixMRoomCanonicalAlias : MatrixRoomStateEvent{
-		public string alias;
-	}
+    public class MatrixMRoomCreate : MatrixRoomStateEvent
+    {
+        public bool mfederate = true;
+        public string creator;
+    }
 
-	public class MatrixMRoomCreate : MatrixRoomStateEvent{
-		public bool mfederate = true;
-		public string creator;	
-	}
+    public class MatrixMRoomJoinRules : MatrixRoomStateEvent
+    {
+        public EMatrixRoomJoinRules join_rule;
+    }
 
-	public class MatrixMRoomJoinRules : MatrixRoomStateEvent{
-		public EMatrixRoomJoinRules join_rule;
-	}
+    public class MatrixMRoomName : MatrixRoomStateEvent
+    {
+        public string name;
+    }
 
-	public class MatrixMRoomName : MatrixRoomStateEvent{
-		public string name;
-	}
+    public class MatrixMRoomTopic : MatrixRoomStateEvent
+    {
+        public string topic;
+    }
 
-	public class MatrixMRoomTopic : MatrixRoomStateEvent{
-		public string topic;
-	}
-
-	public class MatrixMRoomHistoryVisibility : MatrixRoomStateEvent{
-		public EMatrixRoomHistoryVisibility history_visibility;
-	}
+    public class MatrixMRoomHistoryVisibility : MatrixRoomStateEvent
+    {
+        public EMatrixRoomHistoryVisibility history_visibility;
+    }
 }
-

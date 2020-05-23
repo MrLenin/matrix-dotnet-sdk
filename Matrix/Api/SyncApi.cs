@@ -46,7 +46,7 @@ namespace Matrix
             if (RunningInitialSync)
                 RunningInitialSync = false;
         }
-        
+
         public void StartSyncThreads()
         {
             if (_pollThread == null)

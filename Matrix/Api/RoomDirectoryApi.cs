@@ -18,27 +18,26 @@ namespace Matrix
 
             if (!string.IsNullOrEmpty(since))
                 qs.Set("since", since);
-            
+
             if (!string.IsNullOrEmpty(server))
                 qs.Set("server", server);
 
             var apiPath = new Uri($"/_matrix/client/r0/publicRooms?{qs}", UriKind.Relative);
             var error = _matrixApiBackend.Get(apiPath, true, out var result);
-            
-            if (!error.IsOk) throw new MatrixException (error.ToString());
-            
+
+            if (!error.IsOk) throw new MatrixException(error.ToString());
+
             return result.ToObject<PublicRooms>();
         }
-		
+
         public void DeleteFromRoomDirectory(string alias)
         {
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/directory/room/{alias}", UriKind.Relative);
-            var error = _matrixApiBackend.Delete(apiPath, true, out var _);
-            
-            if (!error.IsOk) throw new MatrixException (error.ToString());
-        }
+            var error = _matrixApiBackend.Delete(apiPath, true, out _);
 
+            if (!error.IsOk) throw new MatrixException(error.ToString());
+        }
     }
 }

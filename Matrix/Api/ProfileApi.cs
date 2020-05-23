@@ -17,32 +17,35 @@ namespace Matrix
             return error.IsOk ? response.ToObject<MatrixProfile>() : null;
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-profile-displayname")]
+        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
+            "get-matrix-client-r0-profile-displayname")]
         public void ClientSetDisplayName(string userId, string displayName)
         {
             ThrowIfNotSupported();
 
             var request = new JObject
             {
-                { "displayname", JToken.FromObject(displayName) }
+                {"displayname", JToken.FromObject(displayName)}
             };
 
             var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/displayname",
                 UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath,true, request, out _);
+            var error = _matrixApiBackend.Put(apiPath, true, request, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-profile-userid-displayname")]
+        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
+            "get-matrix-client-r0-profile-userid-displayname")]
         public void ClientSetAvatar(string userId, Uri avatarUrl)
         {
             ThrowIfNotSupported();
 
             var request = new JObject {{"avatar_url", JToken.FromObject(avatarUrl)}};
-            var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/avatar_url", UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath,true,request, out _);
-            
+            var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/avatar_url",
+                UriKind.Relative);
+            var error = _matrixApiBackend.Put(apiPath, true, request, out _);
+
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
     }

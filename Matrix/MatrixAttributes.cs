@@ -21,7 +21,7 @@ namespace Matrix
             LastVersion = lastVersion;
         }
 
-        public override string ToString ()
+        public override string ToString()
         {
             string apiStr;
 
@@ -38,6 +38,7 @@ namespace Matrix
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Api), Api, null);
             }
+
             return $"{MatrixSpecUrl}/{apiStr}/{verStr}.html#${Path}";
         }
 
@@ -59,7 +60,7 @@ namespace Matrix
                     return "unstable";
             }
         }
-        
+
         public static EMatrixSpecApiVersion GetVersionForString(string version)
         {
             switch (version)
@@ -85,7 +86,7 @@ namespace Matrix
         ClientServer,
         ApplicationService
     }
-    
+
     public enum EMatrixSpecApiVersion
     {
         Unknown,
@@ -101,11 +102,14 @@ namespace Matrix
     /// The versions this method
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property |
-    AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field)]
+                    AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field)]
     public class MatrixSpecVersionAttribute : Attribute
     {
         public string[] Versions { get; }
+
         public MatrixSpecVersionAttribute(params string[] versions)
-            => Versions = versions;
+        {
+            Versions = versions;
+        }
     }
 }

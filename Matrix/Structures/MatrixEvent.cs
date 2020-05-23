@@ -4,57 +4,59 @@ using Newtonsoft.Json.Linq;
 
 namespace Matrix.Structures
 {
-	public class MatrixEvent
-	{
-		/// <summary>
-		/// Following http://matrix.org/docs/spec/r0.0.1/client_server.html#get-matrix-client-r0-sync
-		/// </summary>
-		public MatrixEventContent content;
-		public Int64 origin_server_ts;
-		public Int64 age;
-		public string sender;
-		public string type;
-		public string event_id;
-		public string room_id;
-		public MatrixEventUnsigned unsigned;
-		public string state_key;
+    public class MatrixEvent
+    {
+        /// <summary>
+        /// Following http://matrix.org/docs/spec/r0.0.1/client_server.html#get-matrix-client-r0-sync
+        /// </summary>
+        public MatrixEventContent content;
 
-		// Special case for https://matrix.org/docs/spec/r0.0.1/client_server.html#m-room-member
-		public MatrixStrippedState[] invite_room_state;
+        public long origin_server_ts;
+        public long age;
+        public string sender;
+        public string type;
+        public string event_id;
+        public string room_id;
+        public MatrixEventUnsigned unsigned;
+        public string state_key;
 
-		public override string ToString ()
-		{
-			string str = "Event {";
-			foreach (PropertyInfo prop in typeof(MatrixEvent).GetProperties()) {
-				str += "   " + (prop.Name + ": " + prop.GetValue (this));
-			}
-			str += "}";
-			return str;
-		}
-	}
+        // Special case for https://matrix.org/docs/spec/r0.0.1/client_server.html#m-room-member
+        public MatrixStrippedState[] invite_room_state;
 
-	public class MatrixEventUnsigned {
-		public MatrixEventUnsigned prev_content;
-		public Int64 age;
-		public string transaction_id;
-	}
+        public override string ToString()
+        {
+            var str = "Event {";
+            foreach (var prop in typeof(MatrixEvent).GetProperties())
+                str += "   " + (prop.Name + ": " + prop.GetValue(this));
+            str += "}";
+            return str;
+        }
+    }
 
-	/// <summary>
-	/// Base content class.
-	/// </summary>
-	public class MatrixEventContent
-	{
-		public JObject mxContent = null;
-	}
+    public class MatrixEventUnsigned
+    {
+        public MatrixEventUnsigned prev_content;
+        public long age;
+        public string transaction_id;
+    }
 
-	public class MatrixTimeline{
-		public bool limited;
-		public string prev_batch;
-		public MatrixEvent[] events;
-	}
+    /// <summary>
+    /// Base content class.
+    /// </summary>
+    public class MatrixEventContent
+    {
+        public JObject mxContent = null;
+    }
 
-	public static class MatrixEventType
-	{
-		public const string RoomMember = "m.room.member";
-	}
+    public class MatrixTimeline
+    {
+        public bool limited;
+        public string prev_batch;
+        public MatrixEvent[] events;
+    }
+
+    public static class MatrixEventType
+    {
+        public const string RoomMember = "m.room.member";
+    }
 }
