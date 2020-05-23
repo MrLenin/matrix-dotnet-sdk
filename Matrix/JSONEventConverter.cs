@@ -69,29 +69,32 @@ namespace Matrix
 			return typeof(MatrixMRoomMessage);
 		}
 
-		public MatrixEventContent GetContent(JObject jobj,JsonSerializer serializer,string type){
-			Type T;
-			if (!contentTypes.TryGetValue (type, out T)) {
-				return new MatrixEventContent
-				{
-					mxContent = jobj
-				};
-			}
-			try
+		public MatrixEventContent GetContent(JObject jObject, Newtonsoft.Json.JsonSerializer serializer, string type)
+        {
+			if (jObject == null) throw new ArgumentNullException(nameof(jObject));
+            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+
+            if (!contentTypes.TryGetValue(type, out var T))
+                return new MatrixEventContent {mxContent = jObject};
+
+            try
 			{
-				if (T == typeof(MatrixMRoomMessage)) {
-					MatrixMRoomMessage message = new MatrixMRoomMessage ();
-					serializer.Populate (jobj.CreateReader (), message);
-					T = MessageContentType (message.msgtype);
+				if (T == typeof(MatrixMRoomMessage))
+                {
+					var message = new MatrixMRoomMessage();
+					serializer.Populate(jObject.CreateReader(), message);
+					T = MessageContentType(message.msgtype);
 				}
-				MatrixEventContent content = (MatrixEventContent)Activator.CreateInstance(T);
-				content.mxContent = jobj;
-				if (type == "m.receipt") {
-					((MatrixMReceipt)content).ParseJObject(jobj);
-				} else {
-					serializer.Populate (jobj.CreateReader (), content);
-				}
-				return content;
+
+				var content = (MatrixEventContent)Activator.CreateInstance(T);
+				content.mxContent = jObject;
+
+				if (type == "m.receipt")
+                    ((MatrixMReceipt)content).ParseJObject(jObject);
+                else
+                    serializer.Populate(jObject.CreateReader(), content);
+
+                return content;
 			}
 			catch (Exception)
 			{
@@ -99,41 +102,45 @@ namespace Matrix
 			}
 		}
 
-		public override object ReadJson(JsonReader reader,
+		public override object ReadJson(
+            JsonReader reader,
 			Type objectType,
 			object existingValue,
-			JsonSerializer serializer)
+			Newtonsoft.Json.JsonSerializer serializer)
 		{
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+
 			// Load JObject from stream
-			JObject jObject = JObject.Load(reader);
-			if (objectType == typeof(MatrixEvent))
-			{
-				// Populate the event itself
-				MatrixEvent ev = new MatrixEvent();
+			var jObject = JObject.Load(reader);
+
+            // Populate MatrixEventContent if applicable
+            if (objectType != typeof(MatrixEvent))
+                return objectType != typeof(MatrixEventContent) ? null : GetContent(jObject, serializer, "");
+
+            // Populate the event itself
+            var ev = new MatrixEvent();
 			
-				serializer.Populate (jObject.CreateReader (), ev);
-				JToken redact;
-				if (jObject ["content"].HasValues) {
-					ev.content = GetContent (jObject ["content"] as JObject, serializer, ev.type);
-				} else if(((JObject)jObject["unsigned"]).TryGetValue("redacted_because",out redact)){
-					//TODO: Parse Redacted
-				}
-				return ev;
-			}
-			if (objectType == typeof(MatrixEventContent))
-			{
-				// Populate 
-				var ev = GetContent(jObject, serializer, "");
-				return ev;
-			}
-			return null;
-		}
+            serializer.Populate(jObject.CreateReader(), ev);
+
+            if (jObject["content"].HasValues)
+            {
+                ev.content = GetContent(jObject["content"] as JObject, serializer, ev.type);
+            }
+            else if (((JObject)jObject["unsigned"]).TryGetValue("redacted_because", out _))
+            {
+                //TODO: Parse Redacted
+            }
+
+            return ev;
+        }
 
 		public override bool CanWrite => false;
 
-		public override void WriteJson(JsonWriter writer,
+		public override void WriteJson(
+            JsonWriter writer,
 			object value,
-			JsonSerializer serializer)
+			Newtonsoft.Json.JsonSerializer serializer)
 		{
 			throw new NotImplementedException();
 		}

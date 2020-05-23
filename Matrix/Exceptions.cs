@@ -14,15 +14,18 @@ namespace Matrix
 	}
 
 	public class MatrixServerError : MatrixException {
-		public readonly MatrixErrorCode ErrorCode;
-		public readonly string ErrorCodeStr;
-		public readonly JObject ErrorObject;
+		public MatrixErrorCode ErrorCode { get; }
+		public string ErrorCodeStr { get; }
+		public JObject ErrorObject { get; }
 
-		public MatrixServerError (string errorcode, string message, JObject errorObject) : base(message){
-			if (!Enum.TryParse (errorcode, out ErrorCode)) {
-				ErrorCode = MatrixErrorCode.CL_UNKNOWN_ERROR_CODE;
+		public MatrixServerError (string errorcode, string message, JObject errorObject) : base(message)
+        {
+            if (!Enum.TryParse(errorcode, out MatrixErrorCode matrixErrorCode)) {
+				ErrorCode = MatrixErrorCode.UnknownErrorCode;
 				ErrorObject = errorObject;
 			}
+
+            ErrorCode = matrixErrorCode;
 			ErrorCodeStr = errorcode;
 		}
 

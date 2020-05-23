@@ -6,52 +6,68 @@ using Newtonsoft.Json;
 
 namespace Matrix
 {
-    public partial class MatrixAPI
+    public partial class MatrixApi
     {
         [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-sync")]
-        public void ClientSync(bool ConnectionFailureTimeout = false) {
+        public void ClientSync(bool connectionFailureTimeout = false)
+        {
             ThrowIfNotSupported();
-            string url = "/_matrix/client/r0/sync?timeout="+SyncTimeout;
-            if (!String.IsNullOrEmpty(syncToken)) {
-                url += "&since=" + syncToken;
-            }
-            MatrixRequestError error = mbackend.Get (url,true, out var response);
-            if (error.IsOk) {
-                try {
-                    MatrixSync sync = JsonConvert.DeserializeObject<MatrixSync> (response.ToString (), event_converter);
-                    ProcessSync (sync);
+
+            var urlString = "/_matrix/client/r0/sync?timeout=" + SyncTimeout;
+
+            if (!string.IsNullOrEmpty(_syncToken))
+                urlString += "&since=" + _syncToken;
+
+            var apiPath = new Uri(urlString, UriKind.Relative);
+            var error = _matrixApiBackend.Get(apiPath, true, out var response);
+
+            if (error.IsOk)
+            {
+                try
+                {
+                    var sync = JsonConvert.DeserializeObject<MatrixSync>(response.ToString(), _eventConverter);
+                    ProcessSync(sync);
                     IsConnected = true;
-                } catch (Exception e) {
-                    Console.WriteLine(e.InnerException);
-                    throw new MatrixException ("Could not decode sync", e);
                 }
-            } else if (ConnectionFailureTimeout) {
-                IsConnected = false;
-                Console.Error.WriteLine ("Couldn't reach the matrix home server during a sync.");
-                Console.Error.WriteLine(error.ToString());
-                Thread.Sleep (BadSyncTimeout);
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.InnerException);
+                    throw new MatrixException("Could not decode sync", e);
+                }
             }
+            else if (connectionFailureTimeout)
+            {
+                IsConnected = false;
+                Console.Error.WriteLine("Couldn't reach the matrix home server during a sync.");
+                Console.Error.WriteLine(error.ToString());
+                Thread.Sleep(BadSyncTimeout);
+            }
+
             if (RunningInitialSync)
                 RunningInitialSync = false;
         }
         
-        public void StartSyncThreads(){
-            if (poll_thread == null) {
-                poll_thread = new Thread (pollThread_Run);
-                poll_thread.Start ();
-                shouldRun = true;
-            } else {
-                if (poll_thread.IsAlive) {
-                    throw new Exception ("Can't start thread, already running");
-                }
-                poll_thread.Start ();
+        public void StartSyncThreads()
+        {
+            if (_pollThread == null)
+            {
+                _pollThread = new Thread(PollThread_Run);
+                _pollThread.Start();
+                _shouldRun = true;
             }
+            else
+            {
+                if (_pollThread.IsAlive)
+                    throw new Exception("Can't start thread, already running");
 
+                _pollThread.Start();
+            }
         }
 
-        public void StopSyncThreads(){
-            shouldRun = false;
-            poll_thread.Join ();
+        public void StopSyncThreads()
+        {
+            _shouldRun = false;
+            _pollThread.Join();
         }
     }
 }

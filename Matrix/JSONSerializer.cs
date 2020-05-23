@@ -4,35 +4,36 @@ using Newtonsoft.Json.Linq;
 
 namespace Matrix
 {
-	public class JSONSerializer : JsonSerializer
+	public class JsonSerializer : Newtonsoft.Json.JsonSerializer
 	{
-		public JSONSerializer ()
+		public JsonSerializer ()
 		{
 			NullValueHandling = NullValueHandling.Ignore;
-			Converters.Add (new JSONEnumConverter ());
-			Converters.Add (new JSONEventConverter ());
+			Converters.Add(new JsonEnumConverter());
+			Converters.Add(new JSONEventConverter());
 		}
 	}
-	public class JSONEnumConverter : JsonConverter{
-		public override bool CanRead {
-			get {
-				return false;
-			}
-		}
+	public class JsonEnumConverter : JsonConverter
+    {
+		public override bool CanRead => false;
 
-		public override void WriteJson (JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
 		{
-			Type t = value.GetType ();
-			string name = Enum.GetName (t, value).ToLower ();
-			JToken.FromObject (name).WriteTo (writer);
+			if (value == null) throw new ArgumentNullException(nameof(value));
+
+			var t = value.GetType ();
+			var name = Enum.GetName(t, value)?.ToLower();
+
+			JToken.FromObject(name).WriteTo(writer);
 		}
 
-		public override bool CanConvert (Type objectType)
+		public override bool CanConvert(Type objectType)
 		{
-			return objectType.IsEnum;
+			if (objectType == null) throw new ArgumentNullException(nameof(objectType));
+            return objectType.IsEnum;
 		}
 
-		public override object ReadJson (JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
 		{
 			throw new NotImplementedException ();
 		}

@@ -5,126 +5,137 @@ using YamlDotNet.Serialization;
 
 namespace Matrix.AppService
 {
-	public struct AppServiceNamespace{
-		public bool exclusive  { get; set; }
-		public string regex  { get; set; }
-	}
+	public struct AppServiceNamespace
+	{
+		public bool Exclusive  { get; set; }
+		public string Regex  { get; set; }
+    }
 
 	public struct ServiceRegistrationOptionsNamespaces{
-		public List<AppServiceNamespace> users  { get; set; }
-		public List<AppServiceNamespace> aliases  { get; set; }
-		public List<AppServiceNamespace> rooms  { get; set; }
+		public List<AppServiceNamespace> Users  { get; set; }
+		public List<AppServiceNamespace> Aliases  { get; set; }
+		public List<AppServiceNamespace> Rooms  { get; set; }
 	}
 
 	public struct ServiceRegistrationOptions{
-		public string id  { get; set; }
-		public string url  { get; set; }
-		public string as_token  { get; set; }
-		public string hs_token  { get; set; }
-		public string sender_localpart  { get; set; }
-		public ServiceRegistrationOptionsNamespaces namespaces  { get; set; }
+		public string Id { get; set; }
+		public Uri Url { get; set; }
+		public string AppserviceToken { get; set; }
+		public string HomeserverToken { get; set; }
+		public string SenderLocalpart { get; set; }
+		public ServiceRegistrationOptionsNamespaces Namespaces { get; set; }
 	}
 
 	public class ServiceRegistration
 	{
 
-		public string URL {
+		public Uri Url
+		{
 			get;
 			private set;
 		}
 
-		public string Localpart {
+		public string Localpart
+        {
 			get;
 			private set;
 		}
 
-		public string ID {
+		public string Id 
+        {
 			get;
 			private set;
 		}
 
-		public string HomeserverToken {
+		public string HomeserverToken 
+        {
 			get;
 			private set;
 		}
 
-		public string AppServiceToken {
+		public string AppserviceToken
+        {
 			get;
 			private set;
 		}
 
-		public ICollection<AppServiceNamespace> NamespacesUsers {
+		public ICollection<AppServiceNamespace> NamespacesUsers
+        {
 			get;
 			private set;
 		}
 
-		public ICollection<AppServiceNamespace> NamespacesAliases  {
+		public ICollection<AppServiceNamespace> NamespacesAliases
+        {
 			get;
 			private set;
 		}
 
-		public ICollection<AppServiceNamespace> NamespacesRooms  {
+        public ICollection<AppServiceNamespace> NamespacesRooms
+        {
 			get;
 			private set;
 		}
 
-
-		public ServiceRegistration(ServiceRegistrationOptions options){
-			URL = options.url;
-			Localpart = options.sender_localpart;
-			ID = options.id;
-			HomeserverToken = options.hs_token;
-			AppServiceToken = options.as_token;
-			NamespacesAliases = options.namespaces.aliases;
-			NamespacesUsers = options.namespaces.users;
-			NamespacesRooms = options.namespaces.rooms;
+		public ServiceRegistration(ServiceRegistrationOptions options)
+        {
+			Url = options.Url;
+			Localpart = options.SenderLocalpart;
+			Id = options.Id;
+			HomeserverToken = options.HomeserverToken;
+			AppserviceToken = options.AppserviceToken;
+			NamespacesAliases = options.Namespaces.Aliases;
+			NamespacesUsers = options.Namespaces.Users;
+			NamespacesRooms = options.Namespaces.Rooms;
 		}
 
 		public ServiceRegistration(
-			string url,
-			string localpart,
-			ICollection<AppServiceNamespace> users,
-			ICollection<AppServiceNamespace> aliases,
-			ICollection<AppServiceNamespace> rooms
-		 ){
-			URL = url;
+			Uri url, string localpart, ICollection<AppServiceNamespace> users,
+			ICollection<AppServiceNamespace> aliases, ICollection<AppServiceNamespace> rooms)
+        {
+			Url = url;
 			Localpart = localpart;
 			NamespacesUsers = users;
 			NamespacesAliases = aliases;
 			NamespacesRooms = rooms;
 
-			ID = GenerateToken();
+			Id = GenerateToken();
 			HomeserverToken = GenerateToken();
-			AppServiceToken = GenerateToken();
+			AppserviceToken = GenerateToken();
 		}
 
 		public static string GenerateToken ()
-		{
-			return (Guid.NewGuid() + Guid.NewGuid().ToString()).Replace("-","");
+        {
+            return (Guid.NewGuid() + Guid.NewGuid().ToString()).Replace(
+                "-", "", StringComparison.InvariantCulture);
 		}
 
-		public static ServiceRegistration FromYaml(string yaml){
-			Deserializer serial = new Deserializer();
-			ServiceRegistrationOptions opts =serial.Deserialize<ServiceRegistrationOptions>(new StringReader(yaml));
+		public static ServiceRegistration FromYaml(string yaml)
+        {
+			var serial = new Deserializer();
+			var opts = serial.Deserialize<ServiceRegistrationOptions>(new StringReader(yaml));
 			return new ServiceRegistration(opts);
 		}
 
-		public string ToYaml(){
-			Serializer serial = new Serializer();
-			StringWriter writer = new StringWriter();
-			serial.Serialize(writer,new {
-				id = ID,
-				url = URL,
-				as_token = AppServiceToken,
-				hs_token = HomeserverToken,
-				sender_localpart = Localpart,
-				namespaces = new {
-					users = NamespacesUsers,
-					aliases = NamespacesAliases,
-					rooms = NamespacesRooms
-				}
-			});
-			return writer.ToString();
-		}
+		public string ToYaml()
+        {
+			var serial = new Serializer();
+            using var writer = new StringWriter();
+            serial.Serialize(writer, new
+            {
+                id = Id,
+                url = Url,
+                AppserviceToken,
+                HomeserverToken,
+                SenderLocalpart = Localpart,
+                namespaces = new
+                {
+                    users = NamespacesUsers,
+                    aliases = NamespacesAliases,
+                    rooms = NamespacesRooms
+                }
+            });
+            return writer.ToString();
+        }
 	}
 }

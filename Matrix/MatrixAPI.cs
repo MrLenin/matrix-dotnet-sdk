@@ -18,251 +18,257 @@ using Newtonsoft.Json.Linq;
 
 namespace Matrix
 {
-    public delegate void MatrixAPIRoomJoinedDelegate(string roomid, MatrixEventRoomJoined joined);
-    public delegate void MatrixAPIRoomInviteDelegate(string roomid, MatrixEventRoomInvited invited);
+    public delegate void MatrixApiRoomJoinedDelegate(string roomid, MatrixEventRoomJoined joined);
+    public delegate void MatrixApiRoomInviteDelegate(string roomid, MatrixEventRoomInvited invited);
+
 	// We need to mock MatrixAPI, hence needing virtuals.
 	// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
-	public partial class MatrixAPI
+	public partial class MatrixApi
 	{
-		public event MatrixAPIRoomJoinedDelegate SyncJoinEvent;
-		public event MatrixAPIRoomInviteDelegate SyncInviteEvent;
+		public event MatrixApiRoomJoinedDelegate OnSyncJoinEvent;
+		public event MatrixApiRoomInviteDelegate OnSyncInviteEvent;
 		
 		public bool IsConnected { get; private set; }
 		public virtual bool RunningInitialSync { get; private set; } = true;
-		public virtual string BaseURL  { get; private set; }
+		public virtual Uri BaseUrl  { get; private set; }
 		public int BadSyncTimeout { get; set; } = 25000;
 		public virtual string UserId {get; set;}
 
-		private MatrixVersions versions;
-		private string syncToken = "";
-		private ILogger log = Logger.Factory.CreateLogger<MatrixAPI>();
-		private bool IsAS;
-		private MatrixLoginResponse current_login;
-		private Thread poll_thread;
-		private bool shouldRun;
-		private Random rng;
-		private JSONEventConverter event_converter;
-		private IMatrixAPIBackend mbackend;
-		
-		static readonly JSONSerializer matrixSerializer = new JSONSerializer ();
+		private MatrixVersions _versions;
+		private string _syncToken = "";
+		private readonly ILogger _log = Logger.Factory.CreateLogger<MatrixApi>();
+		private readonly bool _isAppservice;
+		private MatrixLoginResponse _currentLogin;
+		private Thread _pollThread;
+		private bool _shouldRun;
+		private readonly Random _rng;
+		private readonly JSONEventConverter _eventConverter;
+		private readonly IMatrixApiBackend _matrixApiBackend;
+
+        private static readonly JsonSerializer MatrixSerializer = new JsonSerializer();
 
 		/// <summary>
 		/// Timeout in seconds between sync requests.
 		/// </summary>
-		public int SyncTimeout {get;set;} = 10000;
+		public int SyncTimeout { get; set; } = 10000;
 
-		public MatrixAPI (string URL)
+		public MatrixApi(Uri url)
 		{
-			if (!Uri.IsWellFormedUriString (URL, UriKind.Absolute)) {
-				throw new MatrixException ("URL is not valid");
-			}
-
-			IsAS = false;
-			mbackend = new HttpBackend (URL);
-			BaseURL = URL;
-			rng = new Random (DateTime.Now.Millisecond);
-			event_converter = new JSONEventConverter ();
-		}
-
-		public MatrixAPI(string URL, string application_token, string user_id){
-			if (!Uri.IsWellFormedUriString (URL, UriKind.Absolute)) {
+			if (url != null && url.IsWellFormedOriginalString() && !url.IsAbsoluteUri)
 				throw new MatrixException("URL is not valid");
-			}
 
-			IsAS = true;
-			mbackend = new HttpBackend (URL,user_id);
-			mbackend.SetAccessToken(application_token);
-			UserId = user_id;
-			BaseURL = URL;
-			rng = new Random (DateTime.Now.Millisecond);
-			event_converter = new JSONEventConverter ();
+            _isAppservice = false;
+			_matrixApiBackend = new HttpBackend(url);
+			BaseUrl = url;
+			_rng = new Random(DateTime.Now.Millisecond);
+			_eventConverter = new JSONEventConverter();
 		}
 
-		public MatrixAPI (string URL, IMatrixAPIBackend backend)
-		{
-			if (!Uri.IsWellFormedUriString (URL, UriKind.Absolute)) {
+		public MatrixApi(Uri url, string applicationToken, string userId)
+        {
+			if (url != null && url.IsWellFormedOriginalString() && !url.IsAbsoluteUri)
 				throw new MatrixException("URL is not valid");
-			}
 
-			IsAS = true;
-			mbackend = backend;
-			BaseURL = URL;
-			rng = new Random (DateTime.Now.Millisecond);
-			event_converter = new JSONEventConverter ();
+            _isAppservice = true;
+			_matrixApiBackend = new HttpBackend(url,userId);
+			_matrixApiBackend.SetAccessToken(applicationToken);
+			UserId = userId;
+			BaseUrl = url;
+			_rng = new Random(DateTime.Now.Millisecond);
+			_eventConverter = new JSONEventConverter ();
 		}
 
-
-		public void AddMessageType (string name, Type type)
+		public MatrixApi(Uri url, IMatrixApiBackend backend)
 		{
-			event_converter.AddMessageType(name,type);
+			if (url != null && url.IsWellFormedOriginalString() && !url.IsAbsoluteUri)
+				throw new MatrixException("URL is not valid");
+
+            _isAppservice = true;
+			_matrixApiBackend = backend;
+			BaseUrl = url;
+			_rng = new Random(DateTime.Now.Millisecond);
+			_eventConverter = new JSONEventConverter();
 		}
 
-		public void AddEventType (string msgtype, Type type)
+
+		public void AddMessageType(string name, Type type)
 		{
-			event_converter.AddEventType(msgtype, type);
+			_eventConverter.AddMessageType(name, type);
 		}
 
-		private void pollThread_Run(){
-			while (shouldRun) {
+		public void AddEventType(string messageType, Type type)
+		{
+			_eventConverter.AddEventType(messageType, type);
+		}
+
+		private void PollThread_Run()
+        {
+			while (_shouldRun)
+            {
 				try
 				{
 					ClientSync (true);
 				}
-				catch(Exception e){
+				catch (Exception e)
+                {
 					#if DEBUG
 					Console.WriteLine ("[warn] A Matrix exception occured during sync!");
 					Console.WriteLine (e);
-					#endif
-				}
+                    throw;
+                    #endif
+                }
 				Thread.Sleep(250);
 			}
 		}
 
-		public void SetSyncToken(string synctoken){
-			syncToken = synctoken;
+		public void SetSyncToken(string syncToken)
+        {
+			_syncToken = syncToken;
 			RunningInitialSync = false;
 		}
 
-		public virtual string GetSyncToken(){
-			return syncToken;
+		public virtual string GetSyncToken()
+        {
+			return _syncToken;
 		}
 
-		public virtual string GetAccessToken ()
+		public virtual string GetAccessToken()
+        {
+            return _currentLogin?.AccessToken;
+        }
+
+		public virtual MatrixLoginResponse GetCurrentLogin()
 		{
-			if (current_login != null) {
-				return current_login.access_token;
-			}
-
-			return null;
+			return _currentLogin;
 		}
 
-		public virtual MatrixLoginResponse GetCurrentLogin ()
-		{
-			return current_login;
+		public void SetLogin(MatrixLoginResponse response)
+        {
+			_currentLogin = response ?? throw new ArgumentNullException(nameof(response));
+			UserId = response.UserId;
+			_matrixApiBackend.SetAccessToken(response.AccessToken);
 		}
 
-		public void SetLogin(MatrixLoginResponse response){
-			current_login = response;
-			UserId = response.user_id;
-			mbackend.SetAccessToken(response.access_token);
-		}
-
-		public static JObject ObjectToJson (object data)
+		public static JObject ObjectToJson(object data)
 		{
 			JObject container;
-			using (JTokenWriter writer = new JTokenWriter ()) {
-				try {
-					matrixSerializer.Serialize (writer, data);
-					container = (JObject)writer.Token;
-				} catch (Exception e) {
-					throw new Exception("Couldn't convert obj to JSON",e);
-				}
+
+            using var writer = new JTokenWriter();
+			try
+            {
+				MatrixSerializer.Serialize(writer, data);
+				container = (JObject)writer.Token;
 			}
+            catch (Exception e)
+            {
+				throw new Exception("Couldn't convert obj to JSON",e);
+			}
+
 			return container;
 		}
 
-		public bool IsLoggedIn(){
+		public bool IsLoggedIn()
+        {
 			//TODO: Check token is still valid
-			return current_login != null;
+			return _currentLogin != null;
 		}
 
-		private void ProcessSync(MatrixSync syncData){
+		private void ProcessSync(MatrixSync syncData)
+        {
 			//Grab data from rooms the user has joined.
-			foreach (KeyValuePair<string,MatrixEventRoomJoined> room in syncData.rooms.join)
-			{
-				SyncJoinEvent?.Invoke (room.Key, room.Value);
-			}
-            foreach (KeyValuePair<string,MatrixEventRoomInvited> room in syncData.rooms.invite)
-            {
-	            SyncInviteEvent?.Invoke (room.Key, room.Value);
-            }
-			syncToken = syncData.next_batch;
+			foreach (var (roomId, matrixEventRoomJoined) in syncData.rooms.join)
+                OnSyncJoinEvent?.Invoke(roomId, matrixEventRoomJoined);
+
+            foreach (var (roomId, matrixEventRoomInvited) in syncData.rooms.invite)
+                OnSyncInviteEvent?.Invoke (roomId, matrixEventRoomInvited);
+
+			_syncToken = syncData.next_batch;
 		}
 
 		[MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-versions")]
-		public MatrixVersions ClientVersions(){
-			MatrixRequestError error = mbackend.Get ("/_matrix/client/versions",false, out var result);
-			if (error.IsOk)
-			{
-				var res = result.ToObject<MatrixVersions>();
-				versions = res;
-				return res;
-			}
+		public MatrixVersions ClientVersions()
+        {
+            var apiPath = new Uri("/_matrix/client/versions", UriKind.Relative);
+			var error = _matrixApiBackend.Get(apiPath, false, out var result);
 
-			throw new MatrixException (error.ToString());//TODO: Need a better exception
-		}
+            if (!error.IsOk) throw new MatrixException(error.ToString());
 
-		[MatrixSpec(EMatrixSpecApiVersion.R040, EMatrixSpecApi.ClientServer,
-			"get-matrix-client-r0-joined_rooms")]
+            var res = result.ToObject<MatrixVersions>();
+            _versions = res;
+            return res;
+        }
+
+		[MatrixSpec(EMatrixSpecApiVersion.R040, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-joined_rooms")]
 		public List<string> GetJoinedRooms()
 		{
-			MatrixRequestError error = mbackend.Get("/_matrix/client/r0/joined_rooms", true, out var result);
-			if (!error.IsOk) {
-				throw new MatrixException (error.ToString());
-			}
-			return (result as JObject)?.GetValue("joined_rooms").ToObject<List<string>>();
+            var apiPath = new Uri("/_matrix/client/r0/joined_rooms", UriKind.Relative);
+			var error = _matrixApiBackend.Get(apiPath, true, out var result);
+
+			if (!error.IsOk) throw new MatrixException(error.ToString());
+
+            return (result as JObject)?.GetValue("joined_rooms", StringComparison.InvariantCulture).ToObject<List<string>>();
 		}
 		
-		[MatrixSpec(EMatrixSpecApiVersion.R040, EMatrixSpecApi.ClientServer,
-			"get-matrix-client-r0-joined_members")]
-		public Dictionary<string, MatrixProfile> GetJoinedMembers(string roomId)
+		[MatrixSpec(EMatrixSpecApiVersion.R040, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-joined_members")]
+		public Dictionary<string,MatrixProfile> GetJoinedMembers(string roomId)
 		{
-			MatrixRequestError error = mbackend.Get($"/_matrix/client/r0/rooms/{roomId}/joined_members", true, out var result);
-			if (!error.IsOk) {
-				throw new MatrixException (error.ToString());
-			}
-			return (result as JObject)?.GetValue("joined").ToObject<Dictionary<string, MatrixProfile>>();
+            var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/joined_members", UriKind.Relative);
+			var error = _matrixApiBackend.Get(apiPath, true, out var result);
+			
+            if (!error.IsOk) throw new MatrixException (error.ToString());
+            
+            return (result as JObject)?.GetValue("joined", StringComparison.InvariantCulture).ToObject<Dictionary<string,MatrixProfile>>();
 		}
 
-		public void RegisterUserAsAS (string user)
+		public void RegisterUserAsAppservice(string user)
 		{
-			if(!IsAS){
-				throw new MatrixException("This client is not registered as a application service client. You can't create new appservice users");
-			}
-			JObject request = JObject.FromObject( new {
-				type = "m.login.application_service",
-				user
-			});
+			if(!_isAppservice)
+                throw new MatrixException("This client is not registered as a application service client. You can't create new appservice users");
 
-			MatrixRequestError error = mbackend.Post("/_matrix/client/r0/register",true,request,out var result);
-			if (!error.IsOk) {
-				throw new MatrixException (error.ToString());//TODO: Need a better exception
-			}
+			var request = JObject.FromObject(
+                new
+                {
+				    type = "m.login.application_service",
+				    user
+			    });
+
+            var apiPath = new Uri("/_matrix/client/r0/register", UriKind.Relative);
+            var error = _matrixApiBackend.Post(apiPath, true, request, out _);
+			
+            if (!error.IsOk) throw new MatrixException (error.ToString());
 		}
 
 		public void ThrowIfNotSupported([CallerMemberName] string name = null)
 		{
-			if (name == null)
-			{
-				return;
-			}
-			if (versions == null)
-			{
-				ClientVersions();
-			}
-			MatrixSpec spec = typeof(MatrixAPI).GetMethod(name).GetCustomAttribute(typeof(MatrixSpec)) as MatrixSpec;
-			if (spec == null)
+			if (name == null) return;
+			
+			if (_versions == null)
+			    ClientVersions();
+
+            if (!((typeof(MatrixApi).GetMethod(name) ?? throw new InvalidOperationException()).GetCustomAttribute(
+                typeof(MatrixSpecAttribute)) is MatrixSpecAttribute spec))
 			{
 				#if DEBUG
-				log.LogWarning($"{name} has no MatrixSpec attribute, cannot determine homeserver support");
+				_log.LogWarning($"{name} has no MatrixSpec attribute, cannot determine homeserver support");
 				#endif
 				return;
 			}
+
 			// Ensure we support a version of the spec >= the min version and <= the last version.
-			if (!versions.supportedVersions().Any(
-				version => version >= spec.MinVersion && version <= spec.LastVersion)
-			)
-			{
+			if (!_versions.supportedVersions().Any(version => version >= spec.MinVersion && version <= spec.LastVersion))
 				return;
-			}
-			string msg = "This homeserver doesn't support this endpoint.";
+
+			var msg = "This homeserver doesn't support this endpoint.";
+
 			if (spec.LastVersion != EMatrixSpecApiVersion.Unknown)
 			{
-				msg += $"The endpoint was removed in spec version {MatrixSpec.GetStringForVersion(spec.LastVersion)}";
-			} else
-			{
-				msg += $"The endpoint was added in spec version {MatrixSpec.GetStringForVersion(spec.MinVersion)}";
+				msg += $"The endpoint was removed in spec version {MatrixSpecAttribute.GetStringForVersion(spec.LastVersion)}";
 			}
+            else
+			{
+				msg += $"The endpoint was added in spec version {MatrixSpecAttribute.GetStringForVersion(spec.MinVersion)}";
+			}
+
 			throw new MatrixException(msg);
 		}
 	}

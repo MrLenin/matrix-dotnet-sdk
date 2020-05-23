@@ -3,14 +3,17 @@ using System;
 namespace Matrix
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class MatrixSpec : Attribute
+    public class MatrixSpecAttribute : Attribute
     {
+        private const string MatrixSpecUrl = "http://matrix.org/docs/spec/";
+
         public EMatrixSpecApiVersion MinVersion { get; }
         public EMatrixSpecApiVersion LastVersion { get; }
         public EMatrixSpecApi Api { get; }
         public string Path { get; }
-        private const string MATRIX_SPEC_URL = "http://matrix.org/docs/spec/";
-        public MatrixSpec(EMatrixSpecApiVersion supportedVer, EMatrixSpecApi api, string path, EMatrixSpecApiVersion lastVersion = EMatrixSpecApiVersion.Unknown)
+
+        public MatrixSpecAttribute(EMatrixSpecApiVersion supportedVer, EMatrixSpecApi api,
+            string path, EMatrixSpecApiVersion lastVersion = EMatrixSpecApiVersion.Unknown)
         {
             Api = api;
             Path = path;
@@ -20,8 +23,10 @@ namespace Matrix
 
         public override string ToString ()
         {
+            string apiStr;
+
             var verStr = GetStringForVersion(LastVersion);
-            var apiStr = "";
+
             switch (Api)
             {
                 case EMatrixSpecApi.ClientServer:
@@ -33,7 +38,7 @@ namespace Matrix
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Api), Api, null);
             }
-            return $"{MATRIX_SPEC_URL}/{apiStr}/{verStr}.html#${Path}";
+            return $"{MatrixSpecUrl}/{apiStr}/{verStr}.html#${Path}";
         }
 
         public static string GetStringForVersion(EMatrixSpecApiVersion version)
@@ -95,17 +100,12 @@ namespace Matrix
     /// <summary>
     /// The versions this method
     /// </summary>
-    [AttributeUsage(
-    AttributeTargets.Method |
-    AttributeTargets.Property |
-    AttributeTargets.Class |
-    AttributeTargets.Struct |
-    AttributeTargets.Field
-    )]
-    public class MatrixSpecVersionAttribute : Attribute {
-        public readonly string[] Versions;
-        public MatrixSpecVersionAttribute(params string[] versions) {
-            Versions = versions;
-        }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property |
+    AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field)]
+    public class MatrixSpecVersionAttribute : Attribute
+    {
+        public string[] Versions { get; }
+        public MatrixSpecVersionAttribute(params string[] versions)
+            => Versions = versions;
     }
 }

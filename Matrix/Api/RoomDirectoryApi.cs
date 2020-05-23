@@ -1,35 +1,43 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 using Matrix.Backends;
 using Matrix.Structures;
 
 namespace Matrix
 {
-    public partial class MatrixAPI
+    public partial class MatrixApi
     {
         public PublicRooms PublicRooms(int limit, string since, string server)
         {
             ThrowIfNotSupported();
+
             var qs = HttpUtility.ParseQueryString(string.Empty);
+
             if (limit != 0)
                 qs.Set("limit", limit.ToString());
-            if (since != "")
+
+            if (!string.IsNullOrEmpty(since))
                 qs.Set("since", since);
-            if (server != "")
+            
+            if (!string.IsNullOrEmpty(server))
                 qs.Set("server", server);
-            MatrixRequestError error = mbackend.Get($"/_matrix/client/r0/publicRooms?{qs}", true, out var result);
-            if (!error.IsOk) {
-                throw new MatrixException (error.ToString());
-            }
+
+            var apiPath = new Uri($"/_matrix/client/r0/publicRooms?{qs}", UriKind.Relative);
+            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            
+            if (!error.IsOk) throw new MatrixException (error.ToString());
+            
             return result.ToObject<PublicRooms>();
         }
 		
         public void DeleteFromRoomDirectory(string alias)
         {
             ThrowIfNotSupported();
-            MatrixRequestError error = mbackend.Delete($"/_matrix/client/r0/directory/room/{alias}", true, out var _);
-            if (!error.IsOk) {
-                throw new MatrixException (error.ToString());
-            }
+
+            var apiPath = new Uri($"/_matrix/client/r0/directory/room/{alias}", UriKind.Relative);
+            var error = _matrixApiBackend.Delete(apiPath, true, out var _);
+            
+            if (!error.IsOk) throw new MatrixException (error.ToString());
         }
 
     }

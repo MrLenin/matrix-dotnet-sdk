@@ -1,4 +1,5 @@
-﻿using Matrix.Structures;
+﻿using System;
+using Matrix.Structures;
 
 namespace Matrix.Client
 {
@@ -12,18 +13,19 @@ namespace Matrix.Client
 		/// This constructor is intended for the API only.
 		/// Create a new user from a profile & userid.
 		/// </summary>
-		/// <param name="Profile">Profile.</param>
-		/// <param name="userid">Userid.</param>
-		public MatrixUser(MatrixProfile Profile,string userid){
-			profile = Profile;
-			UserID = userid;
+		/// <param name="profile">Profile.</param>
+		/// <param name="userId">Userid.</param>
+		public MatrixUser(MatrixProfile profile, string userId)
+        {
+            _profile = profile;
+            UserId = userId;
 		}
 
-		MatrixProfile profile;
+        private readonly MatrixProfile _profile;
 
-		public string AvatarURL { get { return profile.avatar_url; } }
-		public string DisplayName { get { return profile.displayname; } }
-		public readonly string UserID;
+		public Uri AvatarUrl => _profile.AvatarUrl;
+        public string DisplayName => _profile.Displayname;
+        public string UserId { get; }
 	}
 }
 

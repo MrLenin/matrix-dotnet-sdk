@@ -38,9 +38,10 @@ namespace Matrix.Structures
 	/// <summary>
 	/// Following http://matrix.org/docs/spec/r0.0.1/client_server.html#id76
 	/// </summary>
-	public class MatrixLoginResponse{
-		public string access_token;
-		public string home_server;
-		public string user_id;
+	public class MatrixLoginResponse
+    {
+		public string AccessToken;
+		public Uri Homeserver;
+		public string UserId;
 	}
 }

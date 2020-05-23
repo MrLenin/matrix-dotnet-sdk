@@ -1,43 +1,49 @@
 ﻿using System;
-using Matrix.Backends;
 using Matrix.Structures;
 using Newtonsoft.Json.Linq;
 
 namespace Matrix
 {
-    public partial class MatrixAPI
+    public partial class MatrixApi
     {
         [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-profile-userid")]
-        public virtual MatrixProfile ClientProfile(string userid){
+        public virtual MatrixProfile ClientProfile(string userId)
+        {
             ThrowIfNotSupported();
-            MatrixRequestError error = mbackend.Get ("/_matrix/client/r0/profile/" + userid,true, out var response);
-            if (error.IsOk) {
-                return response.ToObject<MatrixProfile> ();
-            }
 
-            return null;
+            var apiPath = new Uri("/_matrix/client/r0/profile/" + userId, UriKind.Relative);
+            var error = _matrixApiBackend.Get(apiPath, true, out var response);
+
+            return error.IsOk ? response.ToObject<MatrixProfile>() : null;
         }
 
         [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-profile-displayname")]
-        public void ClientSetDisplayName(string userid,string displayname){
+        public void ClientSetDisplayName(string userId, string displayName)
+        {
             ThrowIfNotSupported();
-            JObject request = new JObject();
-            request.Add("displayname",JToken.FromObject(displayname));
-            MatrixRequestError error = mbackend.Put (string.Format("/_matrix/client/r0/profile/{0}/displayname",Uri.EscapeUriString(userid)),true,request, out var response);
-            if (!error.IsOk) {
-                throw new MatrixException (error.ToString());//TODO: Need a better exception
-            }
+
+            var request = new JObject
+            {
+                { "displayname", JToken.FromObject(displayName) }
+            };
+
+            var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/displayname",
+                UriKind.Relative);
+            var error = _matrixApiBackend.Put(apiPath,true, request, out _);
+
+            if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
         [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-profile-userid-displayname")]
-        public void ClientSetAvatar(string userid,string avatar_url){
+        public void ClientSetAvatar(string userId, Uri avatarUrl)
+        {
             ThrowIfNotSupported();
-            JObject request = new JObject();
-            request.Add("avatar_url",JToken.FromObject(avatar_url));
-            MatrixRequestError error = mbackend.Put (string.Format("/_matrix/client/r0/profile/{0}/avatar_url",Uri.EscapeUriString(userid)),true,request, out var response);
-            if (!error.IsOk) {
-                throw new MatrixException (error.ToString());//TODO: Need a better exception
-            }
+
+            var request = new JObject {{"avatar_url", JToken.FromObject(avatarUrl)}};
+            var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/avatar_url", UriKind.Relative);
+            var error = _matrixApiBackend.Put(apiPath,true,request, out _);
+            
+            if (!error.IsOk) throw new MatrixException(error.ToString());
         }
     }
 }

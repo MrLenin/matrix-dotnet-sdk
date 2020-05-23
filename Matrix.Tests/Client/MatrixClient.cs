@@ -13,13 +13,13 @@ namespace Matrix.Tests.Client
         public void CreateMatrixClientTest()
         {
             var mock = Utils.MockApi();
-            MatrixClient client = new MatrixClient((MatrixAPI)mock.Object);
+            MatrixClient client = new MatrixClient((MatrixApi)mock.Object);
         }
 
         [Test]
         public void GetSyncTokenTest() {
             var mock = Utils.MockApi();
-            MatrixClient client = new MatrixClient((MatrixAPI)mock.Object);
+            MatrixClient client = new MatrixClient((MatrixApi)mock.Object);
             Assert.That(client.GetSyncToken(), Is.EqualTo("AGoodSyncToken"));
         }
 
@@ -27,14 +27,14 @@ namespace Matrix.Tests.Client
         public void GetAccessTokenTest() {
             var mock = Utils.MockApi();
 
-            MatrixClient client = new MatrixClient((MatrixAPI)mock.Object);
+            MatrixClient client = new MatrixClient((MatrixApi)mock.Object);
             Assert.That(client.GetAccessToken(), Is.EqualTo("AGoodAccessToken"));
         }
 
         [Test]
         public void GetCurrentLoginTest() {
             var mock = Utils.MockApi();
-            MatrixClient client = new MatrixClient((MatrixAPI)mock.Object);
+            MatrixClient client = new MatrixClient((MatrixApi)mock.Object);
             Assert.That(client.GetCurrentLogin(), Is.Not.Null);
         }
 
@@ -43,13 +43,13 @@ namespace Matrix.Tests.Client
             var mock = Utils.MockApi();
             // Without userid parameter
             mock.Setup(f => f.ClientProfile(It.IsAny<String>()));
-            MatrixClient client = new MatrixClient((MatrixAPI)mock.Object);
+            MatrixClient client = new MatrixClient((MatrixApi)mock.Object);
             Assert.That(client.GetUser(), Is.Null);
 
             mock.Setup(f => f.ClientProfile(It.IsAny<String>())).Returns(new MatrixProfile());
             var user = client.GetUser();
             Assert.That(user, Is.Not.Null);
-            Assert.That(user.UserID, Is.EqualTo("@foobar:localhost"));
+            Assert.That(user.UserId, Is.EqualTo("@foobar:localhost"));
 
             //With userid parameter.
             mock.Setup(f => f.ClientProfile(It.IsAny<String>()));
@@ -58,7 +58,7 @@ namespace Matrix.Tests.Client
             mock.Setup(f => f.ClientProfile(It.IsAny<String>())).Returns(new MatrixProfile());
             user = client.GetUser("@barbaz:localhost");
             Assert.That(user, Is.Not.Null);
-            Assert.That(user.UserID, Is.EqualTo("@barbaz:localhost"));
+            Assert.That(user.UserId, Is.EqualTo("@barbaz:localhost"));
         }
 
     }

@@ -3,30 +3,39 @@ using Matrix.Structures;
 
 namespace Matrix.Client
 {
-	public class MatrixMediaFile
-	{
-		private string baseurl;
-		private string mxcurl;
-		private string contenttype;
-		private MatrixFileInfo fileInfo;
-		public  MatrixMediaFile (MatrixAPI api,string MXCUrl,string ContentType)
-		{
-			baseurl = api.BaseURL;
-			mxcurl = MXCUrl;
-			contenttype = ContentType;
-		}
+    public class MatrixMediaFile
+    {
+        private readonly Uri _baseUrl;
+        private readonly Uri _mxcUrl;
+        private string _contentType;
+        private readonly MatrixFileInfo _fileInfo;
 
-		public string GetMXCUrl(){
-			return mxcurl;
-		}
+        public MatrixMediaFile(MatrixApi api, Uri mxcUrl, string contentType)
+        {
+            if (api == null) throw new ArgumentNullException(nameof(api));
 
-		public string GetThumbnailUrl(int width,int height,string method = "crop"){
-			return String.Format("{0}/_matrix/media/r0/thumbnail/{1}?width={2}&height={3}&method={4}",baseurl,mxcurl.Substring(6),width,height,method);
-		}
+            _baseUrl = api.BaseUrl;
+            _mxcUrl = mxcUrl;
+            _contentType = contentType;
+        }
 
-		public string GetUrl(){
-			return String.Format("{0}/_matrix/media/r0/download/{1}",baseurl,mxcurl.Substring(6));
-		}
-	}
+        public Uri GetMxcUrl()
+        {
+            return _mxcUrl;
+        }
+
+        public Uri GetThumbnailUrl(int width, int height, string method = "crop")
+        {
+            var mxcString = _mxcUrl.ToString().Substring(6);
+            return new Uri(_baseUrl,
+                $"/_matrix/media/r0/thumbnail/{mxcString}?width={width}&height={height}&method={method}");
+        }
+
+        public Uri GetUrl()
+        {
+            var mxcString = _mxcUrl.ToString().Substring(6);
+            return new Uri(_baseUrl, $"/_matrix/media/r0/download/{mxcString}");
+        }
+    }
 }
 

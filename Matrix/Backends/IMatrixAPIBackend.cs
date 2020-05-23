@@ -1,27 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Matrix.Backends
 {
-	public interface IMatrixAPIBackend
+	public interface IMatrixApiBackend
 	{
-		MatrixRequestError Get  (string apiPath, bool authenticate, out JToken result);
-		Task<MatrixAPIResult> GetAsync  (string apiPath, bool authenticate);
-		MatrixRequestError Delete (string apiPath, bool authenticate, out JToken result);
-		MatrixRequestError Post (string apiPath, bool authenticate, JToken request, out JToken result);
-		MatrixRequestError Put (string apiPath, bool authenticate, JToken request, out JToken result);
-		Task<MatrixAPIResult> PutAsync (string apiPath, bool authenticate, JToken request);
-		MatrixRequestError Post (string apiPath, bool authenticate, JToken request, Dictionary<string,string> headers, out JToken result);
-		MatrixRequestError Post (string apiPath, bool authenticate, byte[] request , Dictionary<string,string> headers, out JToken result);
+		MatrixRequestError Get(Uri apiPath, bool authenticate, out JToken result);
+		Task<MatrixApiResult> GetAsync(Uri apiPath, bool authenticate);
+		MatrixRequestError Delete(Uri apiPath, bool authenticate, out JToken result);
+		MatrixRequestError Post(Uri apiPath, bool authenticate, JToken request, out JToken result);
+		MatrixRequestError Put(Uri apiPath, bool authenticate, JToken request, out JToken result);
+		Task<MatrixApiResult> PutAsync(Uri apiPath, bool authenticate, JToken request);
+		MatrixRequestError Post(Uri apiPath, bool authenticate, JToken request, Dictionary<string,string> headers, out JToken result);
+		MatrixRequestError Post(Uri apiPath, bool authenticate, byte[] request, Dictionary<string,string> headers, out JToken result);
 
-		void SetAccessToken(string access_token);
+		void SetAccessToken(string accessToken);
 	}
 
-	public struct MatrixAPIResult
+	public struct MatrixApiResult
 	{
-		public JToken result;
-		public MatrixRequestError error;
+		public JToken Result { get; set; }
+		public MatrixRequestError Error { get; set; }
 	}
 }
 

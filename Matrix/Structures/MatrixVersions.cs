@@ -10,7 +10,7 @@ namespace Matrix.Structures
 
         public List<EMatrixSpecApiVersion> supportedVersions()
         {
-            return versions.ConvertAll(MatrixSpec.GetVersionForString);
+            return versions.ConvertAll(MatrixSpecAttribute.GetVersionForString);
         }
     }
 }

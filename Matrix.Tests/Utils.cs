@@ -20,10 +20,12 @@ namespace Matrix.Tests
             return ev;
         }
 
-        public static Mock<MatrixAPI> MockApi() {
-            var mock = new Mock<MatrixAPI>("https://localhost");
-            mock.Setup(f => f.UserId).Returns("@foobar:localhost");
-            mock.Setup(f => f.BaseURL).Returns("https://localhost");
+        public static Mock<MatrixApi> MockApi()
+        {
+            var baseUrl = new Uri("https://localhost");
+            var mock = new Mock<MatrixApi>(baseUrl);
+            mock.SetupGet(f => f.UserId).Returns("@foobar:localhost");
+            mock.SetupGet(f => f.BaseUrl).Returns(new Uri("https://localhost"));
             mock.Setup(f => f.GetSyncToken()).Returns("AGoodSyncToken");
             mock.Setup(f => f.GetAccessToken()).Returns("AGoodAccessToken");
             mock.Setup(f => f.GetCurrentLogin()).Returns(new MatrixLoginResponse());

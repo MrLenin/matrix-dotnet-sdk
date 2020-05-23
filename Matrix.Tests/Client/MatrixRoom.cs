@@ -13,7 +13,7 @@ namespace Matrix.Tests.Client
         public void CreateMatrixRoomTest()
         {
             MatrixRoom room = new MatrixRoom(null, "!abc:localhost");
-            Assert.That(room.ID, Is.EqualTo("!abc:localhost"), "The Room ID must be correct.");
+            Assert.That(room.Id, Is.EqualTo("!abc:localhost"), "The Room ID must be correct.");
             Assert.That(room.Members, Is.Empty, "The Room must have no members.");
         }
 
@@ -95,7 +95,7 @@ namespace Matrix.Tests.Client
         [Test]
         public void FeedEventRoomMemberTest() {
             var mock = Utils.MockApi();
-            MatrixRoom room = new MatrixRoom((MatrixAPI)mock.Object, "!abc:localhost");
+            MatrixRoom room = new MatrixRoom((MatrixApi)mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember() {
                 membership = EMatrixRoomMembership.Join
             };
@@ -107,7 +107,7 @@ namespace Matrix.Tests.Client
         [Test]
         public void FeedEventRoomMemberNoFireEventsTest() {
             var mock = Utils.MockApi();
-            MatrixRoom room = new MatrixRoom((MatrixAPI)mock.Object, "!abc:localhost");
+            MatrixRoom room = new MatrixRoom((MatrixApi)mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember() {
                 membership = EMatrixRoomMembership.Join
             };
@@ -123,7 +123,7 @@ namespace Matrix.Tests.Client
         [Test]
         public void FeedEventRoomMemberFireEventsTest() {
             var mock = Utils.MockApi();
-            MatrixRoom room = new MatrixRoom((MatrixAPI)mock.Object, "!abc:localhost");
+            MatrixRoom room = new MatrixRoom((MatrixApi)mock.Object, "!abc:localhost");
             bool[] didFire = new bool[5];
             int fireCount = 0;
             room.OnUserJoined += (n, a) => didFire[0] = true;
