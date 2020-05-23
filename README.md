@@ -1,29 +1,13 @@
-# Matrix .NET SDK [![#dotnet:half-shot.uk](https://img.shields.io/matrix/dotnet:half-shot.uk.svg?server_fqdn=matrix.half-shot.uk&label=%23dotnet:half-shot.uk&logo=matrix)](https://matrix.to/#/#dotnet:half-shot.uk)
+# Matrix .NET SDK
 
 This project provides a SDK for interfacing with the Matrix Protocol.
 
 It has support for a limited subset of the C2S and AS APIs presently. Support for new endpoints is easy to add,
 so please ask if you want a endpoint to be added.
 
-The SDK is built against `netstandard2.0`, and will work with .NET core projects.
+The SDK is built against 'netcoreapp3.1', and will work with .NET core projects.
 
 ## How to Use
-
-[![Build Status](https://travis-ci.org/Half-Shot/matrix-dotnet-sdk.svg?branch=master)](https://travis-ci.org/Half-Shot/matrix-dotnet-sdk)
-
-A nuget exists for this project at https://www.nuget.org/packages/Half-Shot.Matrix
-
-You can install the package via `dotnet`:
-
-```shell
-dotnet add package Half-Shot.Matrix --version 0.1.5 
-```
-
-or for `Visual Studio Package Manager`:
-
-```shell
-Install-Package Half-Shot.Matrix -Version 0.1.5 
-```
 
 ## Documentation
 
@@ -33,11 +17,12 @@ Documentation is covered for the Client (and *some* of the API), however no onli
 
 Please report bugs/features through the github issue tracker.
 
-If you have a pressing issue, you can find me on matrix as [@Half-Shot:half-shot.uk](https://matrix.to/#/@Half-Shot:half-shot.uk)
+If you have a pressing issue, you can find me on IRC as ibutsu on AfterNET IRC in #evilnet
 
 ## Projects using the SDK
 
 (If you are using it and want to get listed, send a pull request in :smile: )
+(This list is probably no longer valid.)
 
 - [matrix-card-bot](https://github.com/Half-Shot/matrix-card-bot)
 - [matrix-mpd-dj](https://github.com/Half-Shot/matrix-mpd-dj)
