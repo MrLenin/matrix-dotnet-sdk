@@ -21,7 +21,7 @@ namespace Matrix
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/send/{type}/{txnId}", UriKind.Relative);
             var msgData = ObjectToJson(msg);
 
-            var res = await _matrixApiBackend.PutAsync(
+            var res = await _matrixApiBackend.HandlePutAsync(
                 apiPath, true, msgData
             ).ConfigureAwait(false);
 
@@ -37,7 +37,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/leave", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, null, out _);
+            var error = _matrixApiBackend.HandlePost(apiPath, true, null, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
@@ -51,7 +51,7 @@ namespace Matrix
             var msgData = ObjectToJson(message);
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/state/{type}/{key}",
                 UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath, true, msgData, out var result);
+            var error = _matrixApiBackend.HandlePut(apiPath, true, msgData, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -66,7 +66,7 @@ namespace Matrix
 
             var msgData = JObject.FromObject(new {user_id = userId});
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/invite", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, msgData, out _);
+            var error = _matrixApiBackend.HandlePost(apiPath, true, msgData, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
@@ -75,10 +75,12 @@ namespace Matrix
             "put-matrix-client-r0-rooms-roomid-send-eventtype-txnid")]
         public async Task<string> RoomMessageSend(string roomId, string type, MatrixMRoomMessage message)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
             ThrowIfNotSupported();
 
-            if (message.body == null) throw new Exception("Missing body in message");
-            if (message.msgtype == null) throw new Exception("Missing msgtype in message");
+            if (message.Body == null) throw new Exception("Missing body in message");
+            if (message.MessageType == null) throw new Exception("Missing MessageType in message");
 
             var txnId = _rng.Next(int.MinValue, int.MaxValue);
             var msgData = ObjectToJson(message);
@@ -89,7 +91,7 @@ namespace Matrix
             // XXX: Mutex was removed because it's not task safe, need another mechanism.
             while (true)
             {
-                var res = await _matrixApiBackend.PutAsync(
+                var res = await _matrixApiBackend.HandlePutAsync(
                     apiPath, true, msgData
                 ).ConfigureAwait(false);
 
@@ -121,7 +123,7 @@ namespace Matrix
                     $"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/typing/{Uri.EscapeDataString(UserId)}",
                     UriKind.Relative);
 
-            var error = _matrixApiBackend.Put(apiPath, true, msgData, out _);
+            var error = _matrixApiBackend.HandlePut(apiPath, true, msgData, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
@@ -132,7 +134,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/state", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -146,7 +148,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/state/{type}/", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -160,7 +162,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/messages?limit=100&dir=b", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -174,7 +176,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/join/{Uri.EscapeDataString(roomId)}", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, null, out var result);
+            var error = _matrixApiBackend.HandlePost(apiPath, true, null, out var result);
 
             if (!error.IsOk) return null;
 
@@ -189,7 +191,7 @@ namespace Matrix
 
             var req = roomRequest != null ? ObjectToJson(roomRequest) : null;
             var apiPath = new Uri("/_matrix/client/r0/createRoom", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, req, out var result);
+            var error = _matrixApiBackend.HandlePost(apiPath, true, req, out var result);
 
             if (!error.IsOk) return null;
 
@@ -204,7 +206,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/user/{UserId}/rooms/{roomId}/tags", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -219,7 +221,7 @@ namespace Matrix
 
             var req = new JObject {["order"] = order};
             var apiPath = new Uri($"/_matrix/client/r0/user/{UserId}/rooms/{roomId}/tags/{tag}", UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath, true, req, out _);
+            var error = _matrixApiBackend.HandlePut(apiPath, true, req, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }

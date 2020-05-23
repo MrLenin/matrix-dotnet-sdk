@@ -5,20 +5,86 @@ using YamlDotNet.Serialization;
 
 namespace Matrix.AppService
 {
-    public struct AppServiceNamespace
+    public struct AppServiceNamespace : IEquatable<AppServiceNamespace>
     {
         public bool Exclusive { get; set; }
         public string Regex { get; set; }
+
+        public bool Equals(AppServiceNamespace other)
+        {
+            return (Exclusive == other.Exclusive) && (Regex == other.Regex);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            else
+            {
+                var other = (AppServiceNamespace) obj;
+                return Equals(other);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return Exclusive.GetHashCode() ^ Regex.GetHashCode(StringComparison.InvariantCulture);
+        }
+
+        public static bool operator ==(AppServiceNamespace left, AppServiceNamespace right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AppServiceNamespace left, AppServiceNamespace right)
+        {
+            return !(left == right);
+        }
     }
 
-    public struct ServiceRegistrationOptionsNamespaces
+    public struct ServiceRegistrationOptionsNamespaces : IEquatable<ServiceRegistrationOptionsNamespaces>
     {
         public List<AppServiceNamespace> Users { get; set; }
         public List<AppServiceNamespace> Aliases { get; set; }
         public List<AppServiceNamespace> Rooms { get; set; }
+
+         public bool Equals(ServiceRegistrationOptionsNamespaces other)
+         {
+             return Users == other.Users && Aliases == other.Aliases && Rooms == other.Rooms;
+         }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            else
+            {
+                var other = (ServiceRegistrationOptionsNamespaces) obj;
+                return Equals(other);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return Users.GetHashCode() ^ Aliases.GetHashCode() ^ Rooms.GetHashCode();
+        }
+
+        public static bool operator ==(ServiceRegistrationOptionsNamespaces left, ServiceRegistrationOptionsNamespaces right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ServiceRegistrationOptionsNamespaces left, ServiceRegistrationOptionsNamespaces right)
+        {
+            return !(left == right);
+        }
     }
 
-    public struct ServiceRegistrationOptions
+    public struct ServiceRegistrationOptions : IEquatable<ServiceRegistrationOptions>
     {
         public string Id { get; set; }
         public Uri Url { get; set; }
@@ -26,6 +92,45 @@ namespace Matrix.AppService
         public string HomeserverToken { get; set; }
         public string SenderLocalpart { get; set; }
         public ServiceRegistrationOptionsNamespaces Namespaces { get; set; }
+        
+        public bool Equals(ServiceRegistrationOptions other)
+        {
+            return Id == other.Id && Url == other.Url && AppserviceToken == other.AppserviceToken &&
+                   HomeserverToken == other.HomeserverToken && SenderLocalpart == other.SenderLocalpart &&
+                   Namespaces == other.Namespaces;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            else
+            {
+                var other = (ServiceRegistrationOptions) obj;
+                return Equals(other);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode(StringComparison.InvariantCulture) ^ Url.GetHashCode() ^
+                   AppserviceToken.GetHashCode(StringComparison.InvariantCulture) ^
+                   HomeserverToken.GetHashCode(StringComparison.InvariantCulture) ^
+                   SenderLocalpart.GetHashCode(StringComparison.InvariantCulture) ^
+                   Namespaces.GetHashCode();
+        }
+
+        public static bool operator ==(ServiceRegistrationOptions left, ServiceRegistrationOptions right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ServiceRegistrationOptions left, ServiceRegistrationOptions right)
+        {
+            return !(left == right);
+        }
     }
 
     public class ServiceRegistration

@@ -11,33 +11,33 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixLoginPassword : MatrixLogin
     {
-        public MatrixLoginPassword(string user, string pass, string device_id = null, string device_display_name = null)
+        public MatrixLoginPassword(string user, string password, string deviceId = null, string deviceDisplayName = null)
         {
-            this.user = user;
-            password = pass;
-            this.device_id = device_id;
-            this.device_display_name = device_display_name;
+            User = user;
+            Password = password;
+            DeviceId = deviceId;
+            DeviceDisplayName = deviceDisplayName;
         }
 
-        public readonly string type = "m.login.password";
-        public readonly string user;
-        public readonly string password;
-        public readonly string device_id;
-        public readonly string device_display_name;
+        public string Type { get; } = "m.login.password";
+        public string User { get; }
+        public string Password { get; }
+        public string DeviceId { get; }
+        public string DeviceDisplayName { get; }
     }
 
     public class MatrixLoginToken : MatrixLogin
     {
         public MatrixLoginToken(string user, string token)
         {
-            this.user = user;
-            this.token = token;
+            User = user;
+            Token = token;
         }
 
-        public readonly string user;
-        public readonly string token;
-        public readonly string txn_id = Guid.NewGuid().ToString();
-        public readonly string type = "m.login.token";
+        public string User { get; }
+        public string Token { get; }
+        public string TransactionId { get; } = Guid.NewGuid().ToString();
+        public string Type { get; } = "m.login.token";
     }
 
     /// <summary>
@@ -45,8 +45,8 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixLoginResponse
     {
-        public string AccessToken;
-        public Uri Homeserver;
-        public string UserId;
+        public string AccessToken { get; set; }
+        public Uri Homeserver { get; set; }
+        public string UserId { get; set; }
     }
 }

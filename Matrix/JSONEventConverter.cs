@@ -62,10 +62,7 @@ namespace Matrix
 
         public Type MessageContentType(string type)
         {
-            Type otype;
-            if (messageContentTypes.TryGetValue(type, out otype)) return otype;
-
-            return typeof(MatrixMRoomMessage);
+            return messageContentTypes.TryGetValue(type, out var outType) ? outType : typeof(MatrixMRoomMessage);
         }
 
         public MatrixEventContent GetContent(JObject jObject, Newtonsoft.Json.JsonSerializer serializer, string type)
@@ -74,7 +71,7 @@ namespace Matrix
             if (serializer == null) throw new ArgumentNullException(nameof(serializer));
 
             if (!contentTypes.TryGetValue(type, out var T))
-                return new MatrixEventContent {mxContent = jObject};
+                return new MatrixEventContent {MxContent = jObject};
 
             try
             {
@@ -82,11 +79,11 @@ namespace Matrix
                 {
                     var message = new MatrixMRoomMessage();
                     serializer.Populate(jObject.CreateReader(), message);
-                    T = MessageContentType(message.msgtype);
+                    T = MessageContentType(message.MessageType);
                 }
 
                 var content = (MatrixEventContent) Activator.CreateInstance(T);
-                content.mxContent = jObject;
+                content.MxContent = jObject;
 
                 if (type == "m.receipt")
                     ((MatrixMReceipt) content).ParseJObject(jObject);
@@ -124,7 +121,7 @@ namespace Matrix
 
             if (jObject["content"].HasValues)
             {
-                ev.content = GetContent(jObject["content"] as JObject, serializer, ev.type);
+                ev.Content = GetContent(jObject["content"] as JObject, serializer, ev.Type);
             }
             else if (((JObject) jObject["unsigned"]).TryGetValue("redacted_because", out _))
             {

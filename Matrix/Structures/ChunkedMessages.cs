@@ -1,9 +1,11 @@
-﻿namespace Matrix.Structures
+﻿using System.Collections.Generic;
+
+namespace Matrix.Structures
 {
     public class ChunkedMessages
     {
-        public string start;
-        public string end;
-        public MatrixEvent[] chunk;
+        public string Start { get; set; }
+        public string End { get; set; }
+        public IEnumerable<MatrixEvent> Chunk { get; set; }
     }
 }

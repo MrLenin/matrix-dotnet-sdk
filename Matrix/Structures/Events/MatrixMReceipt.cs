@@ -10,38 +10,62 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixMReceipt : MatrixEventContent
     {
-        public Dictionary<string, MatrixReceipts> receipts;
+        public Dictionary<string, MatrixReceipts> Receipts { get; set; }
 
         public void ParseJObject(JObject obj)
         {
-            receipts = new Dictionary<string, MatrixReceipts>();
-            foreach (JProperty prop in obj.Children())
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            Receipts = new Dictionary<string, MatrixReceipts>();
+
+            try
             {
-                var reciepts = new MatrixReceipts();
-                reciepts.ParseJObject((JObject) prop.Value);
-                receipts.Add(prop.Name, reciepts);
+                foreach (JProperty prop in obj.Children())
+                {
+                    var receipts = new MatrixReceipts();
+                    receipts.ParseJObject((JObject) prop.Value);
+                    Receipts.Add(prop.Name, receipts);
+                }
+            }
+            catch (InvalidCastException e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }
 
     public class MatrixReceipts
     {
-        public Dictionary<string, MatrixReceipt> m_read;
+        public Dictionary<string, MatrixReceipt> ReadReceipts { get; private set; }
 
         public void ParseJObject(JObject obj)
         {
-            m_read = new Dictionary<string, MatrixReceipt>();
-            foreach (JProperty prop in obj.GetValue("m.read").Children())
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+            ReadReceipts = new Dictionary<string, MatrixReceipt>();
+
+            try
             {
-                var reciept = new MatrixReceipt();
-                reciept.ts = ((JObject) prop.Value)["ts"].ToObject<long>();
-                m_read.Add(prop.Name, reciept);
+                foreach (JProperty prop in obj.GetValue("m.read", StringComparison.InvariantCulture).Children())
+                {
+                    var receipt = new MatrixReceipt
+                    {
+                        TimeStamp = ((JObject)prop.Value)["ts"].ToObject<long>()
+                    };
+                    ReadReceipts.Add(prop.Name, receipt);
+                }
+            }
+            catch (InvalidCastException e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }
 
     public class MatrixReceipt
     {
-        public long ts;
+        public long TimeStamp { get; set; }
     }
 }

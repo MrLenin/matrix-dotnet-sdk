@@ -2,13 +2,13 @@
 {
     public class MatrixFileInfo
     {
-        public string mimetype;
-        public int size;
+        public string MimeType { get; set; }
+        public int Size { get; set; }
     }
 
     public class MatrixImageInfo : MatrixFileInfo
     {
-        public int h;
-        public int w;
+        public int Height { get; set; }
+        public int Width { get; set; }
     }
 }

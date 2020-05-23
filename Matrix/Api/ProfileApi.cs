@@ -12,7 +12,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri("/_matrix/client/r0/profile/" + userId, UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var response);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var response);
 
             return error.IsOk ? response.ToObject<MatrixProfile>() : null;
         }
@@ -30,7 +30,7 @@ namespace Matrix
 
             var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/displayname",
                 UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath, true, request, out _);
+            var error = _matrixApiBackend.HandlePut(apiPath, true, request, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
@@ -44,7 +44,7 @@ namespace Matrix
             var request = new JObject {{"avatar_url", JToken.FromObject(avatarUrl)}};
             var apiPath = new Uri($"/_matrix/client/r0/profile/{Uri.EscapeUriString(userId)}/avatar_url",
                 UriKind.Relative);
-            var error = _matrixApiBackend.Put(apiPath, true, request, out _);
+            var error = _matrixApiBackend.HandlePut(apiPath, true, request, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }

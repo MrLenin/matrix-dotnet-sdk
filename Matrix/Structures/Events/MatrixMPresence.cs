@@ -13,10 +13,10 @@ namespace Matrix.Structures
 
     public class MatrixMPresence : MatrixEventContent
     {
-        public string user_id;
-        public long last_active_ago;
-        public string avatar_url;
-        public string displayname;
-        public EMatrixPresence presence;
+        public string UserId { get; set; }
+        public long LastActiveAgo { get; set; }
+        public Uri AvatarUrl { get; set; }
+        public string DisplayName { get; set; }
+        public EMatrixPresence Presence { get; set; }
     }
 }

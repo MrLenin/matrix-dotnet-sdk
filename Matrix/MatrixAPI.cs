@@ -178,20 +178,20 @@ namespace Matrix
         private void ProcessSync(MatrixSync syncData)
         {
             //Grab data from rooms the user has joined.
-            foreach (var (roomId, matrixEventRoomJoined) in syncData.rooms.join)
+            foreach (var (roomId, matrixEventRoomJoined) in syncData.Rooms.Join)
                 OnSyncJoinEvent?.Invoke(roomId, matrixEventRoomJoined);
 
-            foreach (var (roomId, matrixEventRoomInvited) in syncData.rooms.invite)
+            foreach (var (roomId, matrixEventRoomInvited) in syncData.Rooms.Invite)
                 OnSyncInviteEvent?.Invoke(roomId, matrixEventRoomInvited);
 
-            _syncToken = syncData.next_batch;
+            _syncToken = syncData.NextBatch;
         }
 
         [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-versions")]
         public MatrixVersions ClientVersions()
         {
             var apiPath = new Uri("/_matrix/client/versions", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, false, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, false, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -204,7 +204,7 @@ namespace Matrix
         public List<string> GetJoinedRooms()
         {
             var apiPath = new Uri("/_matrix/client/r0/joined_rooms", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -216,7 +216,7 @@ namespace Matrix
         public Dictionary<string, MatrixProfile> GetJoinedMembers(string roomId)
         {
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/joined_members", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -238,7 +238,7 @@ namespace Matrix
                 });
 
             var apiPath = new Uri("/_matrix/client/r0/register", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, request, out _);
+            var error = _matrixApiBackend.HandlePost(apiPath, true, request, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
@@ -260,7 +260,7 @@ namespace Matrix
             }
 
             // Ensure we support a version of the spec >= the min version and <= the last version.
-            if (!_versions.supportedVersions()
+            if (!_versions.SupportedVersions()
                 .Any(version => version >= spec.MinVersion && version <= spec.LastVersion))
                 return;
 

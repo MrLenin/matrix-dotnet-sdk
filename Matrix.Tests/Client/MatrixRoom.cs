@@ -24,8 +24,8 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var creationEvent = new MatrixMRoomCreate()
             {
-                creator = "@Half-Shot:localhost",
-                mfederate = false,
+                Creator = "@Half-Shot:localhost",
+                Federated = false,
             };
             room.FeedEvent(Utils.MockEvent(creationEvent));
             Assert.That(room.Creator, Is.EqualTo("@Half-Shot:localhost"), "Creator is correct.");
@@ -38,7 +38,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new MatrixMRoomName()
             {
-                name = "Snug Fox Party!"
+                Name = "Snug Fox Party!"
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.Name, Is.EqualTo("Snug Fox Party!"), "Name is correct.");
@@ -50,7 +50,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new MatrixMRoomTopic()
             {
-                topic = "Foxes welcome!"
+                Topic = "Foxes welcome!"
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.Topic, Is.EqualTo("Foxes welcome!"), "Topic is correct.");
@@ -67,7 +67,7 @@ namespace Matrix.Tests.Client
             };
             var ev = new MatrixMRoomAliases()
             {
-                aliases = aliases
+                Aliases = aliases
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.Aliases, Is.EquivalentTo(aliases), "Aliases are correct.");
@@ -78,7 +78,7 @@ namespace Matrix.Tests.Client
             };
             ev = new MatrixMRoomAliases()
             {
-                aliases = aliases
+                Aliases = aliases
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.Aliases, Is.EquivalentTo(aliases), "Changed aliases are correct.");
@@ -90,7 +90,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new MatrixMRoomCanonicalAlias()
             {
-                alias = "#resturant:resturant"
+                Alias = "#resturant:resturant"
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.CanonicalAlias, Is.EqualTo("#resturant:resturant"), "The canonical alias is correct.");
@@ -102,7 +102,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new MatrixMRoomJoinRules()
             {
-                join_rule = EMatrixRoomJoinRules.Public
+                JoinRule = EMatrixRoomJoinRules.Public
             };
             room.FeedEvent(Utils.MockEvent(ev));
             Assert.That(room.JoinRule, Is.EqualTo(EMatrixRoomJoinRules.Public), "The join rule is correct.");
@@ -115,7 +115,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom((MatrixApi) mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join
+                Membership = EMatrixRoomMembership.Join
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
             Assert.That(room.Members.ContainsKey("@foobar:localhost"), Is.True, "The member is in the room.");
@@ -129,7 +129,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom((MatrixApi) mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join
+                Membership = EMatrixRoomMembership.Join
             };
             mock.Setup(f => f.RunningInitialSync).Returns(true);
             var didFire = false;
@@ -156,36 +156,36 @@ namespace Matrix.Tests.Client
 
             var ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join
+                Membership = EMatrixRoomMembership.Join
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
 
             Assert.That(didFire[0], Is.True, "Procesed join");
             ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join,
-                displayname = "Foobar!",
+                Membership = EMatrixRoomMembership.Join,
+                DisplayName = "Foobar!",
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
 
             Assert.That(didFire[1], Is.True, "Processed change");
             ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Leave,
+                Membership = EMatrixRoomMembership.Leave,
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
             Assert.That(didFire[2], Is.True, "Processed leave");
 
             ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Invite,
+                Membership = EMatrixRoomMembership.Invite,
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
             Assert.That(didFire[3], Is.True, "Processed invite");
 
             ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Ban,
+                Membership = EMatrixRoomMembership.Ban,
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
             Assert.That(didFire[4], Is.True, "Processed ban");
@@ -241,7 +241,7 @@ namespace Matrix.Tests.Client
             var mock = Utils.MockApi();
             var room = new MatrixRoom(mock.Object, "!abc:localhost");
             Assert.That(
-                () => room.SetMemberAvatar("@foobar:localhost"),
+                () => room.SetMemberAvatar(new Uri("@foobar:localhost", UriKind.Relative)),
                 Throws.TypeOf<MatrixException>()
                     .With.Property("Message").EqualTo("Couldn't find the user's membership event")
             );
@@ -254,7 +254,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join,
+                Membership = EMatrixRoomMembership.Join,
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
             room.SetMemberDisplayName("@foobar:localhost");
@@ -267,10 +267,10 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(mock.Object, "!abc:localhost");
             var ev = new MatrixMRoomMember()
             {
-                membership = EMatrixRoomMembership.Join,
+                Membership = EMatrixRoomMembership.Join,
             };
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));
-            room.SetMemberAvatar("@foobar:localhost");
+            room.SetMemberAvatar(new Uri("@foobar:localhost", UriKind.Relative));
         }
     }
 }

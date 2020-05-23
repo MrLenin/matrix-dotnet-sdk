@@ -19,7 +19,7 @@ namespace Matrix
                 urlString += "&since=" + _syncToken;
 
             var apiPath = new Uri(urlString, UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var response);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var response);
 
             if (error.IsOk)
             {

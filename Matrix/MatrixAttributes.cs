@@ -23,61 +23,40 @@ namespace Matrix
 
         public override string ToString()
         {
-            string apiStr;
-
             var verStr = GetStringForVersion(LastVersion);
-
-            switch (Api)
+            var apiStr = Api switch
             {
-                case EMatrixSpecApi.ClientServer:
-                    apiStr = "client_server";
-                    break;
-                case EMatrixSpecApi.ApplicationService:
-                    apiStr = "application_service";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(Api), Api, null);
-            }
-
+                EMatrixSpecApi.ClientServer => "client_server",
+                EMatrixSpecApi.ApplicationService => "application_service",
+                _ => "ERROR UNKNOWN API TYPE",
+            };
             return $"{MatrixSpecUrl}/{apiStr}/{verStr}.html#${Path}";
         }
 
         public static string GetStringForVersion(EMatrixSpecApiVersion version)
         {
-            switch (version)
+            return version switch
             {
-                case EMatrixSpecApiVersion.R001:
-                    return "r0.0.1";
-                case EMatrixSpecApiVersion.R010:
-                    return "r0.1.0";
-                case EMatrixSpecApiVersion.R020:
-                    return "r0.2.0";
-                case EMatrixSpecApiVersion.R030:
-                    return "r0.3.0";
-                case EMatrixSpecApiVersion.R040:
-                    return "r0.4.0";
-                default:
-                    return "unstable";
-            }
+                EMatrixSpecApiVersion.R001 => "r0.0.1",
+                EMatrixSpecApiVersion.R010 => "r0.1.0",
+                EMatrixSpecApiVersion.R020 => "r0.2.0",
+                EMatrixSpecApiVersion.R030 => "r0.3.0",
+                EMatrixSpecApiVersion.R040 => "r0.4.0",
+                _ => "unstable",
+            };
         }
 
         public static EMatrixSpecApiVersion GetVersionForString(string version)
         {
-            switch (version)
+            return version switch
             {
-                case "r0.0.1":
-                    return EMatrixSpecApiVersion.R001;
-                case "r0.1.0":
-                    return EMatrixSpecApiVersion.R010;
-                case "r0.2.0":
-                    return EMatrixSpecApiVersion.R020;
-                case "r0.3.0":
-                    return EMatrixSpecApiVersion.R030;
-                case "r0.4.0":
-                    return EMatrixSpecApiVersion.R040;
-                default:
-                    return EMatrixSpecApiVersion.Unknown;
-            }
+                "r0.0.1" => EMatrixSpecApiVersion.R001,
+                "r0.1.0" => EMatrixSpecApiVersion.R010,
+                "r0.2.0" => EMatrixSpecApiVersion.R020,
+                "r0.3.0" => EMatrixSpecApiVersion.R030,
+                "r0.4.0" => EMatrixSpecApiVersion.R040,
+                _ => EMatrixSpecApiVersion.Unknown,
+            };
         }
     }
 

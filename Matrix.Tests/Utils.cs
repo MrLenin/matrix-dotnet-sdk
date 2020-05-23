@@ -12,10 +12,13 @@ namespace Matrix.Tests
             string stateKey = null,
             int age = 0)
         {
-            var ev = new MatrixEvent();
-            ev.content = content;
-            if (stateKey != null) ev.state_key = stateKey;
-            ev.age = age;
+            var ev = new MatrixEvent
+            {
+                Content = content
+            };
+
+            if (stateKey != null) ev.StateKey = stateKey;
+            ev.Age = age;
             return ev;
         }
 

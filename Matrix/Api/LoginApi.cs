@@ -13,7 +13,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri("/_matrix/client/r0/login", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, false, JObject.FromObject(login), out var result);
+            var error = _matrixApiBackend.HandlePost(apiPath, false, JObject.FromObject(login), out var result);
 
             if (error.IsOk) return result.ToObject<MatrixLoginResponse>();
 

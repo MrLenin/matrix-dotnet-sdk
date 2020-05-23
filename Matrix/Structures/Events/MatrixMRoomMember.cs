@@ -1,4 +1,6 @@
-﻿namespace Matrix.Structures
+﻿using System;
+
+namespace Matrix.Structures
 {
     public enum EMatrixRoomMembership
     {
@@ -11,9 +13,9 @@
 
     public class MatrixMRoomMember : MatrixRoomStateEvent
     {
-        public MatrixInvite third_party_invite;
-        public EMatrixRoomMembership membership;
-        public string avatar_url;
-        public string displayname;
+        public MatrixInvite ThirdPartyInvite { get; set; }
+        public EMatrixRoomMembership Membership { get; set; }
+        public Uri AvatarUrl { get; set; }
+        public string DisplayName { get; set; }
     }
 }

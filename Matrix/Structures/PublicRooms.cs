@@ -1,25 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Matrix.Structures
 {
     public class PublicRooms
     {
-        public List<PublicRoomsChunk> chunk;
-        public string next_batch;
-        public string prev_batch;
-        public int total_room_count_estimate;
+        public IEnumerable<PublicRoomsChunk> Chunk { get; set; }
+        public string NextBatch { get; set; }
+        public string PrevBatch { get; set; }
+        public int TotalRoomCountEstimate { get; set; }
     }
 
     public class PublicRoomsChunk
     {
-        public string[] aliases;
-        public string canonical_alias;
-        public string name;
-        public int num_joined_members;
-        public string room_id;
-        public string topic;
-        public bool world_readable;
-        public bool guest_can_join;
-        public string avatar_url;
+        public IEnumerable<string> Aliases { get; set; }
+        public string CanonicalAlias { get; set; }
+        public string Name { get; set; }
+        public int NumJoinedMembers { get; set; }
+        public string RoomId { get; set; }
+        public string Topic { get; set; }
+        public bool WorldReadable { get; set; }
+        public bool GuestCanJoin { get; set; }
+        public Uri AvatarUrl { get; set; }
     }
 }

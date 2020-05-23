@@ -5,12 +5,19 @@ namespace Matrix.Structures
 {
     public class MatrixVersions
     {
-        public List<string> versions;
-        public Dictionary<string, bool> unstable_features;
+        private List<string> _versionsList;
 
-        public List<EMatrixSpecApiVersion> supportedVersions()
+        public Dictionary<string, bool> UnstableFeatures { get; set; }
+
+        public IEnumerable<string> Versions
         {
-            return versions.ConvertAll(MatrixSpecAttribute.GetVersionForString);
+            get => _versionsList;
+            set => _versionsList = value as List<string>;
+        }
+
+        public IEnumerable<EMatrixSpecApiVersion> SupportedVersions()
+        {
+            return _versionsList.ConvertAll(MatrixSpecAttribute.GetVersionForString);
         }
     }
 }

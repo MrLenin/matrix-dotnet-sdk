@@ -1,62 +1,64 @@
-﻿namespace Matrix.Structures
+﻿using System;
+
+namespace Matrix.Structures
 {
     public class MatrixMRoomMessage : MatrixEventContent
     {
-        public virtual string msgtype { get; set; }
-        public string body;
+        public virtual string MessageType { get; set; }
+        public string Body { get; set; }
 
         public override string ToString()
         {
-            return body;
+            return Body;
         }
     }
 
     public class MMessageNotice : MatrixMRoomMessage
     {
-        public override string msgtype => "m.notice";
+        public override string MessageType => "m.notice";
     }
 
     public class MMessageText : MatrixMRoomMessage
     {
-        public override string msgtype => "m.text";
+        public override string MessageType => "m.text";
     }
 
     public class MMessageEmote : MatrixMRoomMessage
     {
-        public override string msgtype => "m.emote";
+        public override string MessageType => "m.emote";
     }
 
     public class MMessageImage : MatrixMRoomMessage
     {
-        public override string msgtype => "m.image";
-        public MatrixImageInfo info;
-        public MatrixImageInfo thumbnail_info;
-        public string url;
-        public string thumbnail_url;
+        public override string MessageType => "m.image";
+        public MatrixImageInfo Info { get; set; }
+        public MatrixImageInfo ThumbnailInfo { get; set; }
+        public Uri Url { get; set; }
+        public Uri ThumbnailUrl { get; set; }
     }
 
     public class MMessageFile : MatrixMRoomMessage
     {
-        public override string msgtype => "m.file";
-        public MatrixFileInfo info;
-        public MatrixImageInfo thumbnail_info;
-        public string url;
-        public string thumbnail_url;
-        public string filename;
+        public override string MessageType => "m.file";
+        public MatrixFileInfo Info { get; set; }
+        public MatrixImageInfo ThumbnailInfo { get; set; }
+        public Uri Url { get; set; }
+        public Uri ThumbnailUrl { get; set; }
+        public string FileName { get; set; }
     }
 
     public class MMessageLocation : MatrixMRoomMessage
     {
-        public override string msgtype => "m.location";
-        public string geo_url;
-        public string thumbnail_url;
-        public MatrixImageInfo thumbnail_info;
+        public override string MessageType => "m.location";
+        public Uri GeoUrl { get; set; }
+        public Uri ThumbnailUrl { get; set; }
+        public MatrixImageInfo ThumbnailInfo { get; set; }
     }
 
-    public class MMessageCustomHTML : MatrixMRoomMessage
+    public class MMessageCustomHtml : MatrixMRoomMessage
     {
-        public override string msgtype => "m.notice";
-        public string format => "org.matrix.custom.html";
-        public string formatted_body;
+        public override string MessageType => "m.notice";
+        public string Format => "org.matrix.custom.html";
+        public string FormattedBody { get; set; }
     }
 }

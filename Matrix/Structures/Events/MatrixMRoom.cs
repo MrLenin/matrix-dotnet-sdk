@@ -1,4 +1,7 @@
-﻿namespace Matrix.Structures
+﻿using System.Collections.Generic;
+using System.Dynamic;
+
+namespace Matrix.Structures
 {
     public enum EMatrixRoomJoinRules
     {
@@ -13,7 +16,7 @@
         Invited,
         Joined,
         Shared,
-        World_Readable
+        WorldReadable
     }
 
     public class MatrixRoomStateEvent : MatrixEventContent
@@ -22,37 +25,37 @@
 
     public class MatrixMRoomAliases : MatrixRoomStateEvent
     {
-        public string[] aliases;
+        public IEnumerable<string> Aliases { get; set; }
     }
 
     public class MatrixMRoomCanonicalAlias : MatrixRoomStateEvent
     {
-        public string alias;
+        public string Alias { get; set; }
     }
 
     public class MatrixMRoomCreate : MatrixRoomStateEvent
     {
-        public bool mfederate = true;
-        public string creator;
+        public bool Federated { get; set; } = true;
+        public string Creator { get; set; }
     }
 
     public class MatrixMRoomJoinRules : MatrixRoomStateEvent
     {
-        public EMatrixRoomJoinRules join_rule;
+        public EMatrixRoomJoinRules JoinRule { get; set; }
     }
 
     public class MatrixMRoomName : MatrixRoomStateEvent
     {
-        public string name;
+        public string Name { get; set; }
     }
 
     public class MatrixMRoomTopic : MatrixRoomStateEvent
     {
-        public string topic;
+        public string Topic { get; set; }
     }
 
     public class MatrixMRoomHistoryVisibility : MatrixRoomStateEvent
     {
-        public EMatrixRoomHistoryVisibility history_visibility;
+        public EMatrixRoomHistoryVisibility HistoryVisibility { get; set; }
     }
 }

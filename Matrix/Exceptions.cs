@@ -13,6 +13,10 @@ namespace Matrix
         public MatrixException(string message, Exception innerException) : base(message, innerException)
         {
         }
+
+        public MatrixException()
+        {
+        }
     }
 
     public class MatrixServerError : MatrixException
@@ -32,12 +36,36 @@ namespace Matrix
             ErrorCode = matrixErrorCode;
             ErrorCodeStr = errorcode;
         }
+
+        public MatrixServerError()
+        {
+        }
+
+        public MatrixServerError(string message) : base(message)
+        {
+        }
+
+        public MatrixServerError(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 
     public class MatrixBadFormatException : MatrixException
     {
-        public MatrixBadFormatException(string value, string type, string reason) : base(
-            string.Format("Value \"{0}\" is not valid for type {1}, Reason: {2}", value, type, reason))
+        public MatrixBadFormatException(string value, string type, string reason) 
+            : base($"Value \"{value}\" is not valid for type {type}, Reason: {reason}")
+        {
+        }
+
+        public MatrixBadFormatException()
+        {
+        }
+
+        public MatrixBadFormatException(string message) : base(message)
+        {
+        }
+
+        public MatrixBadFormatException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

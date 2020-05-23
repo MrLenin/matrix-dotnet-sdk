@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
 
@@ -9,25 +11,24 @@ namespace Matrix.Structures
         /// <summary>
         /// Following http://matrix.org/docs/spec/r0.0.1/client_server.html#get-matrix-client-r0-sync
         /// </summary>
-        public MatrixEventContent content;
+        public MatrixEventContent Content { get; set; }
 
-        public long origin_server_ts;
-        public long age;
-        public string sender;
-        public string type;
-        public string event_id;
-        public string room_id;
-        public MatrixEventUnsigned unsigned;
-        public string state_key;
+        public long OriginServerTs { get; set; }
+        public long Age { get; set; }
+        public string Sender { get; set; }
+        public string Type { get; set; }
+        public string EventId { get; set; }
+        public string RoomId { get; set; }
+        public MatrixEventUnsigned EventUnsigned { get; set; }
+        public string StateKey { get; set; }
 
         // Special case for https://matrix.org/docs/spec/r0.0.1/client_server.html#m-room-member
-        public MatrixStrippedState[] invite_room_state;
+        public IEnumerable<MatrixStrippedState> InviteRoomState { get; set; }
 
         public override string ToString()
         {
-            var str = "Event {";
-            foreach (var prop in typeof(MatrixEvent).GetProperties())
-                str += "   " + (prop.Name + ": " + prop.GetValue(this));
+            var str = typeof(MatrixEvent).GetProperties().Aggregate("Event {",
+                (current, prop) => current + ("   " + (prop.Name + ": " + prop.GetValue(this))));
             str += "}";
             return str;
         }
@@ -35,9 +36,9 @@ namespace Matrix.Structures
 
     public class MatrixEventUnsigned
     {
-        public MatrixEventUnsigned prev_content;
-        public long age;
-        public string transaction_id;
+        public MatrixEventUnsigned PrevContent { get; set; }
+        public long Age { get; set; }
+        public string TransactionId { get; set; }
     }
 
     /// <summary>
@@ -45,14 +46,14 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixEventContent
     {
-        public JObject mxContent = null;
+        public JObject MxContent { get; set; } = null;
     }
 
     public class MatrixTimeline
     {
-        public bool limited;
-        public string prev_batch;
-        public MatrixEvent[] events;
+        public bool Limited { get; set; }
+        public string PrevBatch { get; set; }
+        public IEnumerable<MatrixEvent> Events { get; set; }
     }
 
     public static class MatrixEventType

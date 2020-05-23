@@ -2,20 +2,20 @@
 {
     public class MatrixEventRoomLeft
     {
-        public MatrixTimeline timeline;
-        public MatrixSyncEvents state;
+        public MatrixTimeline Timeline { get; set; }
+        public MatrixSyncEvents State { get; set; }
     }
 
     public class MatrixEventRoomJoined
     {
-        public MatrixTimeline timeline;
-        public MatrixSyncEvents state;
-        public MatrixSyncEvents account_data;
-        public MatrixSyncEvents ephemeral;
+        public MatrixTimeline Timeline { get; set; }
+        public MatrixSyncEvents State { get; set; }
+        public MatrixSyncEvents AccountData { get; set; }
+        public MatrixSyncEvents Ephemeral { get; set; }
     }
 
     public class MatrixEventRoomInvited
     {
-        public MatrixSyncEvents events;
+        public MatrixSyncEvents Events { get; set; }
     }
 }

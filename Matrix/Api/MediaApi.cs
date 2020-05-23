@@ -12,7 +12,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri("/_matrix/media/r0/upload", UriKind.Relative);
-            var error = _matrixApiBackend.Post(apiPath, true, data,
+            var error = _matrixApiBackend.HandlePost(apiPath, true, data,
                 new Dictionary<string, string> {{"Content-Type", contentType}}, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());

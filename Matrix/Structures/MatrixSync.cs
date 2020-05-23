@@ -7,21 +7,21 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixSync
     {
-        public string next_batch;
-        public MatrixSyncEvents account_data;
-        public MatrixSyncEvents presence;
-        public MatrixSyncRooms rooms;
+        public string NextBatch { get; set; }
+        public MatrixSyncEvents AccountData { get; set; }
+        public MatrixSyncEvents Presence { get; set; }
+        public MatrixSyncRooms Rooms { get; set; }
     }
 
     public class MatrixSyncEvents
     {
-        public MatrixEvent[] events;
+        public IEnumerable<MatrixEvent> Events { get; set; }
     }
 
     public class MatrixSyncRooms
     {
-        public Dictionary<string, MatrixEventRoomInvited> invite;
-        public Dictionary<string, MatrixEventRoomJoined> join;
-        public Dictionary<string, MatrixEventRoomLeft> leave;
+        public Dictionary<string, MatrixEventRoomInvited> Invite { get; set; }
+        public Dictionary<string, MatrixEventRoomJoined> Join { get; set; }
+        public Dictionary<string, MatrixEventRoomLeft> Leave { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace Matrix.Structures
     /// </summary>
     public class RoomTags
     {
-        public Dictionary<string, RoomTag> tags;
+        public Dictionary<string, RoomTag> Tags { get; set; }
     }
 
     public class RoomTag
@@ -15,6 +15,6 @@ namespace Matrix.Structures
         /// <summary>
         /// A number in a range [0,1] describing a relative position of the room under the given tag.
         /// </summary>
-        public double order;
+        public double Order { get; set; }
     }
 }

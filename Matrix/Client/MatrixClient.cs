@@ -131,9 +131,9 @@ namespace Matrix.Client
                 matrixRoom = _rooms[roomId];
             }
 
-            joined.state.events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
-            joined.timeline.events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
-            matrixRoom.SetEphemeral(joined.ephemeral);
+            joined.State.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
+            joined.Timeline.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
+            matrixRoom.SetEphemeral(joined.Ephemeral);
         }
 
         /// <summary>
@@ -243,9 +243,9 @@ namespace Matrix.Client
         {
             var room = new MatrixCreateRoom
             {
-                name = name,
-                room_alias_name = alias,
-                topic = topic
+                Name = name,
+                RoomAliasName = alias,
+                Topic = topic
             };
             return CreateRoom(room);
         }

@@ -75,7 +75,7 @@ namespace Matrix.Backends
             return apiResult;
         }
 
-        public MatrixRequestError Get(Uri apiPath, bool authenticate, out JToken result)
+        public MatrixRequestError HandleGet(Uri apiPath, bool authenticate, out JToken result)
         {
             apiPath = GetPath(apiPath, authenticate);
             var task = _client.GetAsync(apiPath);
@@ -85,13 +85,13 @@ namespace Matrix.Backends
             return res.Result.Error;
         }
 
-        public Task<MatrixApiResult> GetAsync(Uri apiPath, bool authenticate)
+        public Task<MatrixApiResult> HandleGetAsync(Uri apiPath, bool authenticate)
         {
             var task = _client.GetAsync(GetPath(apiPath, authenticate));
             return RequestWrap(task);
         }
 
-        public MatrixRequestError Delete(Uri apiPath, bool authenticate, out JToken result)
+        public MatrixRequestError HandleDelete(Uri apiPath, bool authenticate, out JToken result)
         {
             apiPath = GetPath(apiPath, authenticate);
             var task = _client.DeleteAsync(apiPath);
@@ -101,7 +101,7 @@ namespace Matrix.Backends
             return res.Result.Error;
         }
 
-        public MatrixRequestError Put(Uri apiPath, bool authenticate, JToken data, out JToken result)
+        public MatrixRequestError HandlePut(Uri apiPath, bool authenticate, JToken data, out JToken result)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -114,7 +114,7 @@ namespace Matrix.Backends
             return res.Result.Error;
         }
 
-        public Task<MatrixApiResult> PutAsync(Uri apiPath, bool authenticate, JToken request)
+        public Task<MatrixApiResult> HandlePutAsync(Uri apiPath, bool authenticate, JToken request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
@@ -124,7 +124,7 @@ namespace Matrix.Backends
             return RequestWrap(task);
         }
 
-        public MatrixRequestError Post(Uri apiPath, bool authenticate, JToken data, Dictionary<string, string> headers,
+        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, JToken data, Dictionary<string, string> headers,
             out JToken result)
         {
             if (headers == null) throw new ArgumentNullException(nameof(headers));
@@ -144,7 +144,7 @@ namespace Matrix.Backends
             return res.Result.Error;
         }
 
-        public MatrixRequestError Post(Uri apiPath, bool authenticate, byte[] data, Dictionary<string, string> headers,
+        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, byte[] data, Dictionary<string, string> headers,
             out JToken result)
         {
             if (headers == null) throw new ArgumentNullException(nameof(headers));
@@ -162,15 +162,15 @@ namespace Matrix.Backends
             return res.Result.Error;
         }
 
-        public MatrixRequestError Post(Uri apiPath, bool authenticate, JToken data, out JToken result)
+        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, JToken data, out JToken result)
         {
-            return Post(apiPath, authenticate, data, new Dictionary<string, string>(), out result);
+            return HandlePost(apiPath, authenticate, data, new Dictionary<string, string>(), out result);
         }
 
         private static async Task<Tuple<JToken, HttpStatusCode>> GenericRequest(Task<HttpResponseMessage> task)
         {
-            Task<string> stringTask = null;
             HttpResponseMessage httpResult;
+            Task<string> stringTask;
 
             try
             {

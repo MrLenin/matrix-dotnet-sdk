@@ -23,7 +23,7 @@ namespace Matrix
                 qs.Set("server", server);
 
             var apiPath = new Uri($"/_matrix/client/r0/publicRooms?{qs}", UriKind.Relative);
-            var error = _matrixApiBackend.Get(apiPath, true, out var result);
+            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
@@ -35,7 +35,7 @@ namespace Matrix
             ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/directory/room/{alias}", UriKind.Relative);
-            var error = _matrixApiBackend.Delete(apiPath, true, out _);
+            var error = _matrixApiBackend.HandleDelete(apiPath, true, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }

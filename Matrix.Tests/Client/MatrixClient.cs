@@ -14,7 +14,7 @@ namespace Matrix.Tests.Client
         public void CreateMatrixClientTest()
         {
             var mock = Utils.MockApi();
-            var client = new MatrixClient((MatrixApi) mock.Object);
+            _ = new MatrixClient((MatrixApi)mock.Object);
         }
 
         [Test]
