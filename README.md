@@ -7,6 +7,8 @@ so please ask if you want a endpoint to be added.
 
 The SDK is built against 'netcoreapp3.1', and will work with .NET core projects.
 
+** This fork is not entirely API compatible with its predecessors! **
+
 ## How to Use
 
 ## Documentation
