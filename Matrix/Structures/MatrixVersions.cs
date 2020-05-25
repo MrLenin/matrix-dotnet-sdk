@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Matrix.Api.Versions;
+
 namespace Matrix.Structures
 {
     public class MatrixVersions
@@ -15,9 +17,9 @@ namespace Matrix.Structures
             set => _versionsList = value as List<string>;
         }
 
-        public IEnumerable<EMatrixSpecApiVersion> SupportedVersions()
+        public IEnumerable<ClientServerApiVersion> SupportedVersions()
         {
-            return _versionsList.ConvertAll(MatrixSpecAttribute.GetVersionForString);
+            return _versionsList.ConvertAll(ClientServerApiVersionExtensions.FromJsonString);
         }
     }
 }

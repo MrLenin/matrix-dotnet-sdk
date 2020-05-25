@@ -43,7 +43,7 @@ namespace Matrix.Structures
             {
                 if (value == null) throw new ArgumentNullException(nameof(value));
 
-                if (value.Contains("#") || value.Contains(":"))
+                if (value.Contains("#", StringComparison.InvariantCulture) || value.Contains(":", StringComparison.InvariantCulture))
                     throw new MatrixBadFormatException(value, "local alias", "a local alias must not contain : or #");
                 _roomAliasName = value;
             }
@@ -66,4 +66,6 @@ namespace Matrix.Structures
         PublicChat,
         TrustedPrivateChat
     }
+
+
 }

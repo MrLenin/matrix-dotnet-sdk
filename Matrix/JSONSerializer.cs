@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +12,7 @@ namespace Matrix
         {
             NullValueHandling = NullValueHandling.Ignore;
             Converters.Add(new JsonEnumConverter());
-            Converters.Add(new JSONEventConverter());
+            Converters.Add(new JsonEventConverter());
         }
     }
 
@@ -23,7 +25,7 @@ namespace Matrix
             if (value == null) throw new ArgumentNullException(nameof(value));
 
             var t = value.GetType();
-            var name = Enum.GetName(t, value)?.ToLower();
+            var name = Enum.GetName(t, value)?.ToLower(CultureInfo.InvariantCulture);
 
             JToken.FromObject(name).WriteTo(writer);
         }

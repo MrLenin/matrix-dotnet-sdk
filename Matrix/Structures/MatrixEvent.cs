@@ -13,7 +13,7 @@ namespace Matrix.Structures
         /// </summary>
         public MatrixEventContent Content { get; set; }
 
-        public long OriginServerTs { get; set; }
+        public long OriginServerTimeStamp { get; set; }
         public long Age { get; set; }
         public string Sender { get; set; }
         public string Type { get; set; }

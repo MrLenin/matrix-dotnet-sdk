@@ -100,7 +100,7 @@ namespace Matrix.AppService
 
         private void CheckAndPerformRegistration(string user)
         {
-            if (_api.ClientProfile("@" + user + ":" + Domain) == null)
+            if (_api.Profile.GetProfile("@" + user + ":" + Domain) == null)
                 _api.RegisterUserAsAppservice(user);
         }
 
@@ -159,7 +159,7 @@ namespace Matrix.AppService
                         var data = new byte[context.Request.ContentLength64];
                         context.Request.InputStream.Read(data, 0, data.Length);
                         var batch = JsonConvert.DeserializeObject<EventBatch>(
-                            Encoding.UTF8.GetString(data), new JSONEventConverter());
+                            Encoding.UTF8.GetString(data), new JsonEventConverter());
                         foreach (var ev in batch.Events)
                             OnEvent?.Invoke(ev);
 
@@ -186,7 +186,6 @@ namespace Matrix.AppService
 
             _listener?.Close();
             _acceptSemaphore?.Dispose();
-            _api?.Dispose();
         }
 
         public void Dispose()

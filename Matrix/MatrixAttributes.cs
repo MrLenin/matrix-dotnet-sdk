@@ -1,4 +1,13 @@
 using System;
+using System.Collections.Generic;
+
+using Matrix.Api.Versions;
+
+using Newtonsoft.Json.Converters;
+
+using YamlDotNet.Serialization;
+
+using static Matrix.Api.Versions.ApiVersionContext;
 
 namespace Matrix
 {
@@ -7,74 +16,121 @@ namespace Matrix
     {
         private const string MatrixSpecUrl = "http://matrix.org/docs/spec/";
 
-        public EMatrixSpecApiVersion MinVersion { get; }
-        public EMatrixSpecApiVersion LastVersion { get; }
-        public EMatrixSpecApi Api { get; }
+        private readonly ApiVersionContext _apiVersionContext;
+
+        internal ApiVersionContext ApiVersionContext => _apiVersionContext;
+
         public string Path { get; }
 
-        public MatrixSpecAttribute(EMatrixSpecApiVersion supportedVer, EMatrixSpecApi api,
-            string path, EMatrixSpecApiVersion lastVersion = EMatrixSpecApiVersion.Unknown)
+        public MatrixSpecAttribute(ClientServerApiVersion supportedVer, string path,
+            ClientServerApiVersion lastVersion = ClientServerApiVersion.Unknown)
         {
-            Api = api;
             Path = path;
-            MinVersion = supportedVer;
-            LastVersion = lastVersion;
+            _apiVersionContext = new ClientServer(supportedVer, lastVersion);
+        }
+
+        public MatrixSpecAttribute(ServerServerApiVersion supportedVer, string path,
+            ServerServerApiVersion lastVersion = ServerServerApiVersion.Unknown)
+        {
+            Path = path;
+            _apiVersionContext = new ServerServer(supportedVer, lastVersion);
+        }
+
+        public MatrixSpecAttribute(ApplicationServiceApiVersion supportedVer, string path,
+            ApplicationServiceApiVersion lastVersion = ApplicationServiceApiVersion.Unknown)
+        {
+            Path = path;
+            _apiVersionContext = new ApplicationService(supportedVer, lastVersion);
+        }
+
+        public MatrixSpecAttribute(IdentityServiceApiVersion supportedVer, string path,
+            IdentityServiceApiVersion lastVersion = IdentityServiceApiVersion.Unknown)
+        {
+            Path = path;
+            _apiVersionContext = new IdentityService(supportedVer, lastVersion);
+        }
+
+        public MatrixSpecAttribute(PushGatewayApiVersion supportedVer, string path,
+            PushGatewayApiVersion lastVersion = PushGatewayApiVersion.Unknown)
+        {
+            Path = path;
+            _apiVersionContext = new PushGateway(supportedVer, lastVersion);
+        }
+
+        public MatrixSpecAttribute(RoomsApiVersion supportedVer, string path,
+            RoomsApiVersion lastVersion = RoomsApiVersion.V1)
+        {
+            Path = path;
+            _apiVersionContext = new Rooms(supportedVer, lastVersion);
         }
 
         public override string ToString()
         {
-            var verStr = GetStringForVersion(LastVersion);
-            var apiStr = Api switch
-            {
-                EMatrixSpecApi.ClientServer => "client_server",
-                EMatrixSpecApi.ApplicationService => "application_service",
-                _ => "ERROR UNKNOWN API TYPE",
-            };
+            var verStr = _apiVersionContext.Api switch
+                {
+                MatrixSpecApi.ClientServer =>
+                (_apiVersionContext as ClientServer)?
+                .LastVersion.ToJsonString(),
+                MatrixSpecApi.ServerServer =>
+                (_apiVersionContext as ServerServer)?
+                .LastVersion.ToJsonString(),
+                MatrixSpecApi.ApplicationService =>
+                (_apiVersionContext as ApplicationService)?
+                .LastVersion.ToJsonString(),
+                MatrixSpecApi.IdentityService =>
+                (_apiVersionContext as IdentityService)?
+                .LastVersion.ToJsonString(),
+                MatrixSpecApi.PushGateway =>
+                (_apiVersionContext as PushGateway)?
+                .LastVersion.ToJsonString(),
+                MatrixSpecApi.Rooms =>
+                (_apiVersionContext as Rooms)?
+                .LastVersion.ToJsonString(),
+                };
+
+            var apiStr = _apiVersionContext.Api.ToJsonString();
+
             return $"{MatrixSpecUrl}/{apiStr}/{verStr}.html#${Path}";
         }
-
-        public static string GetStringForVersion(EMatrixSpecApiVersion version)
-        {
-            return version switch
-            {
-                EMatrixSpecApiVersion.R001 => "r0.0.1",
-                EMatrixSpecApiVersion.R010 => "r0.1.0",
-                EMatrixSpecApiVersion.R020 => "r0.2.0",
-                EMatrixSpecApiVersion.R030 => "r0.3.0",
-                EMatrixSpecApiVersion.R040 => "r0.4.0",
-                _ => "unstable",
-            };
-        }
-
-        public static EMatrixSpecApiVersion GetVersionForString(string version)
-        {
-            return version switch
-            {
-                "r0.0.1" => EMatrixSpecApiVersion.R001,
-                "r0.1.0" => EMatrixSpecApiVersion.R010,
-                "r0.2.0" => EMatrixSpecApiVersion.R020,
-                "r0.3.0" => EMatrixSpecApiVersion.R030,
-                "r0.4.0" => EMatrixSpecApiVersion.R040,
-                _ => EMatrixSpecApiVersion.Unknown,
-            };
-        }
     }
 
-    public enum EMatrixSpecApi
+    public enum MatrixSpecApi
     {
         ClientServer,
-        ApplicationService
+        ServerServer,
+        ApplicationService,
+        IdentityService,
+        PushGateway,
+        Rooms
     }
 
-    public enum EMatrixSpecApiVersion
+    public static class MatrixSpecApiExtensions
     {
-        Unknown,
-        Unstable,
-        R001,
-        R010,
-        R020,
-        R030,
-        R040
+        public static string ToJsonString(this MatrixSpecApi clientServerApiVersion)
+        {
+            return clientServerApiVersion switch
+                {
+                MatrixSpecApi.ClientServer => @"client_server",
+                MatrixSpecApi.ServerServer => @"server_server",
+                MatrixSpecApi.ApplicationService => @"application_service",
+                MatrixSpecApi.IdentityService => @"identity_service",
+                MatrixSpecApi.PushGateway => @"push_gateway",
+                MatrixSpecApi.Rooms => @"rooms"
+                };
+        }
+
+        public static MatrixSpecApi FromJsonString(this string clientServerApiVersion)
+        {
+            return clientServerApiVersion switch
+                {
+                @"client_server" => MatrixSpecApi.ClientServer,
+                @"server_server" => MatrixSpecApi.ServerServer,
+                @"application_service" => MatrixSpecApi.ApplicationService,
+                @"identity_service" => MatrixSpecApi.IdentityService,
+                @"push_gateway" => MatrixSpecApi.PushGateway,
+                @"rooms" => MatrixSpecApi.Rooms
+                };
+        }
     }
 
     /// <summary>

@@ -26,6 +26,6 @@ namespace Matrix.Structures
         /// The timestamp (in milliseconds since the unix epoch) when this devices was last seen. (May be a few minutes out of date, for efficiency reasons).
         /// </summary>
         [JsonProperty("last_seen_ts")]
-        public int LastSeenTs { get; protected set; }
+        public int LastSeenTimeStamp { get; protected set; }
     }
 }

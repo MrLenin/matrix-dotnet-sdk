@@ -1,19 +1,26 @@
 ﻿using System;
+
+using Matrix.Api.Versions;
 using Matrix.Backends;
 using Matrix.Structures;
 using Newtonsoft.Json.Linq;
 
-namespace Matrix
+namespace Matrix.Api
 {
-    public partial class MatrixApi
+    public class LoginApi
     {
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "post-matrix-client-r0-login")]
+        private readonly MatrixApi _matrixApi;
+
+        public LoginApi(MatrixApi matrixApi) =>
+            _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
+
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-login")]
         public MatrixLoginResponse ClientLogin(MatrixLogin login)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri("/_matrix/client/r0/login", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePost(apiPath, false, JObject.FromObject(login), out var result);
+            var error = _matrixApi.Backend.HandlePost(apiPath, false, JObject.FromObject(login), out var result);
 
             if (error.IsOk) return result.ToObject<MatrixLoginResponse>();
 

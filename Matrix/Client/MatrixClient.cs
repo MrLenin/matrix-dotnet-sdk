@@ -2,6 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+
+using Matrix.Properties;
 using Matrix.Structures;
 using Microsoft.Extensions.Logging;
 
@@ -23,8 +25,8 @@ namespace Matrix.Client
         /// <value>The sync timeout in milliseconds.</value>
         public int SyncTimeout
         {
-            get => Api.SyncTimeout;
-            set => Api.SyncTimeout = value;
+            get => Api.Sync.Timeout;
+            set => Api.Sync.Timeout = value;
         }
 
         private readonly ConcurrentDictionary<string, MatrixRoom> _rooms =
@@ -57,12 +59,12 @@ namespace Matrix.Client
             try
             {
                 Api.ClientVersions();
-                Api.OnSyncJoinEvent += MatrixClient_OnEvent;
-                Api.OnSyncInviteEvent += MatrixClient_OnInvite;
+                Api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
+                Api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
             }
             catch (MatrixException e)
             {
-                throw new MatrixException("An exception occurred while trying to connect", e);
+                throw new MatrixException(Resources.ConnnectionException, e);
             }
         }
 
@@ -85,8 +87,8 @@ namespace Matrix.Client
         public MatrixClient(MatrixApi api)
         {
             Api = api ?? throw new ArgumentNullException(nameof(api));
-            api.OnSyncJoinEvent += MatrixClient_OnEvent;
-            api.OnSyncInviteEvent += MatrixClient_OnInvite;
+            api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
+            api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
         }
 
         /// <summary>
@@ -95,7 +97,7 @@ namespace Matrix.Client
         /// <returns>The sync token.</returns>
         public string GetSyncToken()
         {
-            return Api.GetSyncToken();
+            return Api.Sync.Token;
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace Matrix.Client
         /// <param name="deviceId">Device ID</param>
         public MatrixLoginResponse LoginWithPassword(string username, string password, string deviceId = null)
         {
-            var result = Api.ClientLogin(new MatrixLoginPassword(username, password, deviceId));
+            var result = Api.Login.ClientLogin(new MatrixLoginPassword(username, password, deviceId));
             Api.SetLogin(result);
             return result;
         }
@@ -153,9 +155,9 @@ namespace Matrix.Client
         /// <param name="syncToken"> If you stored the sync token before, you can set it for the API here</param>
         public void StartSync(string syncToken = "")
         {
-            Api.SetSyncToken(syncToken);
-            Api.ClientSync();
-            Api.StartSyncThreads();
+            Api.Sync.Token = syncToken;
+            Api.Sync.ClientSync();
+            Api.Sync.Start();
         }
 
         /// <summary>
@@ -167,9 +169,9 @@ namespace Matrix.Client
         /// <param name="token">Access Token</param>
         public void LoginWithToken(string username, string token)
         {
-            Api.ClientLogin(new MatrixLoginToken(username, token));
-            Api.ClientSync();
-            Api.StartSyncThreads();
+            Api.Login.ClientLogin(new MatrixLoginToken(username, token));
+            Api.Sync.ClientSync();
+            Api.Sync.Start();
         }
 
         /// <summary>
@@ -195,18 +197,18 @@ namespace Matrix.Client
         public MatrixUser GetUser(string userId = null)
         {
             userId ??= Api.UserId;
-            var profile = Api.ClientProfile(userId);
+            var profile = Api.Profile.GetProfile(userId);
             return profile != null ? new MatrixUser(profile, userId) : null;
         }
 
         public void SetDisplayName(string displayName)
         {
-            Api.ClientSetDisplayName(Api.UserId, displayName);
+            Api.Profile.SetDisplayName(Api.UserId, displayName);
         }
 
         public void SetAvatar(Uri avatarUrl)
         {
-            Api.ClientSetAvatar(Api.UserId, avatarUrl);
+            Api.Profile.SetAvatar(Api.UserId, avatarUrl);
         }
 
         /// <summary>
@@ -225,7 +227,7 @@ namespace Matrix.Client
         /// <param name="roomDetails">Optional set of options to send to the server.</param>
         public MatrixRoom CreateRoom(MatrixCreateRoom roomDetails = null)
         {
-            var roomId = Api.ClientCreateRoom(roomDetails);
+            var roomId = Api.Room.ClientCreate(roomDetails);
             if (roomId == null) return null;
 
             var room = JoinRoom(roomId);
@@ -259,7 +261,7 @@ namespace Matrix.Client
         {
             if (_rooms.ContainsKey(roomId)) return _rooms[roomId];
 
-            roomId = Api.ClientJoin(roomId);
+            roomId = Api.Room.ClientJoin(roomId);
 
             if (roomId == null)
                 return null;
@@ -272,7 +274,7 @@ namespace Matrix.Client
 
         public MatrixMediaFile UploadFile(string contentType, byte[] data)
         {
-            var url = Api.MediaUpload(contentType, data);
+            var url = Api.Media.Upload(contentType, data);
             return new MatrixMediaFile(Api, url, contentType);
         }
 
@@ -288,7 +290,7 @@ namespace Matrix.Client
 
             _log.LogInformation($"Don't have {roomId} synced, getting the room from /state");
             // If we don't have the room, attempt to grab it's state.
-            var state = Api.GetRoomState(roomId);
+            var state = Api.Room.GetState(roomId);
             room = new MatrixRoom(Api, roomId);
             foreach (var matrixEvent in state)
                 room.FeedEvent(matrixEvent);
@@ -336,12 +338,12 @@ namespace Matrix.Client
 
         public PublicRooms GetPublicRooms(int limit = 0, string since = "", string server = "")
         {
-            return Api.PublicRooms(limit, since, server);
+            return Api.RoomDirectory.PublicRooms(limit, since, server);
         }
 
         public void DeleteFromRoomDirectory(string alias)
         {
-            Api.DeleteFromRoomDirectory(alias);
+            Api.RoomDirectory.DeleteFrom(alias);
         }
 
         /// <summary>
@@ -356,7 +358,7 @@ namespace Matrix.Client
         {
             if (!disposing) return;
 
-            Api.StopSyncThreads();
+            Api.Sync.Stop();
         }
 
         public void Dispose()

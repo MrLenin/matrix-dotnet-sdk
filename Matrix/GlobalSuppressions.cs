@@ -5,8 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly:
-    SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification =
-        "<Pending>")]
-[assembly: SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly", Justification =
-    "<Pending>", Scope = "member", Target = "~M:Matrix.Client.MatrixRoom.FeedEvent(Matrix.Structures.MatrixEvent)")]
+[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>", Scope = "member", Target = "~M:Matrix.Client.MatrixRoom.FeedEvent(Matrix.Structures.MatrixEvent)")]

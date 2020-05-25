@@ -6,8 +6,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Matrix
 {
-    public class JSONEventConverter : JsonConverter
+    public class JsonEventConverter : JsonConverter
     {
+        private readonly Newtonsoft.Json.JsonSerializer _jsonSerializer;
+        private Newtonsoft.Json.JsonSerializer _tempSerializer;
+
         private Dictionary<string, Type> contentTypes = new Dictionary<string, Type>
         {
             {"m.presence", typeof(MatrixMPresence)},
@@ -35,24 +38,27 @@ namespace Matrix
             {"m.location", typeof(MMessageLocation)}
         };
 
-        public JSONEventConverter(Dictionary<string, Type> customMsgTypes = null)
+        public JsonEventConverter(Dictionary<string, Type> customMsgTypes = null)
         {
-            if (customMsgTypes != null)
-                foreach (var item in customMsgTypes)
-                    if (contentTypes.ContainsKey(item.Key))
-                        contentTypes[item.Key] = item.Value;
-                    else
-                        contentTypes.Add(item.Key, item.Value);
+            _jsonSerializer = new Newtonsoft.Json.JsonSerializer();
+
+            if (customMsgTypes == null) return;
+
+            foreach (var (messageId, type) in customMsgTypes)
+                if (contentTypes.ContainsKey(messageId))
+                    contentTypes[messageId] = type;
+                else
+                    contentTypes.Add(messageId, type);
         }
 
-        public void AddMessageType(string name, Type type)
+        public void AddMessageType(string messageId, Type type)
         {
-            messageContentTypes.Add(name, type);
+            messageContentTypes.Add(messageId, type);
         }
 
-        public void AddEventType(string msgtype, Type type)
+        public void AddEventType(string messageId, Type type)
         {
-            contentTypes.Add(msgtype, type);
+            contentTypes.Add(messageId, type);
         }
 
         public override bool CanConvert(Type objectType)
@@ -65,20 +71,21 @@ namespace Matrix
             return messageContentTypes.TryGetValue(type, out var outType) ? outType : typeof(MatrixMRoomMessage);
         }
 
-        public MatrixEventContent GetContent(JObject jObject, Newtonsoft.Json.JsonSerializer serializer, string type)
+        public MatrixEventContent GetContent(JObject jObject, string type)
         {
             if (jObject == null) throw new ArgumentNullException(nameof(jObject));
-            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
 
             if (!contentTypes.TryGetValue(type, out var T))
                 return new MatrixEventContent {MxContent = jObject};
+
+            _tempSerializer ??= _jsonSerializer;
 
             try
             {
                 if (T == typeof(MatrixMRoomMessage))
                 {
                     var message = new MatrixMRoomMessage();
-                    serializer.Populate(jObject.CreateReader(), message);
+                    _tempSerializer.Populate(jObject.CreateReader(), message);
                     T = MessageContentType(message.MessageType);
                 }
 
@@ -88,7 +95,7 @@ namespace Matrix
                 if (type == "m.receipt")
                     ((MatrixMReceipt) content).ParseJObject(jObject);
                 else
-                    serializer.Populate(jObject.CreateReader(), content);
+                    _tempSerializer.Populate(jObject.CreateReader(), content);
 
                 return content;
             }
@@ -105,14 +112,15 @@ namespace Matrix
             Newtonsoft.Json.JsonSerializer serializer)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
-            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+
+            _tempSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
 
             // Load JObject from stream
             var jObject = JObject.Load(reader);
 
             // Populate MatrixEventContent if applicable
             if (objectType != typeof(MatrixEvent))
-                return objectType != typeof(MatrixEventContent) ? null : GetContent(jObject, serializer, "");
+                return objectType != typeof(MatrixEventContent) ? null : GetContent(jObject, "");
 
             // Populate the event itself
             var ev = new MatrixEvent();
@@ -121,7 +129,7 @@ namespace Matrix
 
             if (jObject["content"].HasValues)
             {
-                ev.Content = GetContent(jObject["content"] as JObject, serializer, ev.Type);
+                ev.Content = GetContent(jObject["content"] as JObject, ev.Type);
             }
             else if (((JObject) jObject["unsigned"]).TryGetValue("redacted_because", out _))
             {

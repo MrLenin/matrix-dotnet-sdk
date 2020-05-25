@@ -131,7 +131,7 @@ namespace Matrix.Tests.Client
             {
                 Membership = EMatrixRoomMembership.Join
             };
-            mock.Setup(f => f.RunningInitialSync).Returns(true);
+            mock.Setup(f => f.Sync.IsInitialSync).Returns(true);
             var didFire = false;
             room.OnUserJoined += (n, a) => didFire = true;
             room.FeedEvent(Utils.MockEvent(ev, "@foobar:localhost"));

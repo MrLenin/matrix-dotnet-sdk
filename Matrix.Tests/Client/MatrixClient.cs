@@ -47,20 +47,20 @@ namespace Matrix.Tests.Client
         {
             var mock = Utils.MockApi();
             // Without userid parameter
-            mock.Setup(f => f.ClientProfile(It.IsAny<string>()));
+            mock.Setup(f => f.Profile.GetProfile(It.IsAny<string>()));
             var client = new MatrixClient((MatrixApi) mock.Object);
             Assert.That(client.GetUser(), Is.Null);
 
-            mock.Setup(f => f.ClientProfile(It.IsAny<string>())).Returns(new MatrixProfile());
+            mock.Setup(f => f.Profile.GetProfile(It.IsAny<string>())).Returns(new MatrixProfile());
             var user = client.GetUser();
             Assert.That(user, Is.Not.Null);
             Assert.That(user.UserId, Is.EqualTo("@foobar:localhost"));
 
             //With userid parameter.
-            mock.Setup(f => f.ClientProfile(It.IsAny<string>()));
+            mock.Setup(f => f.Profile.GetProfile(It.IsAny<string>()));
             Assert.That(client.GetUser("@barbaz:localhost"), Is.Null);
 
-            mock.Setup(f => f.ClientProfile(It.IsAny<string>())).Returns(new MatrixProfile());
+            mock.Setup(f => f.Profile.GetProfile(It.IsAny<string>())).Returns(new MatrixProfile());
             user = client.GetUser("@barbaz:localhost");
             Assert.That(user, Is.Not.Null);
             Assert.That(user.UserId, Is.EqualTo("@barbaz:localhost"));

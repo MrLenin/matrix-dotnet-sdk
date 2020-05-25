@@ -28,11 +28,11 @@ namespace Matrix.Tests
             var mock = new Mock<MatrixApi>(baseUrl);
             mock.SetupGet(f => f.UserId).Returns("@foobar:localhost");
             mock.SetupGet(f => f.BaseUrl).Returns(new Uri("https://localhost"));
-            mock.Setup(f => f.GetSyncToken()).Returns("AGoodSyncToken");
+            mock.SetupGet(f => f.Sync.Token).Returns("AGoodSyncToken");
             mock.Setup(f => f.GetAccessToken()).Returns("AGoodAccessToken");
             mock.Setup(f => f.GetCurrentLogin()).Returns(new MatrixLoginResponse());
-            mock.Setup(f => f.RunningInitialSync).Returns(false);
-            mock.Setup(f => f.RoomStateSend(
+            mock.SetupGet(f => f.Sync.IsInitialSync).Returns(false);
+            mock.Setup(f => f.Room.SendState(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<MatrixRoomStateEvent>(),

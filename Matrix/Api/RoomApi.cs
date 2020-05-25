@@ -1,27 +1,33 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Matrix.Api.Versions;
 using Matrix.Backends;
+using Matrix.Properties;
 using Matrix.Structures;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Matrix
+namespace Matrix.Api
 {
-    public partial class MatrixApi : IDisposable
+    public class RoomApi : IDisposable
     {
+        private readonly MatrixApi _matrixApi;
         private readonly Mutex _eventSendMutex = new Mutex();
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "post-matrix-client-r0-rooms-roomid-send")]
-        private async Task<string> RoomSend(string roomId, string type, MatrixMRoomMessage msg, string txnId = "")
+        public RoomApi(MatrixApi matrixApi) => _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
+
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-send")]
+        private async Task<string> Send(string roomId, string type, MatrixMRoomMessage msg, string txnId = "")
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/send/{type}/{txnId}", UriKind.Relative);
-            var msgData = ObjectToJson(msg);
+            var msgData = MatrixApi.ObjectToJson(msg);
 
-            var res = await _matrixApiBackend.HandlePutAsync(
+            var res = await _matrixApi.Backend.HandlePutAsync(
                 apiPath, true, msgData
             ).ConfigureAwait(false);
 
@@ -30,60 +36,56 @@ namespace Matrix
             return res.Result["event_id"].ToObject<string>();
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "post-matrix-client-r0-rooms-roomid-leave")]
-        public void RoomLeave(string roomId)
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-leave")]
+        public void Leave(string roomId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/leave", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePost(apiPath, true, null, out _);
+            var error = _matrixApi.Backend.HandlePost(apiPath, true, null, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "put-matrix-client-r0-rooms-roomid-state-eventtype")]
-        public virtual string RoomStateSend(string roomId, string type, MatrixRoomStateEvent message, string key = "")
+        [MatrixSpec(ClientServerApiVersion.R001, "put-matrix-client-r0-rooms-roomid-state-eventtype")]
+        public virtual string SendState(string roomId, string type, MatrixRoomStateEvent message, string key = "")
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
-            var msgData = ObjectToJson(message);
+            var msgData = MatrixApi.ObjectToJson(message);
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/state/{type}/{key}",
                 UriKind.Relative);
-            var error = _matrixApiBackend.HandlePut(apiPath, true, msgData, out var result);
+            var error = _matrixApi.Backend.HandlePut(apiPath, true, msgData, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
             return result["event_id"].ToObject<string>();
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "post-matrix-client-r0-rooms-roomid-invite")]
-        public void InviteToRoom(string roomId, string userId)
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-invite")]
+        public void InviteTo(string roomId, string userId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var msgData = JObject.FromObject(new {user_id = userId});
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/invite", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePost(apiPath, true, msgData, out _);
+            var error = _matrixApi.Backend.HandlePost(apiPath, true, msgData, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "put-matrix-client-r0-rooms-roomid-send-eventtype-txnid")]
-        public async Task<string> RoomMessageSend(string roomId, string type, MatrixMRoomMessage message)
+        [MatrixSpec(ClientServerApiVersion.R001, "put-matrix-client-r0-rooms-roomid-send-eventtype-txnid")]
+        public async Task<string> SendMessage(string roomId, string type, MatrixMRoomMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
-            if (message.Body == null) throw new Exception("Missing body in message");
-            if (message.MessageType == null) throw new Exception("Missing MessageType in message");
+            if (message.Body == null) throw new Exception(Resources.MessageBodyMissing);
+            if (message.MessageType == null) throw new Exception(Resources.MessageTypeMissing);
 
-            var txnId = _rng.Next(int.MinValue, int.MaxValue);
-            var msgData = ObjectToJson(message);
+            var txnId = _matrixApi.Rng.Next(int.MinValue, int.MaxValue);
+            var msgData = MatrixApi.ObjectToJson(message);
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/send/{type}/{txnId}", UriKind.Relative);
 
@@ -91,7 +93,7 @@ namespace Matrix
             // XXX: Mutex was removed because it's not task safe, need another mechanism.
             while (true)
             {
-                var res = await _matrixApiBackend.HandlePutAsync(
+                var res = await _matrixApi.Backend.HandlePutAsync(
                     apiPath, true, msgData
                 ).ConfigureAwait(false);
 
@@ -100,7 +102,7 @@ namespace Matrix
                 if (res.Error.MatrixErrorCode == MatrixErrorCode.LimitExceeded)
                 {
                     var backoff = res.Error.RetryAfter != -1 ? res.Error.RetryAfter : 1000;
-                    _log.LogWarning($"Sending m{txnId} failed. Will retry in {backoff}ms");
+                    _matrixApi.Log.LogWarning($"Sending m{txnId} failed. Will retry in {backoff}ms");
                     await Task.Delay(backoff).ConfigureAwait(false);
                 }
                 else
@@ -110,73 +112,70 @@ namespace Matrix
             }
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "post-matrix-client-r0-rooms-roomid-receipt-receipttype-eventid")]
-        public void RoomTypingSend(string roomId, bool typing, int timeout = 0)
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-receipt-receipttype-eventid")]
+        public void SendTyping(string roomId, bool typing, int timeout = 0)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var msgData = timeout == 0 ? JObject.FromObject(new {typing}) : JObject.FromObject(new {typing, timeout});
 
             var apiPath =
                 new Uri(
-                    $"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/typing/{Uri.EscapeDataString(UserId)}",
+                    $"/_matrix/client/r0/rooms/{Uri.EscapeDataString(roomId)}/typing/{Uri.EscapeDataString(_matrixApi.UserId)}",
                     UriKind.Relative);
 
-            var error = _matrixApiBackend.HandlePut(apiPath, true, msgData, out _);
+            var error = _matrixApi.Backend.HandlePut(apiPath, true, msgData, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "get-matrix-client-r0-rooms-roomid-state")]
-        public MatrixEvent[] GetRoomState(string roomId)
+        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-state")]
+        public MatrixEvent[] GetState(string roomId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/state", UriKind.Relative);
-            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
+            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
-            return JsonConvert.DeserializeObject<MatrixEvent[]>(result.ToString(), _eventConverter);
+            return JsonConvert.DeserializeObject<MatrixEvent[]>(result.ToString(), _matrixApi.EventConverter);
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "get-matrix-client-r0-rooms-roomid-state-eventtype")]
-        public MatrixEventContent GetRoomStateType(string roomId, string type)
+        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-state-eventtype")]
+        public MatrixEventContent GetStateType(string roomId, string type)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/state/{type}/", UriKind.Relative);
-            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
+            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
-            return _eventConverter.GetContent(result as JObject, new Newtonsoft.Json.JsonSerializer(), type);
+            return _matrixApi.EventConverter.GetContent(result as JObject, type);
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "get-matrix-client-r0-rooms-roomid-messages")]
-        public ChunkedMessages GetRoomMessages(string roomId)
+        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-messages")]
+        public ChunkedMessages GetMessages(string roomId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/rooms/{roomId}/messages?limit=100&dir=b", UriKind.Relative);
-            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
+            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
-            return JsonConvert.DeserializeObject<ChunkedMessages>(result.ToString(), _eventConverter);
+            return JsonConvert.DeserializeObject<ChunkedMessages>(result.ToString(), _matrixApi.EventConverter);
         }
 
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "post-matrix-client-r0-rooms-roomid-join")]
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-join")]
         public string ClientJoin(string roomId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var apiPath = new Uri($"/_matrix/client/r0/join/{Uri.EscapeDataString(roomId)}", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePost(apiPath, true, null, out var result);
+            var error = _matrixApi.Backend.HandlePost(apiPath, true, null, out var result);
 
             if (!error.IsOk) return null;
 
@@ -184,14 +183,14 @@ namespace Matrix
             return roomId;
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer, "post-matrix-client-r0-createroom")]
-        public string ClientCreateRoom(MatrixCreateRoom roomRequest = null)
+        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-createroom")]
+        public string ClientCreate(MatrixCreateRoom roomRequest = null)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
-            var req = roomRequest != null ? ObjectToJson(roomRequest) : null;
+            var req = roomRequest != null ? MatrixApi.ObjectToJson(roomRequest) : null;
             var apiPath = new Uri("/_matrix/client/r0/createRoom", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePost(apiPath, true, req, out var result);
+            var error = _matrixApi.Backend.HandlePost(apiPath, true, req, out var result);
 
             if (!error.IsOk) return null;
 
@@ -199,29 +198,27 @@ namespace Matrix
             return roomid;
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
-        public RoomTags RoomGetTags(string roomId)
+        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
+        public RoomTags GetTags(string roomId)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
-            var apiPath = new Uri($"/_matrix/client/r0/user/{UserId}/rooms/{roomId}/tags", UriKind.Relative);
-            var error = _matrixApiBackend.HandleGet(apiPath, true, out var result);
+            var apiPath = new Uri($"/_matrix/client/r0/user/{_matrixApi.UserId}/rooms/{roomId}/tags", UriKind.Relative);
+            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
 
             return result.ToObject<RoomTags>();
         }
 
-        [MatrixSpec(EMatrixSpecApiVersion.R001, EMatrixSpecApi.ClientServer,
-            "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
-        public void RoomPutTag(string roomId, string tag, double order)
+        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
+        public void PutTag(string roomId, string tag, double order)
         {
-            ThrowIfNotSupported();
+            _matrixApi.ThrowIfNotSupported();
 
             var req = new JObject {["order"] = order};
-            var apiPath = new Uri($"/_matrix/client/r0/user/{UserId}/rooms/{roomId}/tags/{tag}", UriKind.Relative);
-            var error = _matrixApiBackend.HandlePut(apiPath, true, req, out _);
+            var apiPath = new Uri($"/_matrix/client/r0/user/{_matrixApi.UserId}/rooms/{roomId}/tags/{tag}", UriKind.Relative);
+            var error = _matrixApi.Backend.HandlePut(apiPath, true, req, out _);
 
             if (!error.IsOk) throw new MatrixException(error.ToString());
         }

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Matrix.Properties;
 using Matrix.Structures;
 
 namespace Matrix.Client
@@ -184,7 +186,7 @@ namespace Matrix.Client
             {
                 var member = (MatrixMRoomMember) matrixEvent.Content;
 
-                if (!_api.RunningInitialSync)
+                if (!_api.Sync.IsInitialSync)
                 {
                     //Handle new join,leave etc
                     MatrixRoomMemberEvent Event = null;
@@ -205,7 +207,7 @@ namespace Matrix.Client
                         case EMatrixRoomMembership.Knock:
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(member.Membership));
+                            throw new IndexOutOfRangeException(nameof(member.Membership));
                     }
 
                     Event?.Invoke(matrixEvent.StateKey, member);
@@ -247,7 +249,8 @@ namespace Matrix.Client
             {
                 Name = newName
             };
-            _api.RoomStateSend(Id, "m.room.name", nameEvent);
+
+            _api.Room.SendState(Id, "m.room.name", nameEvent);
         }
 
         /// <summary>
@@ -261,7 +264,7 @@ namespace Matrix.Client
             {
                 Topic = newTopic
             };
-            _api.RoomStateSend(Id, "m.room.topic", topicEvent);
+            _api.Room.SendState(Id, "m.room.topic", topicEvent);
         }
 
         /// <summary>
@@ -271,14 +274,14 @@ namespace Matrix.Client
         /// <returns>Event ID of the sent message</returns>
         public string SendMessage(MatrixMRoomMessage message)
         {
-            var t = _api.RoomMessageSend(Id, "m.room.message", message);
+            var t = _api.Room.SendMessage(Id, "m.room.message", message);
             t.Wait();
             return t.Result;
         }
 
         public Task<string> SendMessageAsync(MatrixMRoomMessage message)
         {
-            return _api.RoomMessageSend(Id, "m.room.message", message);
+            return _api.Room.SendMessage(Id, "m.room.message", message);
         }
 
         /// <summary>
@@ -313,7 +316,7 @@ namespace Matrix.Client
         /// <returns>Event ID of the sent message</returns>
         public string SendState(MatrixRoomStateEvent stateMessage, string type, string key = "")
         {
-            return _api.RoomStateSend(Id, type, stateMessage, key);
+            return _api.Room.SendState(Id, type, stateMessage, key);
         }
 
         /// <summary>
@@ -323,7 +326,7 @@ namespace Matrix.Client
         /// <param name="timeout">The length of time in milliseconds to mark this user as typing.</param>
         public void SetTyping(bool typing, int timeout = 30000)
         {
-            _api.RoomTypingSend(Id, typing, timeout);
+            _api.Room.SendTyping(Id, typing, timeout);
         }
 
         /// <summary>
@@ -333,7 +336,7 @@ namespace Matrix.Client
         /// <param name="powerlevels">Powerlevels.</param>
         public void ApplyNewPowerLevels(MatrixMRoomPowerLevels powerlevels)
         {
-            _api.RoomStateSend(Id, "m.room.power_levels", powerlevels);
+            _api.Room.SendState(Id, "m.room.power_levels", powerlevels);
         }
 
         /// <summary>
@@ -342,7 +345,7 @@ namespace Matrix.Client
         /// <param name="userid">Userid.</param>
         public void InviteToRoom(string userid)
         {
-            _api.InviteToRoom(Id, userid);
+            _api.Room.InviteTo(Id, userid);
         }
 
         /// <summary>
@@ -361,13 +364,13 @@ namespace Matrix.Client
         /// </summary>
         public void LeaveRoom()
         {
-            _api.RoomLeave(Id);
+            _api.Room.Leave(Id);
         }
 
         public void SetMemberDisplayName(string displayName)
         {
             if (!Members.TryGetValue(_api.UserId, out var member))
-                throw new MatrixException("Couldn't find the user's membership event");
+                throw new MatrixException(Resources.UserMembershipEventNotFound);
 
             member.DisplayName = displayName;
             SendState(member, "m.room.member", _api.UserId);
@@ -376,7 +379,7 @@ namespace Matrix.Client
         public void SetMemberAvatar(Uri avatarUrl)
         {
             if (!Members.TryGetValue(_api.UserId, out var member))
-                throw new MatrixException("Couldn't find the user's membership event");
+                throw new MatrixException(Resources.UserMembershipEventNotFound);
 
             member.AvatarUrl = avatarUrl;
             SendState(member, "m.room.member", _api.UserId);
@@ -412,22 +415,22 @@ namespace Matrix.Client
         //TODO: Give this parameters
         public ChunkedMessages FetchMessages()
         {
-            return _api.GetRoomMessages(Id);
+            return _api.Room.GetMessages(Id);
         }
 
         public RoomTags GetTags()
         {
-            return _api.RoomGetTags(Id);
+            return _api.Room.GetTags(Id);
         }
 
         public void SetTag(string tagName, double order = 0)
         {
-            _api.RoomPutTag(Id, tagName, order);
+            _api.Room.PutTag(Id, tagName, order);
         }
 
         public MatrixEventContent GetStateEvent(string type)
         {
-            var evContent = _api.GetRoomStateType(Id, type);
+            var evContent = _api.Room.GetStateType(Id, type);
             var fakeEvent = new MatrixEvent {Content = evContent};
             FeedEvent(fakeEvent);
             return evContent;
