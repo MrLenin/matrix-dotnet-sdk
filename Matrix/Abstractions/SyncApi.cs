@@ -5,9 +5,8 @@ using Matrix.Api.Versions;
 using Matrix.Backends;
 using Matrix.Properties;
 using Matrix.Structures;
-using Newtonsoft.Json;
 
-namespace Matrix.Api
+namespace Matrix.Abstractions
 {
     public class SyncApi
     {
@@ -30,7 +29,7 @@ namespace Matrix.Api
         private string _token = "";
 
         public SyncApi(MatrixApi matrixApi) =>
-            _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
+            _matrixApi = matrixApi;
 
         public string Token
         {
@@ -55,38 +54,38 @@ namespace Matrix.Api
         {
             _matrixApi.ThrowIfNotSupported();
 
-            var urlString = "/_matrix/client/r0/sync?timeout=" + Timeout;
-
-            if (!string.IsNullOrEmpty(_token))
-                urlString += "&since=" + _token;
-
-            var apiPath = new Uri(urlString, UriKind.Relative);
-            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var response);
-
-            if (error.IsOk)
-            {
-                try
-                {
-                    var sync = JsonConvert.DeserializeObject<MatrixSync>(response.ToString(), _matrixApi.EventConverter);
-                    ProcessSync(sync);
-                    IsConnected = true;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.InnerException);
-                    throw new MatrixException(Resources.SyncDecodeFail, e);
-                }
-            }
-            else if (connectionFailureTimeout)
-            {
-                IsConnected = false;
-                Console.Error.WriteLine("Couldn't reach the matrix home server during a sync.");
-                Console.Error.WriteLine(error.ToString());
-                Thread.Sleep(BadTimeout);
-            }
-
-            if (IsInitialSync)
-                IsInitialSync = false;
+//             var urlString = "/_matrix/client/r0/sync?timeout=" + Timeout;
+// 
+//             if (!string.IsNullOrEmpty(_token))
+//                 urlString += "&since=" + _token;
+// 
+//             var apiPath = new Uri(urlString, UriKind.Relative);
+//             var error = _matrixApi.Backend.HandleGet(apiPath, true, out var response);
+// 
+//             if (error.IsOk)
+//             {
+//                 try
+//                 {
+//                     var sync = JsonConvert.DeserializeObject<MatrixSync>(response.ToString(), _matrixApi.EventConverter);
+//                     ProcessSync(sync);
+//                     IsConnected = true;
+//                 }
+//                 catch (Exception e)
+//                 {
+//                     Console.WriteLine(e.InnerException);
+//                     throw new MatrixException(Resources.SyncDecodeFail, e);
+//                 }
+//             }
+//             else if (connectionFailureTimeout)
+//             {
+//                 IsConnected = false;
+//                 Console.Error.WriteLine("Couldn't reach the matrix home server during a sync.");
+//                 Console.Error.WriteLine(error.ToString());
+//                 Thread.Sleep(BadTimeout);
+//             }
+// 
+//             if (IsInitialSync)
+//                 IsInitialSync = false;
         }
 
         private void ProcessSync(MatrixSync syncData)

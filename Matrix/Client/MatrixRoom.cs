@@ -3,20 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Matrix.Api.ClientServer.Events;
+using Matrix.Api.ClientServer.Events.RoomStateContent;
 using Matrix.Properties;
 using Matrix.Structures;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Client
 {
-    public delegate void MatrixRoomEventDelegate(MatrixRoom room, MatrixEvent evt);
+    public delegate void RoomEventDelegate(MatrixRoom room, RoomEvent roomEvent);
+    public delegate void RoomMessageEventDelegate(MatrixRoom room, IRoomMessageEventContent roomMessageEventContent);
 
     public delegate void MatrixRoomChangeDelegate();
 
-    public delegate void MatrixRoomReceiptDelegate(string eventId, MatrixReceipts receipts);
+    public delegate void MatrixRoomReceiptDelegate(string eventId, ReceiptedEvent receipts);
 
     public delegate void MatrixRoomTypingDelegate(IEnumerable<string> userIds);
 
-    public delegate void MatrixRoomMemberEvent(string userId, MatrixMRoomMember member);
+    public delegate void RoomMembershipEventDelegate(string userId, MembershipEventContent roomMembershipEventContent);
 
     /// <summary>
     /// A room that the user has joined on Matrix.
@@ -34,7 +39,7 @@ namespace Matrix.Client
         public string Topic { get; private set; }
         public string Creator { get; private set; }
 
-        public SortedDictionary<string, MatrixMRoomMember> Members { get; private set; }
+        public SortedDictionary<string, MembershipEventContent> Members { get; private set; }
 
         /// <summary>
         /// Should this Matrix Room federate with other home servers?
@@ -45,30 +50,32 @@ namespace Matrix.Client
         public string CanonicalAlias { get; private set; }
         public IEnumerable<string> Aliases { get; private set; }
 
-        public EMatrixRoomJoinRules JoinRule { get; private set; }
+        public JoinRulesKind JoinRule { get; private set; }
         public MatrixMRoomPowerLevels PowerLevels { get; private set; }
 
         /// <summary>
         /// Occurs when a m.room.message is received.
         /// <remarks>This will include your own messages</remarks>
         /// </summary>
-        public event MatrixRoomEventDelegate OnMessage;
+        public event RoomMessageEventDelegate OnMessage;
 
         public event MatrixRoomChangeDelegate OnEphemeralChanged;
         public event MatrixRoomTypingDelegate OnTypingChanged;
         public event MatrixRoomReceiptDelegate OnReceiptsReceived;
 
-        public event MatrixRoomMemberEvent OnUserJoined;
-        public event MatrixRoomMemberEvent OnUserChange;
-        public event MatrixRoomMemberEvent OnUserLeft;
-        public event MatrixRoomMemberEvent OnUserInvited;
-        public event MatrixRoomMemberEvent OnUserBanned;
+        public event RoomMembershipEventDelegate OnUserJoined;
+        public event RoomMembershipEventDelegate OnUserChange;
+        public event RoomMembershipEventDelegate OnUserLeft;
+        public event RoomMembershipEventDelegate OnUserInvited;
+        public event RoomMembershipEventDelegate OnUserBanned;
 
+
+        private readonly JsonSerializer _jsonSerializer;
 
         /// <summary>
         /// Fires when any room message is received.
         /// </summary>
-        public event MatrixRoomEventDelegate OnEvent;
+        //public event RoomEventDelegate OnEvent;
 
         /// <summary>
         /// Don't fire OnMessage if the message exceeds this age limit (in milliseconds). Set to -1 to ignore.
@@ -77,7 +84,7 @@ namespace Matrix.Client
 
         private readonly List<MatrixMRoomMessage> _messages = new List<MatrixMRoomMessage>(MessageCapacity);
 
-        private MatrixEvent[] _ephemeral;
+        private IEnumerable<IEvent> _ephemeral;
 
         /// <summary>
         /// Get a list of all the messages received so far.
@@ -102,7 +109,7 @@ namespace Matrix.Client
                     foreach (var (userId, roomMember) in Members)
                     {
                         if (userId == _api.UserId ||
-                            roomMember.Membership == EMatrixRoomMembership.Leave && skippingLeave)
+                            roomMember.MembershipState == MembershipState.Leave && skippingLeave)
                             continue;
 
                         if (Members.Count == 2)
@@ -134,107 +141,150 @@ namespace Matrix.Client
         {
             Id = roomId;
             _api = api;
-            Members = new SortedDictionary<string, MatrixMRoomMember>();
+            _jsonSerializer = new JsonSerializer();
+            Members = new SortedDictionary<string, MembershipEventContent>();
         }
 
         /// <summary>
         /// This method is intended for the API only.
         /// If a Room receives a new event, process it in here.
         /// </summary>
-        /// <param name="matrixEvent">New event</param>
-        public void FeedEvent(MatrixEvent matrixEvent)
+        /// <param name="roomEvent">New event</param>
+        public void FeedEvent(RoomEvent roomEvent)
         {
-            if (matrixEvent == null)
-                throw new ArgumentNullException(nameof(matrixEvent));
+            if (roomEvent == null)
+                throw new ArgumentNullException(nameof(roomEvent));
 
-            if (matrixEvent.Content == null)
+            if (roomEvent.Content == null)
                 return; // We can't operate on this
-
-            var t = matrixEvent.Content.GetType();
-
-            if (t == typeof(MatrixMRoomCreate))
+            if (roomEvent.GetType() == typeof(RoomStateEvent))
             {
-                var create = (MatrixMRoomCreate) matrixEvent.Content;
-                Creator = create.Creator;
-                ShouldFederate = create.Federated;
-            }
-            else if (t == typeof(MatrixMRoomName))
-            {
-                Name = ((MatrixMRoomName) matrixEvent.Content).Name;
-            }
-            else if (t == typeof(MatrixMRoomTopic))
-            {
-                Topic = ((MatrixMRoomTopic) matrixEvent.Content).Topic;
-            }
-            else if (t == typeof(MatrixMRoomAliases))
-            {
-                Aliases = ((MatrixMRoomAliases) matrixEvent.Content).Aliases;
-            }
-            else if (t == typeof(MatrixMRoomCanonicalAlias))
-            {
-                CanonicalAlias = ((MatrixMRoomCanonicalAlias) matrixEvent.Content).Alias;
-            }
-            else if (t == typeof(MatrixMRoomJoinRules))
-            {
-                JoinRule = ((MatrixMRoomJoinRules) matrixEvent.Content).JoinRule;
-            }
-            else if (t == typeof(MatrixMRoomPowerLevels))
-            {
-                PowerLevels = (MatrixMRoomPowerLevels) matrixEvent.Content;
-            }
-            else if (t == typeof(MatrixMRoomMember))
-            {
-                var member = (MatrixMRoomMember) matrixEvent.Content;
-
-                if (!_api.Sync.IsInitialSync)
+                var roomStateEvent = roomEvent as RoomStateEvent;
+                switch (roomStateEvent.EventKind)
                 {
-                    //Handle new join,leave etc
-                    MatrixRoomMemberEvent Event = null;
-                    switch (member.Membership)
-                    {
-                        case EMatrixRoomMembership.Invite:
-                            Event = OnUserInvited;
-                            break;
-                        case EMatrixRoomMembership.Join:
-                            Event = Members.ContainsKey(matrixEvent.StateKey) ? OnUserChange : OnUserJoined;
-                            break;
-                        case EMatrixRoomMembership.Leave:
-                            Event = OnUserLeft;
-                            break;
-                        case EMatrixRoomMembership.Ban:
-                            Event = OnUserBanned;
-                            break;
-                        case EMatrixRoomMembership.Knock:
-                            break;
-                        default:
-                            throw new IndexOutOfRangeException(nameof(member.Membership));
-                    }
+                    case EventKind.RoomAvatar:
+                        break;
+                    case EventKind.RoomCanonicalAlias:
+                        var canonicalAliasEventContent = (CanonicalAliasEventContent)roomStateEvent.Content;
+                        CanonicalAlias = canonicalAliasEventContent.Alias;
+                        Aliases = canonicalAliasEventContent.AlternateAliases;
+                        break;
 
-                    Event?.Invoke(matrixEvent.StateKey, member);
+                    case EventKind.RoomCreate:
+                        var createEventContent = (CreateEventContent)roomStateEvent.Content;
+                        Creator = createEventContent.Creator;
+                        ShouldFederate = createEventContent.Federate;
+                        break;
+
+                    case EventKind.RoomGuestAccess:
+                        break;
+                    case EventKind.RoomHistoryVisibility:
+                        break;
+
+                    case EventKind.RoomJoinRules:
+                        var joinRulesEventContent = (JoinRulesEventContent)roomStateEvent.Content;
+                        JoinRule = joinRulesEventContent.JoinRulesKind;
+                        break;
+
+                    case EventKind.RoomMembership:
+                        var membershipContent = (MembershipEventContent) roomStateEvent.Content;
+
+                        if (!_api.Sync.IsInitialSync)
+                        {
+                            //Handle new join,leave etc
+                            RoomMembershipEventDelegate eventDelegate = null;
+                            switch (membershipContent.MembershipState)
+                            {
+                                case MembershipState.Invite:
+                                    eventDelegate = OnUserInvited;
+                                    break;
+                                case MembershipState.Join:
+                                    eventDelegate = Members.ContainsKey(roomStateEvent.StateKey)
+                                        ? OnUserChange
+                                        : OnUserJoined;
+                                    break;
+                                case MembershipState.Leave:
+                                    eventDelegate = OnUserLeft;
+                                    break;
+                                case MembershipState.Ban:
+                                    eventDelegate = OnUserBanned;
+                                    break;
+                                case MembershipState.Knock:
+                                    break;
+                                default:
+                                    throw new IndexOutOfRangeException(nameof(membershipContent.MembershipState));
+                            }
+
+                            eventDelegate?.Invoke(roomStateEvent.StateKey, membershipContent);
+                        }
+
+                        Members[roomStateEvent.StateKey] = membershipContent;
+                        break;
+
+                    case EventKind.RoomName:
+                        break;
+                    case EventKind.RoomPinnedEvents:
+                        break;
+                    case EventKind.RoomPowerLevels:
+                        break;
+                    case EventKind.RoomServerAcl:
+                        break;
+                    case EventKind.RoomThirdPartyInvite:
+                        break;
+                    case EventKind.RoomTombstone:
+                        break;
+                    case EventKind.RoomTopic:
+                        break;
                 }
-
-                Members[matrixEvent.StateKey] = member;
             }
-            else if (typeof(MatrixMRoomMessage).IsAssignableFrom(t))
+            else
             {
-                _messages.Add((MatrixMRoomMessage) matrixEvent.Content);
-                if (OnMessage != null)
-                    if (MessageMaximumAge <= 0 || matrixEvent.Age <= MessageMaximumAge)
-                        try
-                        {
-                            OnMessage.Invoke(this, matrixEvent);
-                        }
-                        catch (Exception e)
-                        {
-#if DEBUG
-                            Console.WriteLine("A OnMessage handler failed");
-                            Console.WriteLine(e);
-                            throw;
-#endif
-                        }
+                switch (roomEvent.EventKind)
+                {
+                    case EventKind.RoomMessage:
+                        break;
+                    case EventKind.RoomRedaction:
+                        break;
+                }
             }
+//            if (t == typeof(MatrixMRoomCreate))
+//            {
+//                var create = (MatrixMRoomCreate) roomEvent.Content;
+//                Creator = create.Creator;
+//                ShouldFederate = create.Federated;
+//            }
+//            else if (t == typeof(MatrixMRoomName))
+//            {
+//                Name = ((MatrixMRoomName) roomEvent.Content).Name;
+//            }
+//            else if (t == typeof(MatrixMRoomTopic))
+//            {
+//                Topic = ((MatrixMRoomTopic) roomEvent.Content).Topic;
+//            }
+//            else if (t == typeof(MatrixMRoomPowerLevels))
+//            {
+//                PowerLevels = (MatrixMRoomPowerLevels) roomEvent.Content;
+//            }
+//            else if (typeof(MatrixMRoomMessage).IsAssignableFrom(t))
+//            {
+//                _messages.Add((MatrixMRoomMessage) roomEvent.Content);
+//                if (OnMessage != null)
+//                    if (MessageMaximumAge <= 0 || roomEvent.Age <= MessageMaximumAge)
+//                        try
+//                        {
+//                            OnMessage.Invoke(this, roomEvent);
+//                        }
+//                        catch (Exception e)
+//                        {
+//#if DEBUG
+//                            Console.WriteLine("A OnMessage handler failed");
+//                            Console.WriteLine(e);
+//                            throw;
+//#endif
+//                        }
+//            }
 
-            OnEvent?.Invoke(this, matrixEvent);
+            //OnEvent?.Invoke(this, roomEvent);
         }
 
 
@@ -245,7 +295,7 @@ namespace Matrix.Client
         /// <param name="newName">New name.</param>
         public void SetName(string newName)
         {
-            var nameEvent = new MatrixMRoomName
+            var nameEvent = new NameEventContent()
             {
                 Name = newName
             };
@@ -260,7 +310,7 @@ namespace Matrix.Client
         /// <param name="newTopic">New topic.</param>
         public void SetTopic(string newTopic)
         {
-            var topicEvent = new MatrixMRoomTopic
+            var topicEvent = new TopicEventContent()
             {
                 Topic = newTopic
             };
@@ -314,9 +364,10 @@ namespace Matrix.Client
         /// <param name="type">Type.</param>
         /// <param name="key">Key.</param>
         /// <returns>Event ID of the sent message</returns>
-        public string SendState(MatrixRoomStateEvent stateMessage, string type, string key = "")
+        public string SendState<T>(T stateMessage, string type, string key = "")
+            where T : class, IRoomStateEventContent
         {
-            return _api.Room.SendState(Id, type, stateMessage, key);
+            return _api.Room.SendState<T>(Id, type, stateMessage, key);
         }
 
         /// <summary>
@@ -334,7 +385,7 @@ namespace Matrix.Client
         /// <remarks> You must set all the values in powerlevels.</remarks>
         /// </summary>
         /// <param name="powerlevels">Powerlevels.</param>
-        public void ApplyNewPowerLevels(MatrixMRoomPowerLevels powerlevels)
+        public void ApplyNewPowerLevels(PowerLevelsEventContent powerlevels)
         {
             _api.Room.SendState(Id, "m.room.power_levels", powerlevels);
         }
@@ -390,24 +441,24 @@ namespace Matrix.Client
             if (matrixSyncEvents == null)
                 throw new ArgumentNullException(nameof(matrixSyncEvents));
 
-            _ephemeral = matrixSyncEvents.Events.ToArray();
+            _ephemeral = matrixSyncEvents.Events;
 
             foreach (var matrixEvent in _ephemeral)
-                switch (matrixEvent.Type)
+                switch (matrixEvent)
                 {
-                    case "m.receipt":
-                        var rec = (MatrixMReceipt) matrixEvent.Content;
-                        foreach (var (eventId, matrixReceipts) in rec.Receipts)
-                            OnReceiptsReceived?.Invoke(eventId, matrixReceipts);
+                    case ReceiptEvent receiptEvent:
+                        var rec = receiptEvent.Content;
+                        foreach (var (eventId, receiptedUsers) in rec.ReceiptedEvents)
+                            OnReceiptsReceived?.Invoke(eventId, receiptedUsers);
                         break;
 
-                    case "m.typing":
-                        OnTypingChanged?.Invoke(((MatrixMTyping) matrixEvent.Content).UserIds);
-                        break;
+                    //case TypingEvent typingEvent:
+                    //    OnTypingChanged?.Invoke(typingEvent.Content.UserIds);
+                    //    break;
 
                     default:
                         continue;
-                }
+                };
 
             OnEphemeralChanged?.Invoke();
         }
@@ -428,10 +479,10 @@ namespace Matrix.Client
             _api.Room.PutTag(Id, tagName, order);
         }
 
-        public MatrixEventContent GetStateEvent(string type)
+        public IRoomStateEventContent GetStateEvent(string type)
         {
             var evContent = _api.Room.GetStateType(Id, type);
-            var fakeEvent = new MatrixEvent {Content = evContent};
+            var fakeEvent = new RoomStateEvent() {Content = evContent};
             FeedEvent(fakeEvent);
             return evContent;
         }

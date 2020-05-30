@@ -1,16 +1,18 @@
 ﻿using System.Net;
 
+using Matrix.Api;
+
 namespace Matrix.Backends
 {
     public class MatrixRequestError
     {
         public string MatrixError { get; }
-        public MatrixErrorCode MatrixErrorCode { get; }
+        public ErrorCode MatrixErrorCode { get; }
         public HttpStatusCode Status { get; }
         public int RetryAfter { get; }
-        public bool IsOk => MatrixErrorCode == MatrixErrorCode.None && Status == HttpStatusCode.OK;
+        public bool IsOk => MatrixErrorCode == ErrorCode.None && Status == HttpStatusCode.OK;
 
-        public MatrixRequestError(string merror, MatrixErrorCode code, HttpStatusCode status, int retryAfter = -1)
+        public MatrixRequestError(string merror, ErrorCode code, HttpStatusCode status, int retryAfter = -1)
         {
             MatrixError = merror;
             MatrixErrorCode = code;
@@ -33,7 +35,7 @@ namespace Matrix.Backends
         public static readonly MatrixRequestError NoError =
             new MatrixRequestError(
                 "",
-                MatrixErrorCode.None,
+                ErrorCode.None,
                 HttpStatusCode.OK
             );
     }

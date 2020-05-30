@@ -123,6 +123,42 @@
   <data name="ConnnectionException" xml:space="preserve">
     <value>An exception occurred while trying to connect.</value>
   </data>
+  <data name="InvalidApplicationServiceVersionContext" xml:space="preserve">
+    <value>Provided version context is not Application Service version context.</value>
+  </data>
+  <data name="InvalidApplicationServiceVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Application Service version list context.</value>
+  </data>
+  <data name="InvalidClientServerVersionContext" xml:space="preserve">
+    <value>Provided version context is not Client-Server version context.</value>
+  </data>
+  <data name="InvalidClientServerVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Client-Server version list context.</value>
+  </data>
+  <data name="InvalidIdentityServiceVersionContext" xml:space="preserve">
+    <value>Provided version context is not Identity Service version context.</value>
+  </data>
+  <data name="InvalidIdentityServiceVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Identity Service version list context.</value>
+  </data>
+  <data name="InvalidPushGatewayVersionContext" xml:space="preserve">
+    <value>Provided version context is not Push Gateway version context.</value>
+  </data>
+  <data name="InvalidPushGatewayVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Push Gateway version list context.</value>
+  </data>
+  <data name="InvalidRoomsVersionContext" xml:space="preserve">
+    <value>Provided version context is not Rooms version context.</value>
+  </data>
+  <data name="InvalidRoomsVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Rooms version list context.</value>
+  </data>
+  <data name="InvalidServerServerVersionContext" xml:space="preserve">
+    <value>Provided version context is not Server-Server version context.</value>
+  </data>
+  <data name="InvalidServerServerVersionListContext" xml:space="preserve">
+    <value>Provided version context is not Server-Server version list context.</value>
+  </data>
   <data name="InvalidUrl" xml:space="preserve">
     <value>URL is not valid.</value>
   </data>
@@ -146,6 +182,9 @@
   </data>
   <data name="ThreadAlreadyRunning" xml:space="preserve">
     <value>Can't start thread, already running.</value>
+  </data>
+  <data name="UnknownMatrixApiType" xml:space="preserve">
+    <value>Unknown Matrix API type.</value>
   </data>
   <data name="UserMembershipEventNotFound" xml:space="preserve">
     <value>Couldn't find the user's membership event.</value>

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Net;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Matrix.Client;
+using Matrix.Json;
 using Matrix.Structures;
-using Newtonsoft.Json;
 
 namespace Matrix.AppService
 {
@@ -158,8 +159,8 @@ namespace Matrix.AppService
                     case "transactions":
                         var data = new byte[context.Request.ContentLength64];
                         context.Request.InputStream.Read(data, 0, data.Length);
-                        var batch = JsonConvert.DeserializeObject<EventBatch>(
-                            Encoding.UTF8.GetString(data), new JsonEventConverter());
+                        var batch = System.Text.Json.JsonSerializer.Deserialize<EventBatch>(
+                            Encoding.UTF8.GetString(data));
                         foreach (var ev in batch.Events)
                             OnEvent?.Invoke(ev);
 

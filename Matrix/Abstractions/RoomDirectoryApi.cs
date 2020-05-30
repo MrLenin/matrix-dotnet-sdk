@@ -4,7 +4,7 @@ using System.Web;
 using Matrix.Backends;
 using Matrix.Structures;
 
-namespace Matrix.Api
+namespace Matrix.Abstractions
 {
     public class RoomDirectoryApi
     {
@@ -29,21 +29,23 @@ namespace Matrix.Api
                 qs.Set("server", server);
 
             var apiPath = new Uri($"/_matrix/client/r0/publicRooms?{qs}", UriKind.Relative);
-            var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
+//             var error = _matrixApi.Backend.HandleGet(apiPath, true, out var result);
+// 
+//             if (!error.IsOk) throw new MatrixException(error.ToString());
 
-            if (!error.IsOk) throw new MatrixException(error.ToString());
-
-            return result.ToObject<PublicRooms>();
+            //return result.ToObject<PublicRooms>();
+            throw new NotImplementedException();
         }
 
         public void DeleteFrom(string alias)
         {
             _matrixApi.ThrowIfNotSupported();
 
-            var apiPath = new Uri($"/_matrix/client/r0/directory/room/{alias}", UriKind.Relative);
-            var error = _matrixApi.Backend.HandleDelete(apiPath, true, out _);
-
-            if (!error.IsOk) throw new MatrixException(error.ToString());
+//             var apiPath = new Uri($"/_matrix/client/r0/directory/room/{alias}", UriKind.Relative);
+//             var error = _matrixApi.Backend.HandleDelete(apiPath, true, out _);
+// 
+//             if (!error.IsOk) throw new MatrixException(error.ToString());
+            throw new NotImplementedException();
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Matrix.Tests
             mock.SetupGet(f => f.BaseUrl).Returns(new Uri("https://localhost"));
             mock.SetupGet(f => f.Sync.Token).Returns("AGoodSyncToken");
             mock.Setup(f => f.GetAccessToken()).Returns("AGoodAccessToken");
-            mock.Setup(f => f.GetCurrentLogin()).Returns(new MatrixLoginResponse());
+            mock.Setup(f => f.GetCurrentLogin()).Returns(new AuthenticationContext());
             mock.SetupGet(f => f.Sync.IsInitialSync).Returns(false);
             mock.Setup(f => f.Room.SendState(
                 It.IsAny<string>(),

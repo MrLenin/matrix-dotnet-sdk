@@ -79,6 +79,114 @@ namespace Matrix.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Application Service version context..
+        /// </summary>
+        internal static string InvalidApplicationServiceVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidApplicationServiceVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Application Service version list context..
+        /// </summary>
+        internal static string InvalidApplicationServiceVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidApplicationServiceVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Client-Server version context..
+        /// </summary>
+        internal static string InvalidClientServerVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidClientServerVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Client-Server version list context..
+        /// </summary>
+        internal static string InvalidClientServerVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidClientServerVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Identity Service version context..
+        /// </summary>
+        internal static string InvalidIdentityServiceVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidIdentityServiceVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Identity Service version list context..
+        /// </summary>
+        internal static string InvalidIdentityServiceVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidIdentityServiceVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Push Gateway version context..
+        /// </summary>
+        internal static string InvalidPushGatewayVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidPushGatewayVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Push Gateway version list context..
+        /// </summary>
+        internal static string InvalidPushGatewayVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidPushGatewayVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Rooms version context..
+        /// </summary>
+        internal static string InvalidRoomsVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidRoomsVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Rooms version list context..
+        /// </summary>
+        internal static string InvalidRoomsVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidRoomsVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Server-Server version context..
+        /// </summary>
+        internal static string InvalidServerServerVersionContext {
+            get {
+                return ResourceManager.GetString("InvalidServerServerVersionContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided version context is not Server-Server version list context..
+        /// </summary>
+        internal static string InvalidServerServerVersionListContext {
+            get {
+                return ResourceManager.GetString("InvalidServerServerVersionListContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to URL is not valid..
         /// </summary>
         internal static string InvalidUrl {
@@ -147,6 +255,15 @@ namespace Matrix.Properties {
         internal static string ThreadAlreadyRunning {
             get {
                 return ResourceManager.GetString("ThreadAlreadyRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown Matrix API type..
+        /// </summary>
+        internal static string UnknownMatrixApiType {
+            get {
+                return ResourceManager.GetString("UnknownMatrixApiType", resourceCulture);
             }
         }
         

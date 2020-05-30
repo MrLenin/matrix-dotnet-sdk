@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+using Matrix.Api;
+using Matrix.Api.ClientServer;
+using Matrix.Api.ClientServer.Events;
 using Matrix.Properties;
 using Matrix.Structures;
 using Microsoft.Extensions.Logging;
@@ -58,7 +61,7 @@ namespace Matrix.Client
 
             try
             {
-                Api.ClientVersions();
+                Api.VersionsEndpoint.RequestVersions();
                 Api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
                 Api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
             }
@@ -109,7 +112,7 @@ namespace Matrix.Client
             return Api.GetAccessToken();
         }
 
-        public MatrixLoginResponse GetCurrentLogin()
+        public AuthenticationContext GetCurrentLogin()
         {
             return Api.GetCurrentLogin();
         }
@@ -133,7 +136,7 @@ namespace Matrix.Client
                 matrixRoom = _rooms[roomId];
             }
 
-            joined.State.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
+            joined.State.Events.ToList().ForEach( x => { matrixRoom.FeedEvent(x); });
             joined.Timeline.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
             matrixRoom.SetEphemeral(joined.Ephemeral);
         }
@@ -145,11 +148,16 @@ namespace Matrix.Client
         /// <param name="username">Username</param>
         /// <param name="password">Password</param>
         /// <param name="deviceId">Device ID</param>
-        public MatrixLoginResponse LoginWithPassword(string username, string password, string deviceId = null)
+        public AuthenticationContext LoginWithPassword(string username, string password, string deviceId = null)
         {
-            var result = Api.Login.ClientLogin(new MatrixLoginPassword(username, password, deviceId));
-            Api.SetLogin(result);
-            return result;
+            var userIdentifier = new UserAuthenticationIdentifier()
+            {
+                UserId = username
+            };
+            var request = new PasswordAuthenticationRequest<UserAuthenticationIdentifier>(userIdentifier, password);
+            var authenticationContext = Api.LoginEndpoint.Login<AuthenticationResponse>(request);
+            Api.SetLogin(authenticationContext);
+            return authenticationContext;
         }
 
         /// <param name="syncToken"> If you stored the sync token before, you can set it for the API here</param>
@@ -167,9 +175,11 @@ namespace Matrix.Client
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="token">Access Token</param>
-        public void LoginWithToken(string username, string token)
+        public void LoginWithToken(string token)
         {
-            Api.Login.ClientLogin(new MatrixLoginToken(username, token));
+            var request = new TokenAuthenticationRequest(token);
+            var response = Api.LoginEndpoint.Login<AuthenticationResponse>(request);
+            // Error testing goes here
             Api.Sync.ClientSync();
             Api.Sync.Start();
         }
@@ -181,7 +191,7 @@ namespace Matrix.Client
         /// <param name="accessToken">Access token.</param>
         public void UseExistingToken(string userId, string accessToken)
         {
-            Api.SetLogin(new MatrixLoginResponse
+            Api.SetLogin(new AuthenticationContext
             {
                 UserId = userId,
                 AccessToken = accessToken,
@@ -323,7 +333,7 @@ namespace Matrix.Client
         /// <param name="type">Type that inherits MatrixMRoomMessage</param>
         public void AddRoomMessageType(string messageType, Type type)
         {
-            Api.AddMessageType(messageType, type);
+            //Api.AddMessageType(messageType, type);
         }
 
         /// <summary>
@@ -333,7 +343,7 @@ namespace Matrix.Client
         /// <param name="type">Type that inherits MatrixMRoomMessage</param>
         public void AddStateEventType(string messageType, Type type)
         {
-            Api.AddEventType(messageType, type);
+            //Api.AddEventType(messageType, type);
         }
 
         public PublicRooms GetPublicRooms(int limit = 0, string since = "", string server = "")

@@ -1,30 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Newtonsoft.Json.Linq;
 
-namespace Matrix.Structures
+namespace Matrix.Api.ClientServer.Events
 {
-    /// <summary>
-    /// http://matrix.org/docs/spec/r0.0.1/client_server.html#m-receipt
-    ///
-    /// </summary>
-    public class MatrixMReceipt : MatrixEventContent
+    public class ReceiptEventContent : IEventContent
     {
-        public Dictionary<string, MatrixReceipts> Receipts { get; set; }
+        public Dictionary<string, ReceiptedEvent> ReceiptedEvents { get; set; }
 
-        public void ParseJObject(JObject obj)
+        public void ParseJObject(JToken obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
 
-            Receipts = new Dictionary<string, MatrixReceipts>();
+            ReceiptedEvents = new Dictionary<string, ReceiptedEvent>();
 
             try
             {
                 foreach (JProperty prop in obj.Children())
                 {
-                    var receipts = new MatrixReceipts();
+                    var receipts = new ReceiptedEvent();
                     receipts.ParseJObject((JObject) prop.Value);
-                    Receipts.Add(prop.Name, receipts);
+                    ReceiptedEvents.Add(prop.Name, receipts);
                 }
             }
             catch (InvalidCastException e)
@@ -35,25 +32,25 @@ namespace Matrix.Structures
         }
     }
 
-    public class MatrixReceipts
+    public class ReceiptedEvent
     {
-        public Dictionary<string, MatrixReceipt> ReadReceipts { get; private set; }
+        public Dictionary<string, Receipt> ReceiptedUsers { get; private set; }
 
         public void ParseJObject(JObject obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
 
-            ReadReceipts = new Dictionary<string, MatrixReceipt>();
+            ReceiptedUsers = new Dictionary<string, Receipt>();
 
             try
             {
                 foreach (JProperty prop in obj.GetValue("m.read", StringComparison.InvariantCulture).Children())
                 {
-                    var receipt = new MatrixReceipt
+                    var receipt = new Receipt
                     {
-                        TimeStamp = ((JObject)prop.Value)["ts"].ToObject<long>()
+                        TimeStamp = ((JToken)prop.Value)["ts"].ToObject<long>()
                     };
-                    ReadReceipts.Add(prop.Name, receipt);
+                    ReceiptedUsers.Add(prop.Name, receipt);
                 }
             }
             catch (InvalidCastException e)
@@ -64,7 +61,7 @@ namespace Matrix.Structures
         }
     }
 
-    public class MatrixReceipt
+    public class Receipt
     {
         public long TimeStamp { get; set; }
     }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Matrix.Api.ClientServer.Events;
+
 namespace Matrix.Structures
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace Matrix.Structures
 
     public class MatrixSyncEvents
     {
-        public IEnumerable<MatrixEvent> Events { get; set; }
+        public IEnumerable<RoomEvent> Events { get; set; }
     }
 
     public class MatrixSyncRooms

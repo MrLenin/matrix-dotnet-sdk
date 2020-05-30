@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+
+using Matrix.Api.ClientServer.Events;
 
 namespace Matrix.Structures
 {
@@ -46,14 +47,14 @@ namespace Matrix.Structures
     /// </summary>
     public class MatrixEventContent
     {
-        public JObject MxContent { get; set; } = null;
+        public JsonDocument MxContent { get; set; } = null;
     }
 
     public class MatrixTimeline
     {
         public bool Limited { get; set; }
         public string PrevBatch { get; set; }
-        public IEnumerable<MatrixEvent> Events { get; set; }
+        public IEnumerable<RoomEvent> Events { get; set; }
     }
 
     public static class MatrixEventType

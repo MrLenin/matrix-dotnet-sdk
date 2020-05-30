@@ -1,6 +1,7 @@
 ﻿using System;
+
+using Matrix.Api;
 using Matrix.Backends;
-using Newtonsoft.Json.Linq;
 
 namespace Matrix
 {
@@ -15,37 +16,6 @@ namespace Matrix
         }
 
         public MatrixException()
-        {
-        }
-    }
-
-    public class MatrixServerError : MatrixException
-    {
-        public MatrixErrorCode ErrorCode { get; }
-        public string ErrorCodeStr { get; }
-        public JObject ErrorObject { get; }
-
-        public MatrixServerError(string errorcode, string message, JObject errorObject) : base(message)
-        {
-            if (!Enum.TryParse(errorcode, out MatrixErrorCode matrixErrorCode))
-            {
-                ErrorCode = MatrixErrorCode.UnknownErrorCode;
-                ErrorObject = errorObject;
-            }
-
-            ErrorCode = matrixErrorCode;
-            ErrorCodeStr = errorcode;
-        }
-
-        public MatrixServerError()
-        {
-        }
-
-        public MatrixServerError(string message) : base(message)
-        {
-        }
-
-        public MatrixServerError(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

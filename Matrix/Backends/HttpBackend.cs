@@ -1,29 +1,105 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
+
+using JsonSubTypes;
+
+using Matrix.Api;
+using Matrix.Api.ClientServer;
+using Matrix.Api.ClientServer.Events;
+using Matrix.Api.ClientServer.Events.RoomContent;
+using Matrix.Api.ClientServer.Events.RoomStateContent;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Matrix.Backends
 {
-    public class HttpBackend : IMatrixApiBackend
+    public sealed class HttpBackend : IMatrixApiBackend, IDisposable
     {
-        private Uri _baseUrl;
+        private readonly Uri _baseUrl;
         private string _accessToken;
-        private string _userId;
-        private HttpClient _client;
+        private readonly string _userId;
+        private readonly HttpClient _client;
+        private readonly JsonSerializer _jsonSerializer;
 
-        public HttpBackend(Uri apiUrl, string userId = null, HttpClient client = null)
+        public HttpBackend(Uri apiUrl, string userId)
         {
+            _jsonSerializer = new JsonSerializer();
+            _client = new HttpClient();
             _baseUrl = apiUrl;
-            ServicePointManager.ServerCertificateValidationCallback += AcceptCertificate;
-            _client = client ?? new HttpClient();
             _userId = userId;
+            
+            ServicePointManager.ServerCertificateValidationCallback += AcceptCertificate;
+
+            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+                .Of(typeof(IEvent), @"type")
+                .RegisterSubtype(typeof(PresenceEvent), PresenceEvent.ToJsonString())
+                .RegisterSubtype(typeof(ReceiptEvent), ReceiptEvent.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomAvatar.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomCanonicalAlias.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomCreate.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomGuestAccess.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomHistoryVisibility.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomJoinRules.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomMembership.ToJsonString())
+                .RegisterSubtype(typeof(RoomEvent), EventKind.RoomMessage.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomName.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomPinnedEvents.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomPowerLevels.ToJsonString())
+                .RegisterSubtype(typeof(RoomEvent), EventKind.RoomRedaction.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomServerAcl.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomThirdPartyInvite.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomTombstone.ToJsonString())
+                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomTopic.ToJsonString())
+                .SerializeDiscriminatorProperty()
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+                .Of(typeof(IEventContent))
+                .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+                .Of(typeof(IRoomEventContent))
+                .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+                .Of(typeof(IRoomMessageEventContent), @"msgtype")
+                .RegisterSubtype(typeof(AudioMessageEventContent), @"m.audio")
+                .RegisterSubtype(typeof(EmoteMessageEventContent), @"m.emote")
+                .RegisterSubtype(typeof(FileMessageEventContent), @"m.file")
+                .RegisterSubtype(typeof(ImageMessageEventContent), @"m.image")
+                .RegisterSubtype(typeof(LocationMessageEventContent), @"m.location")
+                .RegisterSubtype(typeof(NoticeMessageEventContent), @"m.notice")
+                .RegisterSubtype(typeof(ServerNoticeMessageEventContent), @"m.server_notice")
+                .RegisterSubtype(typeof(TextMessageEventContent), @"m.text")
+                //.RegisterSubtype(typeof(VideoMessageEventContent), @"m.text")
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+                .Of(typeof(IRoomStateEventContent))
+                .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+                .Of(typeof(IRequest), @"type")
+                .RegisterSubtype(typeof(PasswordAuthenticationRequest<>), AuthenticationKind.Password.ToJsonString())
+                .RegisterSubtype(typeof(TokenAuthenticationRequest), AuthenticationKind.Token.ToJsonString())
+                .SerializeDiscriminatorProperty()
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+                .Of(typeof(IAuthenticationIdentifier), @"type")
+                .RegisterSubtype(typeof(UserAuthenticationIdentifier), UserAuthenticationIdentifier.ToJsonString())
+                .RegisterSubtype(typeof(ThirdPartyAuthenticationIdentifier), ThirdPartyAuthenticationIdentifier.ToJsonString())
+                .RegisterSubtype(typeof(PhoneAuthenticationIdentifier), PhoneAuthenticationIdentifier.ToJsonString())
+                .SerializeDiscriminatorProperty()
+                .Build());
         }
 
         private static bool AcceptCertificate(object sender, X509Certificate certificate, X509Chain chain,
@@ -52,147 +128,106 @@ namespace Matrix.Backends
             return apiPath;
         }
 
-        private static async Task<MatrixApiResult> RequestWrap(Task<HttpResponseMessage> task)
+        public TResponse Request<TResponse>(Uri url, bool authenticate, HttpContent? httpContent = null)
+            where TResponse : IResponse, new()
         {
-            var apiResult = new MatrixApiResult();
-            try
+            var response = RequestAsync<TResponse>(url, authenticate, httpContent);
+            response.Wait();
+            return response.Result;
+        }
+
+        public TResponse Request<TResponse>(IRequest request, bool authenticate, HttpContent? httpContent = null)
+            where TResponse : IResponse, new()
+        {
+            var response = RequestAsync<TResponse>(request, authenticate, httpContent);
+            response.Wait();
+            return response.Result;
+        }
+
+        public async Task<TResponse> RequestAsync<TResponse>(Uri url, bool authenticate,
+            HttpContent? httpContent = null)
+            where TResponse : IResponse, new()
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+
+            var absolutePath = GetPath(url, authenticate);
+            var httpResponse = await _client.GetAsync(absolutePath)
+                .ConfigureAwait(false);
+            
+            if (httpResponse.StatusCode.HasFlag(HttpStatusCode.OK))
             {
-                var (jToken, httpStatusCode) = await GenericRequest(task).ConfigureAwait(false);
-                apiResult.Result = jToken;
-                apiResult.Error = new MatrixRequestError("", MatrixErrorCode.None, httpStatusCode);
+                var jsonString = await httpResponse.Content.ReadAsStringAsync().
+                    ConfigureAwait(false);
+                using var jsonReader = new JTokenReader(JToken.Parse(jsonString));
+                var response = _jsonSerializer.Deserialize<TResponse>(jsonReader);
+                if (response == null) throw new NullReferenceException(@"");
+                response.HttpStatusCode = httpResponse.StatusCode;
+                return response;
             }
-            catch (MatrixServerError e)
+            else
             {
-                var retryAfter = -1;
-
-                if (e.ErrorObject.ContainsKey("retry_after_ms"))
-                    retryAfter = e.ErrorObject["retry_after_ms"].ToObject<int>();
-
-                apiResult.Error = new MatrixRequestError(e.Message, e.ErrorCode, HttpStatusCode.InternalServerError,
-                    retryAfter);
+                return new TResponse
+                {
+                    ErrorCode = ErrorCode.None,
+                    HttpStatusCode = httpResponse.StatusCode
+                };
             }
-
-            return apiResult;
         }
 
-        public MatrixRequestError HandleGet(Uri apiPath, bool authenticate, out JToken result)
-        {
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.GetAsync(apiPath);
-            var res = RequestWrap(task);
-            res.Wait();
-            result = res.Result.Result;
-            return res.Result.Error;
-        }
-
-        public Task<MatrixApiResult> HandleGetAsync(Uri apiPath, bool authenticate)
-        {
-            var task = _client.GetAsync(GetPath(apiPath, authenticate));
-            return RequestWrap(task);
-        }
-
-        public MatrixRequestError HandleDelete(Uri apiPath, bool authenticate, out JToken result)
-        {
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.DeleteAsync(apiPath);
-            var res = RequestWrap(task);
-            res.Wait();
-            result = res.Result.Result;
-            return res.Result.Error;
-        }
-
-        public MatrixRequestError HandlePut(Uri apiPath, bool authenticate, JToken data, out JToken result)
-        {
-            if (data == null) throw new ArgumentNullException(nameof(data));
-
-            using var content = new StringContent(data.ToString(Formatting.None), Encoding.UTF8, "application/json");
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.PutAsync(apiPath, content);
-            var res = RequestWrap(task);
-            res.Wait();
-            result = res.Result.Result;
-            return res.Result.Error;
-        }
-
-        public Task<MatrixApiResult> HandlePutAsync(Uri apiPath, bool authenticate, JToken request)
+        public async Task<TResponse> RequestAsync<TResponse>(IRequest request, bool authenticate,
+            HttpContent? httpContent = null)
+            where TResponse : IResponse, new()
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            using var content = new StringContent(request.ToString(Formatting.None), Encoding.UTF8, "application/json");
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.PutAsync(apiPath, content);
-            return RequestWrap(task);
-        }
-
-        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, JToken data, Dictionary<string, string> headers,
-            out JToken result)
-        {
-            if (headers == null) throw new ArgumentNullException(nameof(headers));
-
-            using var content = data != null
-                ? new StringContent(data.ToString(), Encoding.UTF8, "application/json")
-                : new StringContent("{}");
-
-            foreach (var (header, value) in headers)
-                content.Headers.Add(header, value);
-
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.PostAsync(apiPath, content);
-            var res = RequestWrap(task);
-            res.Wait();
-            result = res.Result.Result;
-            return res.Result.Error;
-        }
-
-        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, byte[] data, Dictionary<string, string> headers,
-            out JToken result)
-        {
-            if (headers == null) throw new ArgumentNullException(nameof(headers));
-
-            using var content = data != null ? new ByteArrayContent(data) : new ByteArrayContent(Array.Empty<byte>());
-
-            foreach (var (header, value) in headers)
-                content.Headers.Add(header, value);
-
-            apiPath = GetPath(apiPath, authenticate);
-            var task = _client.PostAsync(apiPath, content);
-            var res = RequestWrap(task);
-            res.Wait();
-            result = res.Result.Result;
-            return res.Result.Error;
-        }
-
-        public MatrixRequestError HandlePost(Uri apiPath, bool authenticate, JToken data, out JToken result)
-        {
-            return HandlePost(apiPath, authenticate, data, new Dictionary<string, string>(), out result);
-        }
-
-        private static async Task<Tuple<JToken, HttpStatusCode>> GenericRequest(Task<HttpResponseMessage> task)
-        {
-            HttpResponseMessage httpResult;
-            Task<string> stringTask;
-
-            try
+            var absolutePath = GetPath(request.Path, authenticate);
+            using var httpResponse =  request.RequestKind switch
             {
-                httpResult = await task.ConfigureAwait(false);
-                if (httpResult.StatusCode.HasFlag(HttpStatusCode.OK))
-                    stringTask = httpResult.Content.ReadAsStringAsync();
-                else
-                    return new Tuple<JToken, HttpStatusCode>(null, httpResult.StatusCode);
+                RequestKind.Put =>
+                    await _client.PutAsync(absolutePath, httpContent)
+                        .ConfigureAwait(false),
+                RequestKind.Post =>
+                    await _client.PostAsync(absolutePath, httpContent)
+                        .ConfigureAwait(false),
+                RequestKind.Delete =>
+                    await _client.DeleteAsync(absolutePath)
+                        .ConfigureAwait(false),
+            };
+
+            if (httpResponse.StatusCode.HasFlag(HttpStatusCode.OK))
+            {
+                var jsonString = await httpResponse.Content.ReadAsStringAsync().
+                    ConfigureAwait(false);
+                using var jsonReader = new JTokenReader(JToken.Parse(jsonString));
+                var response = _jsonSerializer.Deserialize<TResponse>(jsonReader);
+                if (response == null) throw new NullReferenceException(@"");
+                response.HttpStatusCode = httpResponse.StatusCode;
+                return response;
             }
-            catch (AggregateException e)
+            else
             {
-                throw new MatrixException(e.InnerException.Message, e.InnerException);
+                return new TResponse
+                {
+                    ErrorCode = ErrorCode.None,
+                    HttpStatusCode = httpResponse.StatusCode
+                };
             }
 
-            var json = await stringTask.ConfigureAwait(false);
-            var result = JToken.Parse(json);
+            //catch (MatrixServerError e)
+            //{
+            //    var retryAfter = -1;
 
-            if (result.Type == JTokenType.Object && result["errcode"] != null)
-                throw new MatrixServerError(result["errcode"].ToObject<string>(),
-                    result["error"].ToObject<string>(), result as JObject);
+            //    if (e.ErrorObject.ContainsKey("retry_after_ms"))
+            //        retryAfter = e.ErrorObject["retry_after_ms"].ToObject<int>();
 
-            return new Tuple<JToken, HttpStatusCode>(result, httpResult.StatusCode);
+            //    apiResult.Error = new MatrixRequestError(e.Message, e.ErrorCode, HttpStatusCode.InternalServerError,
+            //        retryAfter);
+            //}
+        }
+
+        public void Dispose()
+        {
+            _client?.Dispose();
         }
     }
 }

@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
+using Matrix.Api;
+using Matrix.Api.SpecificationContexts;
 using Matrix.Api.Versions;
-
-using Newtonsoft.Json.Converters;
-
-using YamlDotNet.Serialization;
-
-using static Matrix.Api.Versions.ApiVersionContext;
+using Matrix.Properties;
 
 namespace Matrix
 {
@@ -16,135 +14,114 @@ namespace Matrix
     {
         private const string MatrixSpecUrl = "http://matrix.org/docs/spec/";
 
-        private readonly ApiVersionContext _apiVersionContext;
+        internal SpecificationContext SpecificationContext { get; }
 
-        internal ApiVersionContext ApiVersionContext => _apiVersionContext;
+        private string Path { get; }
 
-        public string Path { get; }
-
-        public MatrixSpecAttribute(ClientServerApiVersion supportedVer, string path,
-            ClientServerApiVersion lastVersion = ClientServerApiVersion.Unknown)
+        public MatrixSpecAttribute(ClientServerApiVersion addedVersion, string path,
+            ClientServerApiVersion removedVersion = ClientServerApiVersion.Unknown)
         {
             Path = path;
-            _apiVersionContext = new ClientServer(supportedVer, lastVersion);
+            SpecificationContext = new ClientServerSpecificationContext(addedVersion, removedVersion);
         }
 
-        public MatrixSpecAttribute(ServerServerApiVersion supportedVer, string path,
-            ServerServerApiVersion lastVersion = ServerServerApiVersion.Unknown)
+        public MatrixSpecAttribute(ServerServerApiVersion addedVersion, string path,
+            ServerServerApiVersion removedVersion = ServerServerApiVersion.Unknown)
         {
             Path = path;
-            _apiVersionContext = new ServerServer(supportedVer, lastVersion);
+            SpecificationContext = new ServerServerSpecificationContext(addedVersion, removedVersion);
         }
 
-        public MatrixSpecAttribute(ApplicationServiceApiVersion supportedVer, string path,
-            ApplicationServiceApiVersion lastVersion = ApplicationServiceApiVersion.Unknown)
+        public MatrixSpecAttribute(ApplicationServiceApiVersion addedVersion, string path,
+            ApplicationServiceApiVersion removedVersion = ApplicationServiceApiVersion.Unknown)
         {
             Path = path;
-            _apiVersionContext = new ApplicationService(supportedVer, lastVersion);
+            SpecificationContext = new ApplicationServiceSpecificationContext(addedVersion, removedVersion);
         }
 
-        public MatrixSpecAttribute(IdentityServiceApiVersion supportedVer, string path,
-            IdentityServiceApiVersion lastVersion = IdentityServiceApiVersion.Unknown)
+        public MatrixSpecAttribute(IdentityServiceApiVersion addedVersion, string path,
+            IdentityServiceApiVersion removedVersion = IdentityServiceApiVersion.Unknown)
         {
             Path = path;
-            _apiVersionContext = new IdentityService(supportedVer, lastVersion);
+            SpecificationContext = new IdentityServiceSpecificationContext(addedVersion, removedVersion);
         }
 
-        public MatrixSpecAttribute(PushGatewayApiVersion supportedVer, string path,
-            PushGatewayApiVersion lastVersion = PushGatewayApiVersion.Unknown)
+        public MatrixSpecAttribute(PushGatewayApiVersion addedVersion, string path,
+            PushGatewayApiVersion removedVersion = PushGatewayApiVersion.Unknown)
         {
             Path = path;
-            _apiVersionContext = new PushGateway(supportedVer, lastVersion);
+            SpecificationContext = new PushGatewaySpecificationContext(addedVersion, removedVersion);
         }
 
-        public MatrixSpecAttribute(RoomsApiVersion supportedVer, string path,
-            RoomsApiVersion lastVersion = RoomsApiVersion.V1)
+        public MatrixSpecAttribute(RoomsApiVersion addedVersion, string path,
+            RoomsApiVersion removedVersion = RoomsApiVersion.V1)
         {
             Path = path;
-            _apiVersionContext = new Rooms(supportedVer, lastVersion);
+            SpecificationContext = new RoomsSpecificationContext(addedVersion, removedVersion);
         }
 
-        public override string ToString()
+        public string ToJsonString()
         {
-            var verStr = _apiVersionContext.Api switch
-                {
-                MatrixSpecApi.ClientServer =>
-                (_apiVersionContext as ClientServer)?
-                .LastVersion.ToJsonString(),
-                MatrixSpecApi.ServerServer =>
-                (_apiVersionContext as ServerServer)?
-                .LastVersion.ToJsonString(),
-                MatrixSpecApi.ApplicationService =>
-                (_apiVersionContext as ApplicationService)?
-                .LastVersion.ToJsonString(),
-                MatrixSpecApi.IdentityService =>
-                (_apiVersionContext as IdentityService)?
-                .LastVersion.ToJsonString(),
-                MatrixSpecApi.PushGateway =>
-                (_apiVersionContext as PushGateway)?
-                .LastVersion.ToJsonString(),
-                MatrixSpecApi.Rooms =>
-                (_apiVersionContext as Rooms)?
-                .LastVersion.ToJsonString(),
-                };
+            var verStr = SpecificationContext.Specification switch
+            {
+                Specification.ClientServer => 
+                    SpecificationContext.ClientServer(SpecificationContext).RemovedVersion.ToJsonString(),
+                Specification.ServerServer =>
+                    SpecificationContext.ServerServer(SpecificationContext).RemovedVersion.ToJsonString(),
+                Specification.ApplicationService =>
+                    SpecificationContext.ApplicationService(SpecificationContext).RemovedVersion.ToJsonString(),
+                Specification.IdentityService =>
+                    SpecificationContext.IdentityService(SpecificationContext).RemovedVersion.ToJsonString(),
+                Specification.PushGateway =>
+                    SpecificationContext.PushGateway(SpecificationContext).RemovedVersion.ToJsonString(),
+                Specification.Rooms =>
+                    SpecificationContext.Rooms(SpecificationContext).RemovedVersion.ToJsonString(),
+                _ => throw new InvalidDataException(Resources.UnknownMatrixApiType)
+            };
 
-            var apiStr = _apiVersionContext.Api.ToJsonString();
+            var apiStr = SpecificationContext.Specification.ToJsonString();
 
             return $"{MatrixSpecUrl}/{apiStr}/{verStr}.html#${Path}";
         }
     }
-
-    public enum MatrixSpecApi
-    {
-        ClientServer,
-        ServerServer,
-        ApplicationService,
-        IdentityService,
-        PushGateway,
-        Rooms
-    }
-
-    public static class MatrixSpecApiExtensions
-    {
-        public static string ToJsonString(this MatrixSpecApi clientServerApiVersion)
-        {
-            return clientServerApiVersion switch
-                {
-                MatrixSpecApi.ClientServer => @"client_server",
-                MatrixSpecApi.ServerServer => @"server_server",
-                MatrixSpecApi.ApplicationService => @"application_service",
-                MatrixSpecApi.IdentityService => @"identity_service",
-                MatrixSpecApi.PushGateway => @"push_gateway",
-                MatrixSpecApi.Rooms => @"rooms"
-                };
-        }
-
-        public static MatrixSpecApi FromJsonString(this string clientServerApiVersion)
-        {
-            return clientServerApiVersion switch
-                {
-                @"client_server" => MatrixSpecApi.ClientServer,
-                @"server_server" => MatrixSpecApi.ServerServer,
-                @"application_service" => MatrixSpecApi.ApplicationService,
-                @"identity_service" => MatrixSpecApi.IdentityService,
-                @"push_gateway" => MatrixSpecApi.PushGateway,
-                @"rooms" => MatrixSpecApi.Rooms
-                };
-        }
-    }
-
+    
     /// <summary>
     /// The versions this method
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property |
-                    AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field)]
-    public class MatrixSpecVersionAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | 
+            AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field)]
+    public class MatrixSpecVersionsAttribute : Attribute
     {
-        public string[] Versions { get; }
+        internal SpecificationContext SpecificationContext { get; }
 
-        public MatrixSpecVersionAttribute(params string[] versions)
+        public MatrixSpecVersionsAttribute(IEnumerable<ClientServerApiVersion> supportedVersions)
         {
-            Versions = versions;
+            SpecificationContext = new ClientServerVersionsSpecificationContext(supportedVersions);
+        }
+
+        public MatrixSpecVersionsAttribute(IEnumerable<ServerServerApiVersion> supportedVersions)
+        {
+            SpecificationContext = new ServerServerVersionsSpecificationContext(supportedVersions);
+        }
+
+        public MatrixSpecVersionsAttribute(IEnumerable<ApplicationServiceApiVersion> supportedVersions)
+        {
+            SpecificationContext = new ApplicationServiceVersionsSpecificationContext(supportedVersions);
+        }
+
+        public MatrixSpecVersionsAttribute(IEnumerable<IdentityServiceApiVersion> supportedVersions)
+        {
+            SpecificationContext = new IdentityServiceVersionsSpecificationContext(supportedVersions);
+        }
+
+        public MatrixSpecVersionsAttribute(IEnumerable<PushGatewayApiVersion> supportedVersions)
+        {
+            SpecificationContext = new PushGatewayVersionsSpecificationContext(supportedVersions);
+        }
+
+        public MatrixSpecVersionsAttribute(IEnumerable<RoomsApiVersion> supportedVersions)
+        {
+            SpecificationContext = new RoomsVersionsSpecificationContext(supportedVersions);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Matrix.Api.Versions
+﻿using System;
+
+namespace Matrix.Api.Versions
 {
     public enum ClientServerApiVersion
     {
@@ -60,7 +62,7 @@
         V5
     }
 
-    public static class ClientServerApiVersionExtensions
+    public static class VersionExtensions
     {
         public static string ToJsonString(this ClientServerApiVersion clientServerApiVersion)
         {
@@ -80,7 +82,73 @@
             };
         }
 
-        public static ClientServerApiVersion FromJsonString(this string clientServerApiVersion)
+        public static string ToJsonString(this ServerServerApiVersion serverServerApiVersion)
+        {
+            return serverServerApiVersion switch
+            {
+                ServerServerApiVersion.Unknown => @"unknown",
+                ServerServerApiVersion.Unstable => @"unstable",
+                ServerServerApiVersion.R010 => @"r0.1.0",
+                ServerServerApiVersion.R011 => @"r0.1.1",
+                ServerServerApiVersion.R012 => @"r0.1.2",
+                ServerServerApiVersion.R013 => @"r0.1.3",
+                _ => throw new System.NotImplementedException()
+            };
+        }
+
+        public static string ToJsonString(this ApplicationServiceApiVersion applicationServiceApiVersion)
+        {
+            return applicationServiceApiVersion switch
+            {
+                ApplicationServiceApiVersion.Unknown => @"unknown",
+                ApplicationServiceApiVersion.Unstable => @"unstable",
+                ApplicationServiceApiVersion.R010 => @"r0.1.0",
+                ApplicationServiceApiVersion.R011 => @"r0.1.1",
+                ApplicationServiceApiVersion.R012 => @"r0.1.2",
+                _ => throw new System.NotImplementedException()
+            };
+        }
+
+        public static string ToJsonString(this IdentityServiceApiVersion identityServiceApiVersion)
+        {
+            return identityServiceApiVersion switch
+            {
+                IdentityServiceApiVersion.Unknown => @"unknown",
+                IdentityServiceApiVersion.Unstable => @"unstable",
+                IdentityServiceApiVersion.R010 => @"r0.1.0",
+                IdentityServiceApiVersion.R020 => @"r0.2.0",
+                IdentityServiceApiVersion.R021 => @"r0.2.1",
+                IdentityServiceApiVersion.R030 => @"r0.3.0",
+                _ => throw new System.NotImplementedException()
+            };
+        }
+
+        public static string ToJsonString(this PushGatewayApiVersion pushGatewayApiVersion)
+        {
+            return pushGatewayApiVersion switch
+            {
+                PushGatewayApiVersion.Unknown => @"unknown",
+                PushGatewayApiVersion.Unstable => @"unstable",
+                PushGatewayApiVersion.R010 => @"r0.1.0",
+                PushGatewayApiVersion.R011 => @"r0.1.1",
+                _ => throw new System.NotImplementedException()
+            };
+        }
+
+        public static string ToJsonString(this RoomsApiVersion roomsApiVersion)
+        {
+            return roomsApiVersion switch
+            {
+                RoomsApiVersion.V1 => @"v1",
+                RoomsApiVersion.V2 => @"v2",
+                RoomsApiVersion.V3 => @"v3",
+                RoomsApiVersion.V4 => @"v4",
+                RoomsApiVersion.V5 => @"v5",
+                _ => throw new System.NotImplementedException()
+            };
+        }
+
+        public static ClientServerApiVersion ToClientServerApiVersion(this string clientServerApiVersion)
         {
             return clientServerApiVersion switch
             {
@@ -97,25 +165,8 @@
                 _ => throw new System.NotImplementedException()
             };
         }
-    }
 
-    public static class ServerServerApiVersionExtensions
-    {
-        public static string ToJsonString(this ServerServerApiVersion serverServerApiVersion)
-        {
-            return serverServerApiVersion switch
-            {
-                ServerServerApiVersion.Unknown => @"unknown",
-                ServerServerApiVersion.Unstable => @"unstable",
-                ServerServerApiVersion.R010 => @"r0.1.0",
-                ServerServerApiVersion.R011 => @"r0.1.1",
-                ServerServerApiVersion.R012 => @"r0.1.2",
-                ServerServerApiVersion.R013 => @"r0.1.3",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
-        public static ServerServerApiVersion FromJsonString(this string serverServerApiVersion)
+        public static ServerServerApiVersion ToServerServerApiVersion(this string serverServerApiVersion)
         {
             return serverServerApiVersion switch
             {
@@ -128,24 +179,8 @@
                 _ => throw new System.NotImplementedException()
             };
         }
-    }
 
-    public static class ApplicationServiceApiVersionExtensions
-    {
-        public static string ToJsonString(this ApplicationServiceApiVersion applicationServiceApiVersion)
-        {
-            return applicationServiceApiVersion switch
-            {
-                ApplicationServiceApiVersion.Unknown => @"unknown",
-                ApplicationServiceApiVersion.Unstable => @"unstable",
-                ApplicationServiceApiVersion.R010 => @"r0.1.0",
-                ApplicationServiceApiVersion.R011 => @"r0.1.1",
-                ApplicationServiceApiVersion.R012 => @"r0.1.2",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
-        public static ApplicationServiceApiVersion FromJsonString(this string applicationServiceApiVersion)
+        public static ApplicationServiceApiVersion ToApplicationServiceApiVersion(this string applicationServiceApiVersion)
         {
             return applicationServiceApiVersion switch
             {
@@ -157,25 +192,8 @@
                 _ => throw new System.NotImplementedException()
             };
         }
-    }
 
-    public static class IdentityServiceApiVersionExtensions
-    {
-        public static string ToJsonString(this IdentityServiceApiVersion identityServiceApiVersion)
-        {
-            return identityServiceApiVersion switch
-            {
-                IdentityServiceApiVersion.Unknown => @"unknown",
-                IdentityServiceApiVersion.Unstable => @"unstable",
-                IdentityServiceApiVersion.R010 => @"r0.1.0",
-                IdentityServiceApiVersion.R020 => @"r0.2.0",
-                IdentityServiceApiVersion.R021 => @"r0.2.1",
-                IdentityServiceApiVersion.R030 => @"r0.3.0",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
-        public static IdentityServiceApiVersion FromJsonString(this string identityServiceApiVersion)
+        public static IdentityServiceApiVersion ToIdentityServiceApiVersion(this string identityServiceApiVersion)
         {
             return identityServiceApiVersion switch
             {
@@ -188,23 +206,8 @@
                 _ => throw new System.NotImplementedException()
             };
         }
-    }
 
-    public static class PushGatewayApiVersionExtensions
-    {
-        public static string ToJsonString(this PushGatewayApiVersion pushGatewayApiVersion)
-        {
-            return pushGatewayApiVersion switch
-            {
-                PushGatewayApiVersion.Unknown => @"unknown",
-                PushGatewayApiVersion.Unstable => @"unstable",
-                PushGatewayApiVersion.R010 => @"r0.1.0",
-                PushGatewayApiVersion.R011 => @"r0.1.1",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
-        public static PushGatewayApiVersion FromJsonString(this string pushGatewayApiVersion)
+        public static PushGatewayApiVersion ToPushGatewayApiVersion(this string pushGatewayApiVersion)
         {
             return pushGatewayApiVersion switch
             {
@@ -215,24 +218,8 @@
                 _ => throw new System.NotImplementedException()
             };
         }
-    }
 
-    public static class RoomApiVersionExtensions
-    {
-        public static string ToJsonString(this RoomsApiVersion roomsApiVersion)
-        {
-            return roomsApiVersion switch
-            {
-                RoomsApiVersion.V1 => @"v1",
-                RoomsApiVersion.V2 => @"v2",
-                RoomsApiVersion.V3 => @"v3",
-                RoomsApiVersion.V4 => @"v4",
-                RoomsApiVersion.V5 => @"v5",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
-        public static RoomsApiVersion FromJsonString(this string roomApiVersion)
+        public static RoomsApiVersion ToRoomsApiVersion(this string roomApiVersion)
         {
             return roomApiVersion switch
             {
