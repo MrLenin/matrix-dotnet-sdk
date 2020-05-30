@@ -1,6 +1,7 @@
 ﻿using System.Net;
 
 using Matrix.Api;
+using Matrix.Api.ClientServer.Enumerations;
 
 namespace Matrix.Backends
 {

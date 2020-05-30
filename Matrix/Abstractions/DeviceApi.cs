@@ -13,7 +13,7 @@ namespace Matrix.Abstractions
         public DeviceApi(MatrixApi matrixApi) =>
             _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
 
-        [MatrixSpec(ClientServerApiVersion.R030, "get-matrix-client-r0-devices")]
+        [MatrixSpec(ClientServerVersion.R030, "get-matrix-client-r0-devices")]
         public async Task<Device[]> GetDevices()
         {
             throw new NotImplementedException();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.Versions;
 
 namespace Matrix.Api.ClientServer
@@ -16,8 +17,8 @@ namespace Matrix.Api.ClientServer
             _apiPath = new Uri(@"/_matrix/client/r0/login", UriKind.Relative);
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-login")]
-        private IEnumerable<AuthenticationKind> RequestAuthenticationMethods()
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-login")]
+        private IEnumerable<AuthenticationKind> RequestAuthenticationKinds()
         {
             _matrixApi.ThrowIfNotSupported();
 
@@ -27,7 +28,7 @@ namespace Matrix.Api.ClientServer
             return response.AuthenticationMethods;
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-login")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-login")]
         public AuthenticationContext Login<T>(AuthenticationRequest authenticationRequest)
             where T : AuthenticationResponse, new()
         {

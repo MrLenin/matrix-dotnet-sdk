@@ -3,16 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 using Matrix.Api.ClientServer;
+using Matrix.Api.ClientServer.Enumerations;
 
 namespace Matrix.Api
 {
-    public enum RequestKind
-    {
-        Post,
-        Put,
-        Delete
-    }
-
     public interface IRequest
     {
         RequestKind RequestKind { get; }

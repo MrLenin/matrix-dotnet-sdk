@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
+using Matrix.Api.ClientServer.Enumerations;
 
 namespace Matrix.Api.ClientServer.Events
 {
-    public enum PresenceStatus
-    {
-        Online,
-        Offline,
-        Unavailable,
-        FreeForChat,
-        Hidden
-    }
-
     public class PresenceEventContent : IEventContent
     {
         [DataMember(Name = @"last_active_ago")]

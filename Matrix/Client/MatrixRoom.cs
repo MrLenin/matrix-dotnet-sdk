@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
+using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.Events.RoomStateContent;
+using Matrix.Api.ClientServer.StateEventContent;
 using Matrix.Properties;
 using Matrix.Structures;
 
@@ -50,7 +50,7 @@ namespace Matrix.Client
         public string CanonicalAlias { get; private set; }
         public IEnumerable<string> Aliases { get; private set; }
 
-        public JoinRulesKind JoinRule { get; private set; }
+        public JoinRuleKind JoinRule { get; private set; }
         public MatrixMRoomPowerLevels PowerLevels { get; private set; }
 
         /// <summary>
@@ -157,9 +157,9 @@ namespace Matrix.Client
 
             if (roomEvent.Content == null)
                 return; // We can't operate on this
-            if (roomEvent.GetType() == typeof(RoomStateEvent))
+            if (roomEvent.GetType() == typeof(StateEvent))
             {
-                var roomStateEvent = roomEvent as RoomStateEvent;
+                var roomStateEvent = roomEvent as StateEvent;
                 switch (roomStateEvent.EventKind)
                 {
                     case EventKind.RoomAvatar:
@@ -183,7 +183,7 @@ namespace Matrix.Client
 
                     case EventKind.RoomJoinRules:
                         var joinRulesEventContent = (JoinRulesEventContent)roomStateEvent.Content;
-                        JoinRule = joinRulesEventContent.JoinRulesKind;
+                        JoinRule = joinRulesEventContent.JoinRuleKind;
                         break;
 
                     case EventKind.RoomMembership:
@@ -365,7 +365,7 @@ namespace Matrix.Client
         /// <param name="key">Key.</param>
         /// <returns>Event ID of the sent message</returns>
         public string SendState<T>(T stateMessage, string type, string key = "")
-            where T : class, IRoomStateEventContent
+            where T : class, IStateEventContent
         {
             return _api.Room.SendState<T>(Id, type, stateMessage, key);
         }
@@ -479,10 +479,10 @@ namespace Matrix.Client
             _api.Room.PutTag(Id, tagName, order);
         }
 
-        public IRoomStateEventContent GetStateEvent(string type)
+        public IStateEventContent GetStateEvent(string type)
         {
             var evContent = _api.Room.GetStateType(Id, type);
-            var fakeEvent = new RoomStateEvent() {Content = evContent};
+            var fakeEvent = new StateEvent() {Content = evContent};
             FeedEvent(fakeEvent);
             return evContent;
         }

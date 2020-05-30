@@ -1,9 +1,8 @@
 ﻿using System;
 
-using Newtonsoft.Json;
+using Matrix.Api.ClientServer.Enumerations;
 
-using Matrix.Api;
-using Matrix.Api.ClientServer;
+using Newtonsoft.Json;
 
 namespace Matrix.Json
 {

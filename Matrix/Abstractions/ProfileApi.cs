@@ -12,7 +12,7 @@ namespace Matrix.Abstractions
         public ProfileApi(MatrixApi matrixApi) =>
             _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-profile-userid")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-profile-userid")]
         public virtual MatrixProfile GetProfile(string userId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -24,7 +24,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-profile-displayname")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-profile-displayname")]
         public void SetDisplayName(string userId, string displayName)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -41,7 +41,7 @@ namespace Matrix.Abstractions
             //if (!error.IsOk) throw new MatrixException(error.ToString());
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-profile-userid-displayname")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-profile-userid-displayname")]
         public void SetAvatar(string userId, Uri avatarUrl)
         {
             _matrixApi.ThrowIfNotSupported();

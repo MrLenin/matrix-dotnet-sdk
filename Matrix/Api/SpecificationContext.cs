@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
 using Matrix.Api.SpecificationContexts;
+using Matrix.Api.Versions;
 using Matrix.Properties;
 
 namespace Matrix.Api
@@ -17,100 +18,106 @@ namespace Matrix.Api
             Specification = specification;
         }
 
-        internal static ClientServerSpecificationContext ClientServer(SpecificationContext baseContext)
+        internal static SpecificationContext<ClientServerVersion> ClientServer(SpecificationContext baseContext)
         {
-            return baseContext as ClientServerSpecificationContext ??
+            return baseContext as SpecificationContext<ClientServerVersion> ??
                    throw new ArgumentException(Resources.InvalidClientServerVersionContext);
         }
 
-        internal static ServerServerSpecificationContext ServerServer(SpecificationContext baseContext)
+        internal static SpecificationContext<ServerServerVersion> ServerServer(SpecificationContext baseContext)
         {
-            return baseContext as ServerServerSpecificationContext ??
+            return baseContext as SpecificationContext<ServerServerVersion> ??
                    throw new ArgumentException(Resources.InvalidServerServerVersionContext);
         }
 
-        internal static ApplicationServiceSpecificationContext ApplicationService(SpecificationContext baseContext)
+        internal static SpecificationContext<ApplicationServiceVersion> ApplicationService(
+            SpecificationContext baseContext)
         {
-            return baseContext as ApplicationServiceSpecificationContext ??
+            return baseContext as SpecificationContext<ApplicationServiceVersion> ??
                    throw new ArgumentException(Resources.InvalidApplicationServiceVersionContext);
         }
 
-        internal static IdentityServiceSpecificationContext IdentityService(SpecificationContext baseContext)
+        internal static SpecificationContext<IdentityServiceVersion> IdentityService(SpecificationContext baseContext)
         {
-            return baseContext as IdentityServiceSpecificationContext ??
+            return baseContext as SpecificationContext<IdentityServiceVersion> ??
                    throw new ArgumentException(Resources.InvalidIdentityServiceVersionContext);
         }
 
-        internal static PushGatewaySpecificationContext PushGateway(SpecificationContext baseContext)
+        internal static SpecificationContext<PushGatewayVersion> PushGateway(SpecificationContext baseContext)
         {
-            return baseContext as PushGatewaySpecificationContext ??
+            return baseContext as SpecificationContext<PushGatewayVersion> ??
                    throw new ArgumentException(Resources.InvalidPushGatewayVersionContext);
         }
 
-        internal static RoomsSpecificationContext Rooms(SpecificationContext baseContext)
+        internal static SpecificationContext<RoomsVersion> Rooms(SpecificationContext baseContext)
         {
-            return baseContext as RoomsSpecificationContext ??
+            return baseContext as SpecificationContext<RoomsVersion> ??
                    throw new ArgumentException(Resources.InvalidRoomsVersionContext);
         }
 
-        internal static ClientServerVersionsSpecificationContext ClientServerVersions(SpecificationContext baseContext)
+        internal static VersionsSpecificationContext<ClientServerVersion> ClientServerVersions(
+            SpecificationContext baseContext)
         {
-            return baseContext as ClientServerVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<ClientServerVersion> ??
                    throw new ArgumentException(Resources.InvalidClientServerVersionListContext);
         }
 
-        internal static ServerServerVersionsSpecificationContext ServerServerVersions(SpecificationContext baseContext)
+        internal static VersionsSpecificationContext<ServerServerVersion> ServerServerVersions(
+            SpecificationContext baseContext)
         {
-            return baseContext as ServerServerVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<ServerServerVersion> ??
                    throw new ArgumentException(Resources.InvalidServerServerVersionListContext);
         }
 
-        internal static ApplicationServiceVersionsSpecificationContext ApplicationServiceVersions(
+        internal static VersionsSpecificationContext<ApplicationServiceVersion> ApplicationServiceVersions(
             SpecificationContext baseContext)
         {
-            return baseContext as ApplicationServiceVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<ApplicationServiceVersion> ??
                    throw new ArgumentException(Resources.InvalidApplicationServiceVersionListContext);
         }
 
-        internal static IdentityServiceVersionsSpecificationContext IdentityServiceVersions(
+        internal static VersionsSpecificationContext<IdentityServiceVersion> IdentityServiceVersions(
             SpecificationContext baseContext)
         {
-            return baseContext as IdentityServiceVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<IdentityServiceVersion> ??
                    throw new ArgumentException(Resources.InvalidIdentityServiceVersionListContext);
         }
 
-        internal static PushGatewayVersionsSpecificationContext PushGatewayVersions(SpecificationContext baseContext)
+        internal static VersionsSpecificationContext<PushGatewayVersion> PushGatewayVersions(
+            SpecificationContext baseContext)
         {
-            return baseContext as PushGatewayVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<PushGatewayVersion> ??
                    throw new ArgumentException(Resources.InvalidPushGatewayVersionListContext);
         }
 
-        internal static RoomsVersionsSpecificationContext RoomsVersions(SpecificationContext baseContext)
+        internal static VersionsSpecificationContext<RoomsVersion> RoomsVersions(SpecificationContext baseContext)
         {
-            return baseContext as RoomsVersionsSpecificationContext ??
+            return baseContext as VersionsSpecificationContext<RoomsVersion> ??
                    throw new ArgumentException(Resources.InvalidRoomsVersionListContext);
         }
     }
 
-    internal abstract class SpecificationContext<T> : SpecificationContext where T : Enum
+    internal class SpecificationContext<TVersions> : SpecificationContext where TVersions : Enum
     {
-        internal T AddedVersion { get; set; }
-        internal T RemovedVersion { get; set; }
+        internal TVersions AddedVersion { get; set; }
+        internal TVersions RemovedVersion { get; set; }
 
-        internal SpecificationContext(Specification specification) : base(specification)
+        internal SpecificationContext(Specification specification, TVersions addedVersion, TVersions removedVersion) :
+            base(specification)
         {
-            AddedVersion = Activator.CreateInstance<T>();
-            RemovedVersion = Activator.CreateInstance<T>();
+            AddedVersion = addedVersion;
+            RemovedVersion = removedVersion;
         }
     }
 
-    internal abstract class VersionsSpecificationContext<T> : SpecificationContext where T : Enum
+    internal class VersionsSpecificationContext<TVersions> : SpecificationContext where TVersions : Enum
     {
-        internal IEnumerable<T> Versions { get; set; }
+        internal IEnumerable<TVersions> Versions { get; set; }
 
-        internal VersionsSpecificationContext(Specification specification) : base(specification)
+        internal VersionsSpecificationContext(Specification specification, IEnumerable<TVersions> supportedVersions) :
+            base(specification)
         {
-            Versions = Array.Empty<T>();
+            Versions = Array.Empty<TVersions>();
         }
     }
 }

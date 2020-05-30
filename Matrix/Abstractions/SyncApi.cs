@@ -2,7 +2,6 @@
 using System.Threading;
 
 using Matrix.Api.Versions;
-using Matrix.Backends;
 using Matrix.Properties;
 using Matrix.Structures;
 
@@ -49,7 +48,7 @@ namespace Matrix.Abstractions
             }
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-sync")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-sync")]
         public void ClientSync(bool connectionFailureTimeout = false)
         {
             _matrixApi.ThrowIfNotSupported();

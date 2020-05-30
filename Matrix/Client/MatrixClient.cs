@@ -6,6 +6,7 @@ using System.Linq;
 using Matrix.Api;
 using Matrix.Api.ClientServer;
 using Matrix.Api.ClientServer.Events;
+using Matrix.Api.ClientServer.Structures;
 using Matrix.Properties;
 using Matrix.Structures;
 using Microsoft.Extensions.Logging;

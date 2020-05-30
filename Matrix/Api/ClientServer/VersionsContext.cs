@@ -9,6 +9,6 @@ namespace Matrix.Api.ClientServer
     public class VersionsContext
     {
         public IDictionary<string, bool> UnstableFeatures { get; set; }
-        public IEnumerable<ClientServerApiVersion> Versions { get; set; }
+        public IEnumerable<ClientServerVersion> Versions { get; set; }
     }
 }

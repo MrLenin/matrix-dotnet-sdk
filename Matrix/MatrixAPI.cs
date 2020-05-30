@@ -143,7 +143,7 @@ namespace Matrix
 
 
 
-        [MatrixSpec(ClientServerApiVersion.R040, "get-matrix-client-r0-joined_rooms")]
+        [MatrixSpec(ClientServerVersion.R040, "get-matrix-client-r0-joined_rooms")]
         public List<string> GetJoinedRooms()
         {
             throw new NotImplementedException();
@@ -156,7 +156,7 @@ namespace Matrix
 //                 .ToObject<List<string>>();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R040, "get-matrix-client-r0-joined_members")]
+        [MatrixSpec(ClientServerVersion.R040, "get-matrix-client-r0-joined_members")]
         public Dictionary<string, MatrixProfile> GetJoinedMembers(string roomId)
         {
             throw new NotImplementedException();
@@ -215,7 +215,7 @@ namespace Matrix
 
             var msg = "This homeserver doesn't support this endpoint.";
 
-            if (clientServerContext.RemovedVersion != ClientServerApiVersion.Unknown)
+            if (clientServerContext.RemovedVersion != ClientServerVersion.Unknown)
                 msg +=
                     $"The endpoint was removed in spec version {clientServerContext.RemovedVersion.ToJsonString()}";
             else

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
 
-using Matrix.Backends;
+using Matrix.Api.ClientServer.Enumerations;
 
 namespace Matrix.Api
 {

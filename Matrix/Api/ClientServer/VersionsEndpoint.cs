@@ -18,7 +18,7 @@ namespace Matrix.Api.ClientServer
             _apiPath = new Uri(@"/_matrix/client/versions", UriKind.Relative);
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-versions")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-versions")]
         public VersionsContext RequestVersions()
         {
             _matrixApi.ThrowIfNotSupported();

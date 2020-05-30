@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
+using Matrix.Api.ClientServer.Enumerations;
 
 namespace Matrix.Api.ClientServer.Events
 {

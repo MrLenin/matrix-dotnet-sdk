@@ -21,7 +21,7 @@ namespace Matrix.Abstractions
 
         public RoomApi(MatrixApi matrixApi) => _matrixApi = matrixApi ?? throw new ArgumentNullException(nameof(matrixApi));
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-send")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-rooms-roomid-send")]
         private async Task<string> Send(string roomId, string type, MatrixMRoomMessage msg, string txnId = "")
         {
             _matrixApi.ThrowIfNotSupported();
@@ -39,7 +39,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-leave")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-rooms-roomid-leave")]
         public void Leave(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -51,9 +51,9 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "put-matrix-client-r0-rooms-roomid-state-eventtype")]
+        [MatrixSpec(ClientServerVersion.R001, "put-matrix-client-r0-rooms-roomid-state-eventtype")]
         public virtual string SendState<T>(string roomId, string type, T message, string key = "")
-            where T : class, IRoomStateEventContent
+            where T : class, IStateEventContent
         {
             _matrixApi.ThrowIfNotSupported();
 
@@ -68,7 +68,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-invite")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-rooms-roomid-invite")]
         public void InviteTo(string roomId, string userId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -81,7 +81,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "put-matrix-client-r0-rooms-roomid-send-eventtype-txnid")]
+        [MatrixSpec(ClientServerVersion.R001, "put-matrix-client-r0-rooms-roomid-send-eventtype-txnid")]
         public async Task<string> SendMessage(string roomId, string type, MatrixMRoomMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -120,7 +120,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-receipt-receipttype-eventid")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-rooms-roomid-receipt-receipttype-eventid")]
         public void SendTyping(string roomId, bool typing, int timeout = 0)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -138,8 +138,8 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-state")]
-        public IEnumerable<RoomStateEvent> GetState(string roomId)
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-rooms-roomid-state")]
+        public IEnumerable<StateEvent> GetState(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
 
@@ -152,8 +152,8 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-state-eventtype")]
-        public IRoomStateEventContent GetStateType(string roomId, string type)
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-rooms-roomid-state-eventtype")]
+        public IStateEventContent GetStateType(string roomId, string type)
         {
             _matrixApi.ThrowIfNotSupported();
 
@@ -166,7 +166,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-rooms-roomid-messages")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-rooms-roomid-messages")]
         public ChunkedMessages GetMessages(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -181,7 +181,7 @@ namespace Matrix.Abstractions
         }
 
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-rooms-roomid-join")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-rooms-roomid-join")]
         public string ClientJoin(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -196,7 +196,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "post-matrix-client-r0-createroom")]
+        [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-createroom")]
         public string ClientCreate(MatrixCreateRoom roomRequest = null)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -212,7 +212,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
         public RoomTags GetTags(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
@@ -226,7 +226,7 @@ namespace Matrix.Abstractions
             throw new NotImplementedException();
         }
 
-        [MatrixSpec(ClientServerApiVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
+        [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-user-userid-rooms-roomid-tags")]
         public void PutTag(string roomId, string tag, double order)
         {
             _matrixApi.ThrowIfNotSupported();

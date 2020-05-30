@@ -9,9 +9,10 @@ using JsonSubTypes;
 
 using Matrix.Api;
 using Matrix.Api.ClientServer;
+using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.Events.RoomContent;
-using Matrix.Api.ClientServer.Events.RoomStateContent;
+using Matrix.Api.ClientServer.RoomEventContent;
+using Matrix.Api.ClientServer.Structures;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -39,22 +40,22 @@ namespace Matrix.Backends
                 .Of(typeof(IEvent), @"type")
                 .RegisterSubtype(typeof(PresenceEvent), PresenceEvent.ToJsonString())
                 .RegisterSubtype(typeof(ReceiptEvent), ReceiptEvent.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomAvatar.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomCanonicalAlias.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomCreate.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomGuestAccess.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomHistoryVisibility.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomJoinRules.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomMembership.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomAvatar.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomCanonicalAlias.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomCreate.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomGuestAccess.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomHistoryVisibility.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomJoinRules.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomMembership.ToJsonString())
                 .RegisterSubtype(typeof(RoomEvent), EventKind.RoomMessage.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomName.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomPinnedEvents.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomPowerLevels.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomName.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomPinnedEvents.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomPowerLevels.ToJsonString())
                 .RegisterSubtype(typeof(RoomEvent), EventKind.RoomRedaction.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomServerAcl.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomThirdPartyInvite.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomTombstone.ToJsonString())
-                .RegisterSubtype(typeof(RoomStateEvent), EventKind.RoomTopic.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomServerAcl.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomThirdPartyInvite.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomTombstone.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent), EventKind.RoomTopic.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
 
@@ -82,7 +83,7 @@ namespace Matrix.Backends
                 .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
-                .Of(typeof(IRoomStateEventContent))
+                .Of(typeof(IStateEventContent))
                 .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
                 .Build());
 

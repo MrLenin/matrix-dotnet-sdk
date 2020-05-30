@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 
+using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.Versions;
 
 namespace Matrix.Api.ClientServer
@@ -12,7 +11,7 @@ namespace Matrix.Api.ClientServer
     public class VersionsResponse : IResponse
     {
         [DataMember(Name = @"versions")]
-        public IEnumerable<ClientServerApiVersion> ApiVersions { get; set; }
+        public IEnumerable<ClientServerVersion> ApiVersions { get; set; }
         [DataMember(Name = @"unstable_features")]
         public IDictionary<string, bool> UnstableFeatures { get; set; }
 
@@ -20,7 +19,7 @@ namespace Matrix.Api.ClientServer
         {
             ErrorCode = ErrorCode.None;
             HttpStatusCode = HttpStatusCode.OK;
-            ApiVersions = new List<ClientServerApiVersion>();
+            ApiVersions = new List<ClientServerVersion>();
             UnstableFeatures = new Dictionary<string, bool>();
         }
 
