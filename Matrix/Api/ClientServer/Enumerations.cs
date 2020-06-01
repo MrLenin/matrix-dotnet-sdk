@@ -16,6 +16,12 @@ namespace Matrix.Api.ClientServer
             Dummy
         }
 
+        public enum EncryptionAlgorithm
+        {
+            OlmV1Curve25519AesSha2,
+            MegOlmV1AesSha2
+        }
+
         public enum ErrorCode
         {
             Forbidden,
@@ -148,6 +154,16 @@ namespace Matrix.Api.ClientServer
                     AuthenticationKind.Token => @"m.login.token",
                     AuthenticationKind.Dummy => @"m.login.dummy",
                     _ => throw new InvalidCastException()
+                };
+            }
+
+            public static string ToJsonString(this EncryptionAlgorithm encryptionAlgorithm)
+            {
+                return encryptionAlgorithm switch
+                {
+                    EncryptionAlgorithm.OlmV1Curve25519AesSha2 => @"m.olm.v1.curve25519-aes-sha2",
+                    EncryptionAlgorithm.MegOlmV1AesSha2 => @"m.megolm.v1.aes-sha2",
+                _ => throw new InvalidCastException()
                 };
             }
 
@@ -303,6 +319,16 @@ namespace Matrix.Api.ClientServer
                     @"m.login.msisdn" => AuthenticationKind.Msisdn,
                     @"m.login.token" => AuthenticationKind.Token,
                     @"m.login.dummy" => AuthenticationKind.Dummy,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static EncryptionAlgorithm ToEncryptionAlgorithm(this string encryptionAlgorithm)
+            {
+                return encryptionAlgorithm switch
+                {
+                    @"m.olm.v1.curve25519-aes-sha2" => EncryptionAlgorithm.OlmV1Curve25519AesSha2,
+                    @"m.megolm.v1.aes-sha2" => EncryptionAlgorithm.MegOlmV1AesSha2,
                     _ => throw new InvalidCastException()
                 };
             }

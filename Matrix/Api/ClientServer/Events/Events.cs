@@ -5,9 +5,10 @@ using System.Runtime.Serialization;
 using JsonSubTypes;
 
 using Matrix.Api.ClientServer.Enumerations;
+using Matrix.Api.ClientServer.EventContent;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.RoomEventContent;
-using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.RoomContent;
+using Matrix.Api.ClientServer.StateContent;
 using Matrix.Api.ClientServer.Structures;
 
 using Newtonsoft.Json;
@@ -18,17 +19,17 @@ namespace Matrix.Api.ClientServer.Events
     {
     }
 
-    public interface IRoomEventContent : IEventContent
+    public interface IRoomContent : IEventContent
     {
     }
 
-    public interface IMessageEventContent : IRoomEventContent
+    public interface IMessageContent : IRoomContent
     {
         [JsonProperty(@"body")] string MessageBody { get; set; }
         [JsonProperty(@"msgtype")] MessageKind MessageKind { get; }
     }
 
-    public interface IStateEventContent : IRoomEventContent
+    public interface IStateContent : IRoomContent
     {
     }
 
@@ -40,7 +41,7 @@ namespace Matrix.Api.ClientServer.Events
     }
 
     public interface IRoomEvent<T> : IEvent
-        where T : class, IRoomEventContent
+        where T : class, IRoomContent
     {
         [JsonProperty(@"event_id")] string EventId { get; set; }
         [JsonProperty(@"sender")] string Sender { get; set; }
@@ -52,14 +53,14 @@ namespace Matrix.Api.ClientServer.Events
     }
 
     public interface IStateEvent<T> : IRoomEvent<T>
-        where T : class, IStateEventContent
+        where T : class, IStateContent
     {
         [JsonProperty(@"state_key")] string StateKey { get; set; }
         [JsonProperty(@"prev_content")] T? PrevContent { get; set; }
     }
 
     public class RoomEvent<TRoomEventContent> : IRoomEvent<TRoomEventContent>
-        where TRoomEventContent : class, IRoomEventContent
+        where TRoomEventContent : class, IRoomContent
     {
         public string EventId { get; set; }
         public string Sender { get; set; }
@@ -98,7 +99,7 @@ namespace Matrix.Api.ClientServer.Events
     }
 
     public class StateEvent<TStateEventContent> : IStateEvent<TStateEventContent>
-        where TStateEventContent : class, IStateEventContent
+        where TStateEventContent : class, IStateContent
     {
         public string EventId { get; set; }
         public string Sender { get; set; }
@@ -125,13 +126,54 @@ namespace Matrix.Api.ClientServer.Events
         public EventKind EventKind { get; set; }
     }
 
-    public sealed class RoomEvent : RoomEvent<IRoomEventContent>
+    public sealed class RoomEvent : RoomEvent<IRoomContent>
     { }
 
-    public sealed class StateEvent : StateEvent<IStateEventContent>
+    public sealed class StateEvent : StateEvent<IStateContent>
     { }
 
-    public sealed class RedactionRoomEvent : IRoomEvent<RedactionEventContent>
+    public class PresenceEvent : IEvent
+    {
+        [JsonProperty(@"sender")]
+        public string Sender { get; }
+
+        [JsonProperty(@"content")]
+        public PresenceContent Content { get; set; }
+        public EventKind EventKind { get; set; }
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (PresenceContent)value;
+        }
+
+        public static string ToJsonString()
+        {
+            return @"m.presence";
+        }
+    }
+
+    public sealed class ReceiptEvent : IEvent
+    {
+        [JsonProperty(@"room_id")]
+        public string RoomId { get; }
+
+        [JsonProperty(@"content")]
+        public ReceiptContent Content { get; set; }
+        public EventKind EventKind { get; set; }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (ReceiptContent)value;
+        }
+
+        public static string ToJsonString()
+        {
+            return @"m.receipt";
+        }
+    }
+
+    public sealed class RedactionRoomEvent : IRoomEvent<RedactionContent>
     {
         [JsonProperty(@"redacts")]
         public string RedactedEventId { get; set; }
@@ -141,18 +183,18 @@ namespace Matrix.Api.ClientServer.Events
         public long OriginServerTimestamp { get; set; }
         public UnsignedData UnsignedData { get; set; }
         public string RoomId { get; set; }
-        public RedactionEventContent Content { get; set; }
+        public RedactionContent Content { get; set; }
 
         IEventContent IEvent.Content
         {
             get => Content;
-            set => Content = (RedactionEventContent) value;
+            set => Content = (RedactionContent) value;
         }
 
         public EventKind EventKind { get; set; }
     }
 
-    public sealed class MessageRoomEvent : IRoomEvent<IMessageEventContent>
+    public sealed class MessageRoomEvent : IRoomEvent<IMessageContent>
     {
         public string EventId { get; set; }
         public string Sender { get; set; }
@@ -161,9 +203,9 @@ namespace Matrix.Api.ClientServer.Events
         public string RoomId { get; set; }
 
 
-        public IMessageEventContent Content { get; set; }
+        public IMessageContent Content { get; set; }
 
-        IMessageEventContent IRoomEvent<IMessageEventContent>.Content
+        IMessageContent IRoomEvent<IMessageContent>.Content
         {
             get => Content;
             set => Content = value;
@@ -172,7 +214,7 @@ namespace Matrix.Api.ClientServer.Events
         IEventContent IEvent.Content
         {
             get => Content;
-            set => Content = (IMessageEventContent) value;
+            set => Content = (IMessageContent) value;
         }
 
         public EventKind EventKind { get; set; }

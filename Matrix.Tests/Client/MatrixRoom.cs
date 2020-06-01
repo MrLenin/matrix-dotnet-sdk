@@ -3,8 +3,8 @@ using NUnit.Framework;
 using Matrix;
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.RoomEventContent;
-using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.RoomContent;
+using Matrix.Api.ClientServer.StateContent;
 using Matrix.Client;
 using Matrix.Structures;
 using Moq;
@@ -26,9 +26,9 @@ namespace Matrix.Tests.Client
         public void FeedEventCreatorTest()
         {
             var room = new MatrixRoom(null, "!abc:localhost");
-            var creationEvent = new StateEvent<CreateEventContent>()
+            var creationEvent = new StateEvent<RoomCreateContent>()
             {
-                Content = new CreateEventContent()
+                Content = new RoomCreateContent()
                 {
                     Creator = "@Half-Shot:localhost",
                     Federate = false,
@@ -45,7 +45,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new NameEventContent() 
+                Content = new RoomNameContent() 
                 {
                     Name = "Snug Fox Party!"
                 }
@@ -61,7 +61,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new TopicEventContent()
+                Content = new RoomTopicContent()
                 {
                     Topic = "Foxes welcome!"
                 }
@@ -81,7 +81,7 @@ namespace Matrix.Tests.Client
             };
             var ev = new StateEvent()
             {
-                Content = new CanonicalAliasEventContent()
+                Content = new RoomCanonicalAliasContent()
                 {
                     Alias = "#restaurant:restaurant",
                     AlternateAliases = aliases
@@ -97,7 +97,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(null, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new JoinRuleEventContent()
+                Content = new RoomJoinRulesContent()
                 {
                     JoinRule = JoinRule.Public
                 }
@@ -113,14 +113,14 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom((MatrixApi) mock.Object, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join
                 }
             };
             room.FeedEvent(Utils.MockStateEvent(ev, "@foobar:localhost"));
             Assert.That(room.Members.ContainsKey("@foobar:localhost"), Is.True, "The member is in the room.");
-            Assert.That(room.Members.ContainsValue((MembershipEventContent)ev.Content), Is.True, "The member is in the room.");
+            Assert.That(room.Members.ContainsValue((RoomMembershipContent)ev.Content), Is.True, "The member is in the room.");
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom((MatrixApi) mock.Object, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join
                 }
@@ -141,7 +141,7 @@ namespace Matrix.Tests.Client
             room.FeedEvent(Utils.MockStateEvent(ev, "@foobar:localhost"));
             Assert.That(didFire, Is.False);
             Assert.That(room.Members.ContainsKey("@foobar:localhost"), Is.True, "The member is in the room.");
-            Assert.That(room.Members.ContainsValue((MembershipEventContent)ev.Content), Is.True, "The member is in the room.");
+            Assert.That(room.Members.ContainsValue((RoomMembershipContent)ev.Content), Is.True, "The member is in the room.");
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace Matrix.Tests.Client
 
             var ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join
                 }
@@ -170,7 +170,7 @@ namespace Matrix.Tests.Client
             Assert.That(didFire[0], Is.True, "Processed join");
             ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join,
                     DisplayName = "Foobar!"
@@ -181,7 +181,7 @@ namespace Matrix.Tests.Client
             Assert.That(didFire[1], Is.True, "Processed change");
             ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Leave
                 }
@@ -191,7 +191,7 @@ namespace Matrix.Tests.Client
 
             ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Invite
                 }
@@ -201,7 +201,7 @@ namespace Matrix.Tests.Client
 
             ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Ban
                 }
@@ -223,7 +223,7 @@ namespace Matrix.Tests.Client
             room.MessageMaximumAge = 0;
             var ev = new RoomEvent()
             {
-                Content = new TextMessageEventContent()
+                Content = new TextMessageContent()
                 {
                     MessageBody = ""
                 }
@@ -278,7 +278,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(mock.Object, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join
                 }
@@ -294,7 +294,7 @@ namespace Matrix.Tests.Client
             var room = new MatrixRoom(mock.Object, "!abc:localhost");
             var ev = new StateEvent()
             {
-                Content = new MembershipEventContent()
+                Content = new RoomMembershipContent()
                 {
                     MembershipState = MembershipState.Join
                 }

@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json.Linq;
 
-using static Matrix.Api.SpecificationContext;
+using static Matrix.Api.SpecContext;
 
 [assembly:NeutralResourcesLanguage("en")]
 
@@ -54,7 +54,7 @@ namespace Matrix
 
         private VersionsContext _versions;
         private readonly bool _isAppservice;
-        private AuthenticationContext _currentLogin;
+        private AuthContext _currentLogin;
 
         public MatrixApi(Uri url)
         {
@@ -123,12 +123,12 @@ namespace Matrix
             return _currentLogin.AccessToken;
         }
 
-        public virtual AuthenticationContext GetCurrentLogin()
+        public virtual AuthContext GetCurrentLogin()
         {
             return _currentLogin;
         }
 
-        public void SetLogin(AuthenticationContext response)
+        public void SetLogin(AuthContext response)
         {
             _currentLogin = response ?? throw new ArgumentNullException(nameof(response));
             UserId = response.UserId;
@@ -203,9 +203,9 @@ namespace Matrix
                 return;
             }
 
-            var clientServerContext = spec.SpecificationContext.Specification switch
+            var clientServerContext = spec.SpecContext.Specification switch
                 {
-                Specification.ClientServer => ClientServer(spec.SpecificationContext)
+                Specification.ClientServer => ClientServer(spec.SpecContext)
                 };
             
             // Ensure we support a version of the spec >= the min version and <= the last version.

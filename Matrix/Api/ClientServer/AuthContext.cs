@@ -5,7 +5,7 @@ namespace Matrix.Api.ClientServer
     /// <summary>
     /// Following http://matrix.org/docs/spec/r0.0.1/client_server.html#id76
     /// </summary>
-    public class AuthenticationContext
+    public class AuthContext
     {
         public string AccessToken { get; set; }
         public Uri Homeserver { get; set; }

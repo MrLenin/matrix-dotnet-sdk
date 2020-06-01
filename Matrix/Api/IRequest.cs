@@ -16,6 +16,6 @@ namespace Matrix.Api
         IEnumerable<byte> Content { get; }
 
         [JsonProperty(@"auth")]
-        AuthenticationRequest? Authentication { get; }
+        AuthRequest? Auth { get; }
     }
 }

@@ -10,9 +10,33 @@ using Matrix.Api.Versions;
 using Newtonsoft.Json;
 
 
-namespace Matrix.Api.ClientServer.RoomEventContent
+namespace Matrix.Api.ClientServer.EventContent
 {
-    public class AudioMessageEventContent : IMessageEventContent
+    public class PresenceContent : IEventContent
+    {
+        [JsonProperty(@"last_active_ago")]
+        public long LastActiveAgo { get; }
+        [JsonProperty(@"avatar_url")]
+        public Uri AvatarUrl { get; }
+        [JsonProperty(@"displayname")]
+        public string DisplayName { get; }
+        [JsonProperty(@"presence")]
+        public PresenceStatus PresenceStatus { get; }
+        [JsonProperty(@"currently_active")]
+        public bool CurrentlyActive { get; }
+        [JsonProperty(@"status_msg")]
+        public string StatusMessage { get; }
+    }
+
+    public class ReceiptContent : IEventContent
+    {
+        public Dictionary<string, ReceiptedEvent> ReceiptedEvents { get; set; }
+    }
+}
+
+namespace Matrix.Api.ClientServer.RoomContent
+{
+    public class AudioMessageContent : IMessageContent
     {
         [JsonProperty(@"info")] public AudioInfo AudioInfo { get; set; }
         [JsonProperty(@"url")] public Uri? Url { get; set; }
@@ -22,7 +46,7 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public MessageKind MessageKind => MessageKind.Audio;
     }
 
-    public class FileMessageEventContent : IMessageEventContent
+    public class FileMessageContent : IMessageContent
     {
         [JsonProperty(@"filename")] public string FileName { get; set; }
         [JsonProperty(@"info")] public FileInfo FileInfo { get; set; }
@@ -33,7 +57,7 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public MessageKind MessageKind => MessageKind.File;
     }
 
-    public class ImageMessageEventContent : IMessageEventContent
+    public class ImageMessageContent : IMessageContent
     {
         [JsonProperty(@"info")] public ImageInfo ImageInfo { get; set; }
         [JsonProperty(@"url")] public Uri Url { get; set; }
@@ -43,7 +67,7 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public MessageKind MessageKind => MessageKind.Image;
     }
 
-    public class LocationMessageEventContent : IMessageEventContent
+    public class LocationMessageContent : IMessageContent
     {
         [JsonProperty(@"geo_uri")] public Uri GeoUri { get; set; }
         [JsonProperty(@"info")] public LocationInfo? LocationInfo { get; set; }
@@ -52,7 +76,7 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public MessageKind MessageKind => MessageKind.Location;
     }
 
-    public class ServerNoticeMessageEventContent : IMessageEventContent
+    public class ServerNoticeMessageContent : IMessageContent
     {
         [JsonProperty(@"server_notice_type")] public string ServerNoticeKind { get; set; }
         [JsonProperty(@"admin_contact")] public string? AdminContact { get; set; }
@@ -62,7 +86,7 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public MessageKind MessageKind => MessageKind.ServerNotice;
     }
 
-    public class TextMessageEventContent : IMessageEventContent
+    public class TextMessageContent : IMessageContent
     {
         [JsonProperty(@"format")] public string Format { get; set; }
         [JsonProperty(@"formatted_body")] public string FormattedBody { get; set; }
@@ -71,24 +95,24 @@ namespace Matrix.Api.ClientServer.RoomEventContent
         public virtual MessageKind MessageKind => MessageKind.Text;
     }
 
-    public class EmoteMessageEventContent : TextMessageEventContent
+    public class EmoteMessageContent : TextMessageContent
     {
         public override MessageKind MessageKind => MessageKind.Emote;
     }
 
-    public class NoticeMessageEventContent : TextMessageEventContent
+    public class NoticeMessageContent : TextMessageContent
     {
         public override MessageKind MessageKind => MessageKind.Notice;
     }
 
-    public class RedactionEventContent : IRoomEventContent
+    public class RedactionContent : IRoomContent
     {
         [JsonProperty(@"reason")] public string Reason { get; set; }
     }
 
     [Obsolete(
         @"**NB: Usage of this event is discouraged in favour of the receipts module. **Most clients will not recognise this event**")]
-    public class MessageFeedbackEventContent : IRoomEventContent
+    public class MessageFeedbackContent : IRoomContent
     {
         public enum FeedbackKind
         {
@@ -101,65 +125,65 @@ namespace Matrix.Api.ClientServer.RoomEventContent
     }
 }
 
-namespace Matrix.Api.ClientServer.StateEventContent
+namespace Matrix.Api.ClientServer.StateContent
 {
-    public class AvatarEventContent : IStateEventContent
+    public class RoomAvatarContent : IStateContent
     {
         [JsonProperty(@"info")] public ImageInfo? ImageInfo { get; set; }
         [JsonProperty(@"url")] public Uri Url { get; set; }
     }
 
-    public class CanonicalAliasEventContent : IStateEventContent
+    public class RoomCanonicalAliasContent : IStateContent
     {
-        [JsonProperty(@"alias")] public string Alias { get; set; }
+        [JsonProperty(@"alias")] public string? Alias { get; set; }
         [JsonProperty(@"alt_aliases")] public IEnumerable<string> AlternateAliases { get; set; }
     }
 
-    public class CreateEventContent : IStateEventContent
+    public class RoomCreateContent : IStateContent
     {
         [JsonProperty(@"creator")] public string Creator { get; set; }
-        [JsonProperty(@"m.federate")] public bool Federate { get; set; }
+        [JsonProperty(@"m.federate")] public bool Federate { get; set; } = true;
         [JsonProperty(@"room_version")] public RoomsVersion RoomsVersion { get; set; } = RoomsVersion.V1;
         [JsonProperty(@"predecessor")] public RoomPredecessor? RoomPredecessor { get; set; }
     }
 
-    public class GuestAccessEventContent : IStateEventContent
+    public class RoomGuestAccessContent : IStateContent
     {
         [JsonProperty(@"guest_access")]
         public GuestAccessKind GuestAccessKind { get; set; } = GuestAccessKind.Forbidden;
     }
 
-    public class HistoryVisibilityEventContent : IStateEventContent
+    public class RoomHistoryVisibilityContent : IStateContent
     {
         [JsonProperty(@"history_visibility")] public HistoryVisibilityKind HistoryVisibilityKind { get; set; }
     }
 
-    public class JoinRuleEventContent : IStateEventContent
+    public class RoomJoinRulesContent : IStateContent
     {
         [JsonProperty(@"join_rule")] public JoinRule JoinRule { get; set; }
     }
 
-    public class MembershipEventContent : IStateEventContent
+    public class RoomMembershipContent : IStateContent
     {
         [JsonProperty(@"avatar_url")] public Uri? AvatarUrl { get; set; }
         [JsonProperty(@"displayname")] public string? DisplayName { get; set; }
         [JsonProperty(@"membership")] public MembershipState MembershipState { get; set; }
         [JsonProperty(@"is_direct")] public bool IsDirect { get; set; }
-        [JsonProperty(@"third_party_invite")] public ThirdPartyInvite ThirdPartyInvite { get; set; }
+        [JsonProperty(@"third_party_invite")] public ThirdPartyInvite? ThirdPartyInvite { get; set; }
 
     }
 
-    public class NameEventContent : IStateEventContent
+    public class RoomNameContent : IStateContent
     {
         [JsonProperty(@"name")] public string Name { get; set; }
     }
 
-    public class PinnedEventsEventContent : IStateEventContent
+    public class RoomPinnedEventsContent : IStateContent
     {
         [JsonProperty(@"pinned")] public IEnumerable<string> PinnedEvents { get; set; }
     }
 
-    public class PowerLevelsEventContent : IStateEventContent
+    public class RoomPowerLevelsContent : IStateContent
     {
         [JsonProperty(@"ban")] public int BanLevel { get; set; }
         [JsonProperty(@"events")] public IDictionary<string, int> EventLevels { get; set; }
@@ -173,14 +197,14 @@ namespace Matrix.Api.ClientServer.StateEventContent
         [JsonProperty(@"notifications")] public IDictionary<string, int> NotificationLevels { get; set; }
     }
 
-    public class ServerAclEventContent : IStateEventContent
+    public class RoomServerAclContent : IStateContent
     {
         [JsonProperty(@"allow_ip_literals")] public bool AllowIpLiterals { get; set; }
         [JsonProperty(@"allow")] public IEnumerable<string> AllowServers { get; set; }
         [JsonProperty(@"deny")] public IEnumerable<string> DenyServers { get; set; }
     }
 
-    public class ThirdPartyInviteEventContent : IStateEventContent
+    public class RoomThirdPartyInviteContent : IStateContent
     {
         [JsonProperty(@"display_name")] public string DisplayName { get; set; }
         [JsonProperty(@"key_validity_url")] public Uri KeyValidityUrl { get; set; }
@@ -188,13 +212,13 @@ namespace Matrix.Api.ClientServer.StateEventContent
         [JsonProperty(@"public_keys")] public IEnumerable<PublicKeys> PublicKeys { get; set; }
     }
 
-    public class TombstoneEventContent : IStateEventContent
+    public class RoomTombstoneContent : IStateContent
     {
         [JsonProperty(@"body")] public string Body { get; set; }
         [JsonProperty(@"replacement_room")] public string ReplacementRoomId { get; set; }
     }
 
-    public class TopicEventContent : IStateEventContent
+    public class RoomTopicContent : IStateContent
     {
         [JsonProperty(@"topic")] public string Topic { get; set; }
     }

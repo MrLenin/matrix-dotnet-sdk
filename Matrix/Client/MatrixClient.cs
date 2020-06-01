@@ -113,7 +113,7 @@ namespace Matrix.Client
             return Api.GetAccessToken();
         }
 
-        public AuthenticationContext GetCurrentLogin()
+        public AuthContext GetCurrentLogin()
         {
             return Api.GetCurrentLogin();
         }
@@ -150,14 +150,14 @@ namespace Matrix.Client
         /// <param name="username">Username</param>
         /// <param name="password">Password</param>
         /// <param name="deviceId">Device ID</param>
-        public AuthenticationContext LoginWithPassword(string username, string password, string deviceId = null)
+        public AuthContext LoginWithPassword(string username, string password, string deviceId = null)
         {
-            var userIdentifier = new UserAuthenticationIdentifier()
+            var userIdentifier = new UserAuthIdentifier()
             {
                 UserId = username
             };
-            var request = new PasswordAuthenticationRequest<UserAuthenticationIdentifier>(userIdentifier, password);
-            var authenticationContext = Api.LoginEndpoint.Login<AuthenticationResponse>(request);
+            var request = new PasswordAuthRequest<UserAuthIdentifier>(userIdentifier, password);
+            var authenticationContext = Api.LoginEndpoint.Login<AuthResponse>(request);
             Api.SetLogin(authenticationContext);
             return authenticationContext;
         }
@@ -179,8 +179,8 @@ namespace Matrix.Client
         /// <param name="token">Access Token</param>
         public void LoginWithToken(string token)
         {
-            var request = new TokenAuthenticationRequest(token);
-            var response = Api.LoginEndpoint.Login<AuthenticationResponse>(request);
+            var request = new TokenAuthRequest(token);
+            var response = Api.LoginEndpoint.Login<AuthResponse>(request);
             // Error testing goes here
             Api.Sync.ClientSync();
             Api.Sync.Start();
@@ -193,7 +193,7 @@ namespace Matrix.Client
         /// <param name="accessToken">Access token.</param>
         public void UseExistingToken(string userId, string accessToken)
         {
-            Api.SetLogin(new AuthenticationContext
+            Api.SetLogin(new AuthContext
             {
                 UserId = userId,
                 AccessToken = accessToken,

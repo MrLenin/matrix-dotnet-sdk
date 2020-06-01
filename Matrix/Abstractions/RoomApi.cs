@@ -53,7 +53,7 @@ namespace Matrix.Abstractions
 
         [MatrixSpec(ClientServerVersion.R001, "put-matrix-client-r0-rooms-roomid-state-eventtype")]
         public virtual string SendState<T>(string roomId, string type, T message, string key = "")
-            where T : class, IStateEventContent
+            where T : class, IStateContent
         {
             _matrixApi.ThrowIfNotSupported();
 
@@ -153,7 +153,7 @@ namespace Matrix.Abstractions
         }
 
         [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-rooms-roomid-state-eventtype")]
-        public IStateEventContent GetStateType(string roomId, string type)
+        public IStateContent GetStateType(string roomId, string type)
         {
             _matrixApi.ThrowIfNotSupported();
 

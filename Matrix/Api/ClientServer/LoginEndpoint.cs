@@ -23,19 +23,19 @@ namespace Matrix.Api.ClientServer
             _matrixApi.ThrowIfNotSupported();
 
             var response =  _matrixApi.Backend.
-                Request<AuthenticationResponse>(_apiPath, false);
+                Request<AuthResponse>(_apiPath, false);
             // Error testing goes here
             return response.AuthenticationMethods;
         }
 
         [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-login")]
-        public AuthenticationContext Login<T>(AuthenticationRequest authenticationRequest)
-            where T : AuthenticationResponse, new()
+        public AuthContext Login<T>(AuthRequest authRequest)
+            where T : AuthResponse, new()
         {
-            if (authenticationRequest == null) throw new ArgumentNullException(nameof(authenticationRequest));
+            if (authRequest == null) throw new ArgumentNullException(nameof(authRequest));
             _matrixApi.ThrowIfNotSupported();
-            var response = _matrixApi.Backend.Request<T>(authenticationRequest, false);
-            return new AuthenticationContext
+            var response = _matrixApi.Backend.Request<T>(authRequest, false);
+            return new AuthContext
             {
                 AccessToken = response.AccessToken,
                 DeviceId = response.DeviceId,

@@ -7,8 +7,8 @@ using Matrix.Api;
 using Matrix.Api.ClientServer;
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.RoomEventContent;
-using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.RoomContent;
+using Matrix.Api.ClientServer.StateContent;
 using Matrix.Api.ClientServer.Structures;
 using Matrix.Api.Versions;
 using Matrix.Json;
@@ -33,54 +33,54 @@ namespace Matrix.Tests
                 .Of(typeof(IEvent), @"type")
                 .RegisterSubtype(typeof(PresenceEvent), PresenceEvent.ToJsonString())
                 .RegisterSubtype(typeof(ReceiptEvent), ReceiptEvent.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<AvatarEventContent>), EventKind.RoomAvatar.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<CanonicalAliasEventContent>), EventKind.RoomCanonicalAlias.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<CreateEventContent>), EventKind.RoomCreate.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<GuestAccessEventContent>), EventKind.RoomGuestAccess.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<HistoryVisibilityEventContent>), EventKind.RoomHistoryVisibility.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<JoinRuleEventContent>), EventKind.RoomJoinRule.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<MembershipEventContent>), EventKind.RoomMembership.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomAvatarContent>), EventKind.RoomAvatar.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomCanonicalAliasContent>), EventKind.RoomCanonicalAlias.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomCreateContent>), EventKind.RoomCreate.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomGuestAccessContent>), EventKind.RoomGuestAccess.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomHistoryVisibilityContent>), EventKind.RoomHistoryVisibility.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomJoinRulesContent>), EventKind.RoomJoinRule.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomMembershipContent>), EventKind.RoomMembership.ToJsonString())
                 .RegisterSubtype(typeof(MessageRoomEvent), EventKind.RoomMessage.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<NameEventContent>), EventKind.RoomName.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<PinnedEventsEventContent>), EventKind.RoomPinnedEvents.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<PowerLevelsEventContent>), EventKind.RoomPowerLevels.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomNameContent>), EventKind.RoomName.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomPinnedEventsContent>), EventKind.RoomPinnedEvents.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomPowerLevelsContent>), EventKind.RoomPowerLevels.ToJsonString())
                 .RegisterSubtype(typeof(RedactionRoomEvent), EventKind.RoomRedaction.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<ServerAclEventContent>), EventKind.RoomServerAcl.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<ThirdPartyInviteEventContent>), EventKind.RoomThirdPartyInvite.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<TombstoneEventContent>), EventKind.RoomTombstone.ToJsonString())
-                .RegisterSubtype(typeof(StateEvent<TopicEventContent>), EventKind.RoomTopic.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomServerAclContent>), EventKind.RoomServerAcl.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomThirdPartyInviteContent>), EventKind.RoomThirdPartyInvite.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomTombstoneContent>), EventKind.RoomTombstone.ToJsonString())
+                .RegisterSubtype(typeof(StateEvent<RoomTopicContent>), EventKind.RoomTopic.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
-                .Of(typeof(IMessageEventContent), @"msgtype")
-                .RegisterSubtype(typeof(AudioMessageEventContent), MessageKind.Audio.ToJsonString())
-                .RegisterSubtype(typeof(EmoteMessageEventContent), MessageKind.Emote.ToJsonString())
-                .RegisterSubtype(typeof(FileMessageEventContent), MessageKind.File.ToJsonString())
-                .RegisterSubtype(typeof(ImageMessageEventContent), MessageKind.Image.ToJsonString())
-                .RegisterSubtype(typeof(LocationMessageEventContent), MessageKind.Location.ToJsonString())
-                .RegisterSubtype(typeof(NoticeMessageEventContent), MessageKind.Notice.ToJsonString())
-                .RegisterSubtype(typeof(ServerNoticeMessageEventContent), MessageKind.ServerNotice.ToJsonString())
-                .RegisterSubtype(typeof(TextMessageEventContent), MessageKind.Text.ToJsonString())
+                .Of(typeof(IMessageContent), @"msgtype")
+                .RegisterSubtype(typeof(AudioMessageContent), MessageKind.Audio.ToJsonString())
+                .RegisterSubtype(typeof(EmoteMessageContent), MessageKind.Emote.ToJsonString())
+                .RegisterSubtype(typeof(FileMessageContent), MessageKind.File.ToJsonString())
+                .RegisterSubtype(typeof(ImageMessageContent), MessageKind.Image.ToJsonString())
+                .RegisterSubtype(typeof(LocationMessageContent), MessageKind.Location.ToJsonString())
+                .RegisterSubtype(typeof(NoticeMessageContent), MessageKind.Notice.ToJsonString())
+                .RegisterSubtype(typeof(ServerNoticeMessageContent), MessageKind.ServerNotice.ToJsonString())
+                .RegisterSubtype(typeof(TextMessageContent), MessageKind.Text.ToJsonString())
                 //.RegisterSubtype(typeof(VideoMessageEventContent), MessageKind.Video.ToJsonString())
                 .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
                 .Of(typeof(IStrippedState), @"type")
-                .RegisterSubtype(typeof(StrippedState<AvatarEventContent>), EventKind.RoomAvatar.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<CanonicalAliasEventContent>), EventKind.RoomCanonicalAlias.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<CreateEventContent>), EventKind.RoomCreate.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<GuestAccessEventContent>), EventKind.RoomGuestAccess.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<HistoryVisibilityEventContent>), EventKind.RoomHistoryVisibility.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<JoinRuleEventContent>), EventKind.RoomJoinRule.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<MembershipEventContent>), EventKind.RoomMembership.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<NameEventContent>), EventKind.RoomName.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<PinnedEventsEventContent>), EventKind.RoomPinnedEvents.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<PowerLevelsEventContent>), EventKind.RoomPowerLevels.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<ServerAclEventContent>), EventKind.RoomServerAcl.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<ThirdPartyInviteEventContent>), EventKind.RoomThirdPartyInvite.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<TombstoneEventContent>), EventKind.RoomTombstone.ToJsonString())
-                .RegisterSubtype(typeof(StrippedState<TopicEventContent>), EventKind.RoomTopic.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomAvatarContent>), EventKind.RoomAvatar.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomCanonicalAliasContent>), EventKind.RoomCanonicalAlias.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomCreateContent>), EventKind.RoomCreate.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomGuestAccessContent>), EventKind.RoomGuestAccess.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomHistoryVisibilityContent>), EventKind.RoomHistoryVisibility.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomJoinRulesContent>), EventKind.RoomJoinRule.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomMembershipContent>), EventKind.RoomMembership.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomNameContent>), EventKind.RoomName.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomPinnedEventsContent>), EventKind.RoomPinnedEvents.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomPowerLevelsContent>), EventKind.RoomPowerLevels.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomServerAclContent>), EventKind.RoomServerAcl.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomThirdPartyInviteContent>), EventKind.RoomThirdPartyInvite.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomTombstoneContent>), EventKind.RoomTombstone.ToJsonString())
+                .RegisterSubtype(typeof(StrippedState<RoomTopicContent>), EventKind.RoomTopic.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
 
@@ -98,45 +98,45 @@ namespace Matrix.Tests
 
             //_jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
             //    .Of(typeof(IEventContent))
-            //    .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
-            //    .Build());
-
-            //_jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
-            //    .Of(typeof(IRoomEventContent))
-            //    .RegisterSubtypeWithProperty(typeof(PresenceEventContent), @"presence")
+            //    .RegisterSubtypeWithProperty(typeof(PresenceContent), @"presence")
             //    .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
-                .Of(typeof(IStateEventContent))
-                .RegisterSubtypeWithProperty(typeof(CanonicalAliasEventContent), @"alias")
-                .RegisterSubtypeWithProperty(typeof(CanonicalAliasEventContent), @"alt_aliases")
-                .RegisterSubtypeWithProperty(typeof(AvatarEventContent), @"url")
-                .RegisterSubtypeWithProperty(typeof(CreateEventContent), @"creator")
-                .RegisterSubtypeWithProperty(typeof(GuestAccessEventContent), @"guest_access")
-                .RegisterSubtypeWithProperty(typeof(HistoryVisibilityEventContent), @"history_visibility")
-                .RegisterSubtypeWithProperty(typeof(JoinRuleEventContent), @"join_rule")
-                .RegisterSubtypeWithProperty(typeof(MembershipEventContent), @"membership")
-                .RegisterSubtypeWithProperty(typeof(NameEventContent), @"name")
-                .RegisterSubtypeWithProperty(typeof(PinnedEventsEventContent), @"pinned")
-                .RegisterSubtypeWithProperty(typeof(RedactionEventContent), @"redacts")
-                .RegisterSubtypeWithProperty(typeof(ThirdPartyInviteEventContent), @"key_validity_url")
-                .RegisterSubtypeWithProperty(typeof(TombstoneEventContent), @"replacement_room")
-                .RegisterSubtypeWithProperty(typeof(TopicEventContent), @"topic")
+                .Of(typeof(IRoomContent))
+                .RegisterSubtypeWithProperty(typeof(RedactionContent), @"reason")
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+                .Of(typeof(IStateContent))
+                .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alias")
+                .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alt_aliases")
+                .RegisterSubtypeWithProperty(typeof(RoomAvatarContent), @"url")
+                .RegisterSubtypeWithProperty(typeof(RoomCreateContent), @"creator")
+                .RegisterSubtypeWithProperty(typeof(RoomGuestAccessContent), @"guest_access")
+                .RegisterSubtypeWithProperty(typeof(RoomHistoryVisibilityContent), @"history_visibility")
+                .RegisterSubtypeWithProperty(typeof(RoomJoinRulesContent), @"join_rule")
+                .RegisterSubtypeWithProperty(typeof(RoomMembershipContent), @"membership")
+                .RegisterSubtypeWithProperty(typeof(RoomNameContent), @"name")
+                .RegisterSubtypeWithProperty(typeof(RoomPinnedEventsContent), @"pinned")
+                .RegisterSubtypeWithProperty(typeof(RedactionContent), @"redacts")
+                .RegisterSubtypeWithProperty(typeof(RoomThirdPartyInviteContent), @"key_validity_url")
+                .RegisterSubtypeWithProperty(typeof(RoomTombstoneContent), @"replacement_room")
+                .RegisterSubtypeWithProperty(typeof(RoomTopicContent), @"topic")
                 .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
                 .Of(typeof(IRequest), @"type")
-                .RegisterSubtype(typeof(PasswordAuthenticationRequest<>), AuthenticationKind.Password.ToJsonString())
-                .RegisterSubtype(typeof(TokenAuthenticationRequest), AuthenticationKind.Token.ToJsonString())
+                .RegisterSubtype(typeof(PasswordAuthRequest<>), AuthenticationKind.Password.ToJsonString())
+                .RegisterSubtype(typeof(TokenAuthRequest), AuthenticationKind.Token.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
-                .Of(typeof(IAuthenticationIdentifier), @"type")
-                .RegisterSubtype(typeof(UserAuthenticationIdentifier), UserAuthenticationIdentifier.ToJsonString())
-                .RegisterSubtype(typeof(ThirdPartyAuthenticationIdentifier),
-                    ThirdPartyAuthenticationIdentifier.ToJsonString())
-                .RegisterSubtype(typeof(PhoneAuthenticationIdentifier), PhoneAuthenticationIdentifier.ToJsonString())
+                .Of(typeof(IAuthIdentifier), @"type")
+                .RegisterSubtype(typeof(UserAuthIdentifier), UserAuthIdentifier.ToJsonString())
+                .RegisterSubtype(typeof(ThirdPartyAuthIdentifier),
+                    ThirdPartyAuthIdentifier.ToJsonString())
+                .RegisterSubtype(typeof(PhoneAuthIdentifier), PhoneAuthIdentifier.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
         }
@@ -170,9 +170,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomAvatar));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<AvatarEventContent>());
-            var stateEvent = @event as StateEvent<AvatarEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomAvatarContent>());
+            var stateEvent = @event as StateEvent<RoomAvatarContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Url, Is.EqualTo(new Uri(@"mxc://example.org/JWEIFJgwEIhweiWJE")));
             Assert.That(stateEvent.Content.ImageInfo.HasValue, Is.True);
@@ -216,9 +216,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomCanonicalAlias));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<CanonicalAliasEventContent>());
-            var stateEvent = @event as StateEvent<CanonicalAliasEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomCanonicalAliasContent>());
+            var stateEvent = @event as StateEvent<RoomCanonicalAliasContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Alias, Is.EqualTo(@"#somewhere:localhost"));
             Assert.That(stateEvent.Content.AlternateAliases, Is.EqualTo(new string[] {@"#somewhere:example.org", @"#myroom:example.com"}));
@@ -260,9 +260,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomCreate));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<CreateEventContent>());
-            var stateEvent = @event as StateEvent<CreateEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomCreateContent>());
+            var stateEvent = @event as StateEvent<RoomCreateContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Creator, Is.EqualTo(@"@example:example.org"));
             Assert.That(stateEvent.Content.Federate, Is.True);
@@ -302,9 +302,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomGuestAccess));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<GuestAccessEventContent>());
-            var stateEvent = @event as StateEvent<GuestAccessEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomGuestAccessContent>());
+            var stateEvent = @event as StateEvent<RoomGuestAccessContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.GuestAccessKind, Is.EqualTo(GuestAccessKind.CanJoin));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -339,9 +339,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomHistoryVisibility));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<HistoryVisibilityEventContent>());
-            var stateEvent = @event as StateEvent<HistoryVisibilityEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomHistoryVisibilityContent>());
+            var stateEvent = @event as StateEvent<RoomHistoryVisibilityContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.HistoryVisibilityKind, Is.EqualTo(HistoryVisibilityKind.Shared));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -376,9 +376,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomJoinRule));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<JoinRuleEventContent>());
-            var stateEvent = @event as StateEvent<JoinRuleEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomJoinRulesContent>());
+            var stateEvent = @event as StateEvent<RoomJoinRulesContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.JoinRule, Is.EqualTo(JoinRule.Public));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -433,9 +433,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMembership));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<MembershipEventContent>());
-            var stateEvent = @event as StateEvent<MembershipEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomMembershipContent>());
+            var stateEvent = @event as StateEvent<RoomMembershipContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.AvatarUrl, Is.EqualTo(new Uri(@"mxc://example.org/SEsfnsuifSDFSSEF")));
             Assert.That(stateEvent.Content.DisplayName, Is.EqualTo(@"Alice Margatroid"));
@@ -446,11 +446,11 @@ namespace Matrix.Tests
             {
                 switch (state.Content)
                 {
-                    case NameEventContent nameEventContent:
+                    case RoomNameContent nameEventContent:
                         Assert.That(nameEventContent.Name, Is.EqualTo(@"Example Room"));
                         ++count;
                         break;
-                    case JoinRuleEventContent joinRuleEventContent:
+                    case RoomJoinRulesContent joinRuleEventContent:
                         Assert.That(joinRuleEventContent.JoinRule, Is.EqualTo(JoinRule.Invite));
                         ++count;
                         break;
@@ -470,80 +470,69 @@ namespace Matrix.Tests
             Assert.That(stateEvent.UnsignedData.Age, Is.EqualTo(1234));
         }
 
-        // TODO: Implement encryption stuff
-        //        [Test]
-        //        public void MembershipStateEventTest2()
-        //        {
-        //            const string json =
-        //@"{
-        //    ""content"": {
-        //        ""avatar_url"": ""mxc://example.org/SEsfnsuifSDFSSEF"",
-        //        ""displayname"": ""Alice Margatroid"",
-        //        ""membership"": ""join"",
-        //        ""third_party_invite"": {
-        //            ""display_name"": ""alice"",
-        //            ""signed"": {
-        //                ""mxid"": ""@alice:example.org"",
-        //                ""signatures"": {
-        //                    ""magic.forest"": {
-        //                        ""ed25519:3"": ""fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg""
-        //                    }
-        //                },
-        //                ""token"": ""abc123""
-        //            }
-        //        }
-        //    },
-        //    ""event_id"": ""$143273582443PhrSn:example.org"",
-        //    ""origin_server_ts"": 1432735824653,
-        //    ""room_id"": ""!jEsUZKDJdhlrceRyVU:example.org"",
-        //    ""sender"": ""@example:example.org"",
-        //    ""state_key"": ""@alice:example.org"",
-        //    ""type"": ""m.room.member"",
-        //    ""unsigned"": {
-        //        ""age"": 1234
-        //    }
-        //}";
-        //            using var jsonReader = new JTokenReader(JToken.Parse(json));
-        //            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
-        //            Assert.That(@event, Is.Not.Null);
-        //            Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMembership));
-        //            Assert.That(@event.Content, Is.Not.Null);
-        //            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-        //            Assert.That(@event.Content, Is.TypeOf<MembershipEventContent>());
-        //            var stateEvent = @event as StateEvent<MembershipEventContent>;
-        //            Assert.That(stateEvent, Is.Not.Null);
-        //            Assert.That(stateEvent.Content.AvatarUrl, Is.EqualTo(new Uri(@"mxc://example.org/SEsfnsuifSDFSSEF")));
-        //            Assert.That(stateEvent.Content.DisplayName, Is.EqualTo(@"Alice Margatroid"));
-        //            Assert.That(stateEvent.Content.MembershipState, Is.EqualTo(MembershipState.Join));
-        //            Assert.That(stateEvent.Content.UnsignedData.InviteRoomStates.Count(), Is.EqualTo(2));
-        //            var count = 0;
-        //            foreach (var state in stateEvent.Content.UnsignedData.InviteRoomStates)
-        //            {
-        //                switch (state.Content)
-        //                {
-        //                    case NameEventContent nameEventContent:
-        //                        Assert.That(nameEventContent.Name, Is.EqualTo(@"Example Room"));
-        //                        ++count;
-        //                        break;
-        //                    case JoinRuleEventContent joinRuleEventContent:
-        //                        Assert.That(joinRuleEventContent.JoinRule, Is.EqualTo(JoinRule.Invite));
-        //                        ++count;
-        //                        break;
-        //                    default:
-        //                        Assert.Fail(@"Reached unexpected event content type.");
-        //                        break;
-        //                };
-        //                Assert.That(state.Sender, Is.EqualTo(@"@bob:example.org"));
-        //            }
-        //            Assert.That(count, Is.EqualTo(2));
-        //            Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
-        //            Assert.That(stateEvent.OriginServerTimestamp, Is.EqualTo(1432735824653));
-        //            Assert.That(stateEvent.RoomId, Is.EqualTo(@"!jEsUZKDJdhlrceRyVU:example.org"));
-        //            Assert.That(stateEvent.Sender, Is.EqualTo(@"@example:example.org"));
-        //            Assert.That(stateEvent.StateKey, Is.EqualTo(@"@alice:example.org"));
-        //            Assert.That(stateEvent.UnsignedData, Is.Not.Null);
-        //            Assert.That(stateEvent.UnsignedData.Age, Is.EqualTo(1234));
-        //        }
+        [Test]
+        public void ThirdPartInviteMembershipStateEventTest()
+        {
+            const string json =
+@"{
+    ""content"": {
+        ""avatar_url"": ""mxc://example.org/SEsfnsuifSDFSSEF"",
+        ""displayname"": ""Alice Margatroid"",
+        ""membership"": ""join"",
+        ""third_party_invite"": {
+            ""display_name"": ""alice"",
+            ""signed"": {
+                ""mxid"": ""@alice:example.org"",
+                ""signatures"": {
+                    ""magic.forest"": {
+                        ""ed25519:3"": ""fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg""
+                    }
+                },
+                ""token"": ""abc123""
+            }
+        }
+    },
+    ""event_id"": ""$143273582443PhrSn:example.org"",
+    ""origin_server_ts"": 1432735824653,
+    ""room_id"": ""!jEsUZKDJdhlrceRyVU:example.org"",
+    ""sender"": ""@example:example.org"",
+    ""state_key"": ""@alice:example.org"",
+    ""type"": ""m.room.member"",
+    ""unsigned"": {
+        ""age"": 1234
+    }
+}";
+            using var jsonReader = new JTokenReader(JToken.Parse(json));
+            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            Assert.That(@event, Is.Not.Null);
+            Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMembership));
+            Assert.That(@event.Content, Is.Not.Null);
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomMembershipContent>());
+            var stateEvent = @event as StateEvent<RoomMembershipContent>;
+            Assert.That(stateEvent, Is.Not.Null);
+            Assert.That(stateEvent.Content.AvatarUrl, Is.EqualTo(new Uri(@"mxc://example.org/SEsfnsuifSDFSSEF")));
+            Assert.That(stateEvent.Content.DisplayName, Is.EqualTo(@"Alice Margatroid"));
+            Assert.That(stateEvent.Content.MembershipState, Is.EqualTo(MembershipState.Join));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.HasValue, Is.True);
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.DisplayName, Is.EqualTo(@"alice"));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.InvitedUserId, Is.EqualTo(@"@alice:example.org"));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Token, Is.EqualTo(@"abc123"));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Signatures.Count, Is.EqualTo(1));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Signatures.ContainsKey(@"magic.forest"), Is.True);
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Signatures[@"magic.forest"].Count,
+                Is.EqualTo(1));
+            Assert.That(stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Signatures[@"magic.forest"].ContainsKey(@"ed25519:3"), Is.True);
+            Assert.That((stateEvent.Content.ThirdPartyInvite.Value.SignedContent.Signatures[@"magic.forest"])[@"ed25519:3"], 
+                Is.EqualTo(@"fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg"));
+            Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
+            Assert.That(stateEvent.OriginServerTimestamp, Is.EqualTo(1432735824653));
+            Assert.That(stateEvent.RoomId, Is.EqualTo(@"!jEsUZKDJdhlrceRyVU:example.org"));
+            Assert.That(stateEvent.Sender, Is.EqualTo(@"@example:example.org"));
+            Assert.That(stateEvent.StateKey, Is.EqualTo(@"@alice:example.org"));
+            Assert.That(stateEvent.UnsignedData, Is.Not.Null);
+            Assert.That(stateEvent.UnsignedData.Age, Is.EqualTo(1234));
+        }
 
         [Test]
         public void NameStateEventTest()
@@ -568,9 +557,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomName));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<NameEventContent>());
-            var stateEvent = @event as StateEvent<NameEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomNameContent>());
+            var stateEvent = @event as StateEvent<RoomNameContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Name, Is.EqualTo(@"The room name"));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -607,9 +596,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomPinnedEvents));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<PinnedEventsEventContent>());
-            var stateEvent = @event as StateEvent<PinnedEventsEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomPinnedEventsContent>());
+            var stateEvent = @event as StateEvent<RoomPinnedEventsContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.PinnedEvents, Is.EqualTo(new string[] {@"$someevent:example.org"}));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -660,9 +649,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomPowerLevels));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<PowerLevelsEventContent>());
-            var stateEvent = @event as StateEvent<PowerLevelsEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomPowerLevelsContent>());
+            var stateEvent = @event as StateEvent<RoomPowerLevelsContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.BanLevel, Is.EqualTo(50));
             Assert.That(stateEvent.Content.EventLevels.ContainsKey(@"m.room.name"), Is.True);
@@ -718,9 +707,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomServerAcl));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<ServerAclEventContent>());
-            var stateEvent = @event as StateEvent<ServerAclEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomServerAclContent>());
+            var stateEvent = @event as StateEvent<RoomServerAclContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.AllowIpLiterals, Is.EqualTo(false));
             Assert.That(stateEvent.Content.AllowServers.Contains(@"*"), Is.True);
@@ -766,9 +755,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomThirdPartyInvite));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<ThirdPartyInviteEventContent>());
-            var stateEvent = @event as StateEvent<ThirdPartyInviteEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomThirdPartyInviteContent>());
+            var stateEvent = @event as StateEvent<RoomThirdPartyInviteContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.DisplayName, Is.EqualTo(@"Alice Margatroid"));
             Assert.That(stateEvent.Content.KeyValidityUrl, Is.EqualTo(new Uri("https://magic.forest/verifykey")));
@@ -815,9 +804,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomTombstone));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<TombstoneEventContent>());
-            var stateEvent = @event as StateEvent<TombstoneEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomTombstoneContent>());
+            var stateEvent = @event as StateEvent<RoomTombstoneContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Body, Is.EqualTo(@"This room has been replaced"));
             Assert.That(stateEvent.Content.ReplacementRoomId, Is.EqualTo(@"!newroom:example.org"));
@@ -853,9 +842,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomTopic));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IStateEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<TopicEventContent>());
-            var stateEvent = @event as StateEvent<TopicEventContent>;
+            Assert.That(@event.Content, Is.InstanceOf<IStateContent>());
+            Assert.That(@event.Content, Is.TypeOf<RoomTopicContent>());
+            var stateEvent = @event as StateEvent<RoomTopicContent>;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Topic, Is.EqualTo(@"A room topic"));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
@@ -892,9 +881,9 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMessage));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IMessageEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<TextMessageEventContent>());
-            RoomEvent<TextMessageEventContent> stateEvent = @event as MessageRoomEvent;
+            Assert.That(@event.Content, Is.InstanceOf<IMessageContent>());
+            Assert.That(@event.Content, Is.TypeOf<TextMessageContent>());
+            RoomEvent<TextMessageContent> stateEvent = @event as MessageRoomEvent;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.MessageKind, Is.EqualTo(MessageKind.Text));
             Assert.That(stateEvent.Content.MessageBody, Is.EqualTo(@"This is an example text message"));
@@ -931,8 +920,8 @@ namespace Matrix.Tests
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomRedaction));
             Assert.That(@event.Content, Is.Not.Null);
-            Assert.That(@event.Content, Is.InstanceOf<IRoomEventContent>());
-            Assert.That(@event.Content, Is.TypeOf<RedactionEventContent>());
+            Assert.That(@event.Content, Is.InstanceOf<IRoomContent>());
+            Assert.That(@event.Content, Is.TypeOf<RedactionContent>());
             var stateEvent = @event as RedactionRoomEvent;
             Assert.That(stateEvent, Is.Not.Null);
             Assert.That(stateEvent.Content.Reason, Is.EqualTo(@"Spamming"));

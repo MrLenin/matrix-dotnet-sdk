@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.StateContent;
+using Matrix.Api.ClientServer.Structures;
 using Matrix.Properties;
 using Matrix.Structures;
 
@@ -20,7 +21,7 @@ namespace Matrix.Client
 
     public delegate void MatrixRoomTypingDelegate(IEnumerable<string> userIds);
 
-    public delegate void RoomMembershipEventDelegate(string userId, MembershipEventContent roomMembershipEventContent);
+    public delegate void RoomMembershipEventDelegate(string userId, RoomMembershipContent roomMembershipContent);
 
     /// <summary>
     /// A room that the user has joined on Matrix.
@@ -38,7 +39,7 @@ namespace Matrix.Client
         public string Topic { get; private set; }
         public string Creator { get; private set; }
 
-        public SortedDictionary<string, MembershipEventContent> Members { get; private set; }
+        public SortedDictionary<string, RoomMembershipContent> Members { get; private set; }
 
         /// <summary>
         /// Should this Matrix Room federate with other home servers?
@@ -141,7 +142,7 @@ namespace Matrix.Client
             Id = roomId;
             _api = api;
             _jsonSerializer = new JsonSerializer();
-            Members = new SortedDictionary<string, MembershipEventContent>();
+            Members = new SortedDictionary<string, RoomMembershipContent>();
         }
 
         /// <summary>
@@ -159,28 +160,28 @@ namespace Matrix.Client
 
             switch (@event)
             {
-                case StateEvent<AvatarEventContent> avatarStateEvent:
+                case StateEvent<RoomAvatarContent> avatarStateEvent:
                     break;
-                case StateEvent<CanonicalAliasEventContent> canonicalAliasStateEvent:
+                case StateEvent<RoomCanonicalAliasContent> canonicalAliasStateEvent:
                     CanonicalAlias = canonicalAliasStateEvent.Content.Alias;
                     Aliases = canonicalAliasStateEvent.Content.AlternateAliases;
                     break;
 
-                case StateEvent<CreateEventContent> createStateEvent:
+                case StateEvent<RoomCreateContent> createStateEvent:
                     Creator = createStateEvent.Content.Creator;
                     ShouldFederate = createStateEvent.Content.Federate;
                     break;
 
-                case StateEvent<GuestAccessEventContent> guestAccessStateEvent:
+                case StateEvent<RoomGuestAccessContent> guestAccessStateEvent:
                     break;
-                case StateEvent<HistoryVisibilityEventContent> historyVisibilityStateEvent:
+                case StateEvent<RoomHistoryVisibilityContent> historyVisibilityStateEvent:
                     break;
 
-                case StateEvent<JoinRuleEventContent> joinRuleStateEvent:
+                case StateEvent<RoomJoinRulesContent> joinRuleStateEvent:
                     JoinRule = joinRuleStateEvent.Content.JoinRule;
                     break;
 
-                case StateEvent<MembershipEventContent> membershipStateEvent:
+                case StateEvent<RoomMembershipContent> membershipStateEvent:
                     if (!_api.Sync.IsInitialSync)
                     {
                         //Handle new join,leave etc
@@ -213,19 +214,19 @@ namespace Matrix.Client
                     Members[membershipStateEvent.StateKey] = membershipStateEvent.Content;
                     break;
 
-                case StateEvent<NameEventContent> nameStateEvent:
+                case StateEvent<RoomNameContent> nameStateEvent:
                     break;
-                case StateEvent<PinnedEventsEventContent> pinnedEventsStateEvent:
+                case StateEvent<RoomPinnedEventsContent> pinnedEventsStateEvent:
                     break;
-                case StateEvent<PowerLevelsEventContent> powerLevelsStateEvent:
+                case StateEvent<RoomPowerLevelsContent> powerLevelsStateEvent:
                     break;
-                case StateEvent<ServerAclEventContent> serverAclStateEvent:
+                case StateEvent<RoomServerAclContent> serverAclStateEvent:
                     break;
-                case StateEvent<ThirdPartyInviteEventContent> thirdPartyInviteStateEvent:
+                case StateEvent<RoomThirdPartyInviteContent> thirdPartyInviteStateEvent:
                     break;
-                case StateEvent<TombstoneEventContent> tombstoneStateEvent:
+                case StateEvent<RoomTombstoneContent> tombstoneStateEvent:
                     break;
-                case StateEvent<TopicEventContent> topicStateEvent:
+                case StateEvent<RoomTopicContent> topicStateEvent:
                     break;
             }
 //            if (t == typeof(MatrixMRoomCreate))
@@ -276,7 +277,7 @@ namespace Matrix.Client
         /// <param name="newName">New name.</param>
         public void SetName(string newName)
         {
-            var nameEvent = new NameEventContent()
+            var nameEvent = new RoomNameContent()
             {
                 Name = newName
             };
@@ -291,7 +292,7 @@ namespace Matrix.Client
         /// <param name="newTopic">New topic.</param>
         public void SetTopic(string newTopic)
         {
-            var topicEvent = new TopicEventContent()
+            var topicEvent = new RoomTopicContent()
             {
                 Topic = newTopic
             };
@@ -346,7 +347,7 @@ namespace Matrix.Client
         /// <param name="key">Key.</param>
         /// <returns>Event ID of the sent message</returns>
         public string SendState<T>(T stateMessage, string type, string key = "")
-            where T : class, IStateEventContent
+            where T : class, IStateContent
         {
             return _api.Room.SendState<T>(Id, type, stateMessage, key);
         }
@@ -366,7 +367,7 @@ namespace Matrix.Client
         /// <remarks> You must set all the values in powerlevels.</remarks>
         /// </summary>
         /// <param name="powerlevels">Powerlevels.</param>
-        public void ApplyNewPowerLevels(PowerLevelsEventContent powerlevels)
+        public void ApplyNewPowerLevels(RoomPowerLevelsContent powerlevels)
         {
             _api.Room.SendState(Id, "m.room.power_levels", powerlevels);
         }
@@ -460,7 +461,7 @@ namespace Matrix.Client
             _api.Room.PutTag(Id, tagName, order);
         }
 
-        public IStateEventContent GetStateEvent(string type)
+        public IStateContent GetStateEvent(string type)
         {
             var evContent = _api.Room.GetStateType(Id, type);
             var fakeEvent = new StateEvent() {Content = evContent};

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
-using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.StateContent;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -74,6 +74,16 @@ namespace Matrix.Api.ClientServer
             [JsonProperty(@"public_key")] public string PublicKey { get; set; }
         }
 
+        public struct ReceiptedEvent
+        {
+            public Dictionary<string, Receipt> ReceiptedUsers { get; private set; }
+        }
+
+        public struct Receipt
+        {
+            public long TimeStamp { get; set; }
+        }
+
         public struct RoomPredecessor
         {
             [JsonProperty(@"room_id")] public string RoomId { get; set; }
@@ -82,18 +92,18 @@ namespace Matrix.Api.ClientServer
 
         public interface IStrippedState
         {
-            [JsonProperty(@"content")] public IStateEventContent Content { get; set; }
+            [JsonProperty(@"content")] public IStateContent Content { get; set; }
             [JsonProperty(@"state_key")] public string StateKey { get; set; }
             [JsonProperty(@"sender")] public string Sender { get; set; }
             [JsonProperty(@"type")] public EventKind EventKind { get; set; }
         }
 
         public class StrippedState<TStateEventContent> : IStrippedState
-            where TStateEventContent : class, IStateEventContent
+            where TStateEventContent : class, IStateContent
         {
             public TStateEventContent Content { get; set; }
 
-            IStateEventContent IStrippedState.Content
+            IStateContent IStrippedState.Content
             {
                 get => Content;
                 set => Content = (TStateEventContent) value;
@@ -104,10 +114,20 @@ namespace Matrix.Api.ClientServer
             public EventKind EventKind { get; set; }
         }
 
+        public struct ThirdPartyInviteSigned
+        {
+            [JsonProperty(@"mxid")]
+            public string InvitedUserId { get; set; }
+            [JsonProperty(@"token")]
+            public string Token { get; set; }
+            [JsonProperty(@"signatures")]
+            public IDictionary<string, IDictionary<string, string>> Signatures { get; set; }
+        }
+
         public struct ThirdPartyInvite
         {
             [JsonProperty(@"display_name")] public string DisplayName { get; set; }
-            [JsonProperty(@"signed")] public object SignedContent { get; set; }
+            [JsonProperty(@"signed")] public ThirdPartyInviteSigned SignedContent { get; set; }
         }
 
         public class UnsignedData
@@ -118,12 +138,12 @@ namespace Matrix.Api.ClientServer
             [JsonProperty(@"transaction_id")] public string? TransactionId { get; set; }
         }
 
-        public class UserAuthenticationIdentifier : IAuthenticationIdentifier
+        public class UserAuthIdentifier : IAuthIdentifier
         {
             [JsonProperty(@"user")] public string UserId { get; set; }
 
-            public UserAuthenticationIdentifier() => UserId = "";
-            public UserAuthenticationIdentifier(string userId) => UserId = userId;
+            public UserAuthIdentifier() => UserId = "";
+            public UserAuthIdentifier(string userId) => UserId = userId;
 
             public static string ToJsonString()
             {
@@ -131,12 +151,12 @@ namespace Matrix.Api.ClientServer
             }
         }
 
-        public class ThirdPartyAuthenticationIdentifier : IAuthenticationIdentifier
+        public class ThirdPartyAuthIdentifier : IAuthIdentifier
         {
             [JsonProperty(@"medium`")] public string Medium { get; }
             [JsonProperty(@"address")] public string Address { get; }
 
-            public ThirdPartyAuthenticationIdentifier(string medium, string address)
+            public ThirdPartyAuthIdentifier(string medium, string address)
             {
                 Medium = medium;
                 Address = address;
@@ -148,12 +168,12 @@ namespace Matrix.Api.ClientServer
             }
         }
 
-        public class PhoneAuthenticationIdentifier : IAuthenticationIdentifier
+        public class PhoneAuthIdentifier : IAuthIdentifier
         {
             [JsonProperty(@"country")] public string Country { get; }
             [JsonProperty(@"phone")] public string PhoneNumber { get; }
 
-            public PhoneAuthenticationIdentifier(string country, string phoneNumber)
+            public PhoneAuthIdentifier(string country, string phoneNumber)
             {
                 Country = country;
                 PhoneNumber = phoneNumber;

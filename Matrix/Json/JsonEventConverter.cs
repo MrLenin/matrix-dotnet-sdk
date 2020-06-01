@@ -105,7 +105,7 @@
 //                content.MxContent = jObject;
 
 //                if (type == "m.receipt")
-//                    ((ReceiptEventContent)content).ParseJObject(jObject);
+//                    ((ReceiptContent)content).ParseJObject(jObject);
 //                else
 //                    _tempSerializer.Populate(jObject.CreateReader(), content);
 
@@ -162,8 +162,8 @@
 //        }
 //        private Dictionary<string, Type> contentTypes = new Dictionary<string, Type>
 //        {
-//            {"m.presence", typeof(PresenceEventContent)},
-//            {"m.receipt", typeof(ReceiptEventContent)}, //*Special case below
+//            {"m.presence", typeof(PresenceContent)},
+//            {"m.receipt", typeof(ReceiptContent)}, //*Special case below
 //            {"m.room.message", typeof(MatrixMRoomMessage)},
 //            {"m.room.member", typeof(MatrixMRoomMember)},
 //            {"m.room.create", typeof(MatrixMRoomCreate)},

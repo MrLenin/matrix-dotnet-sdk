@@ -13,12 +13,12 @@ using Newtonsoft.Json;
 
 namespace Matrix.Api.ClientServer
 {
-    public interface IAuthenticationIdentifier
+    public interface IAuthIdentifier
     {
         
     }
 
-    public abstract class AuthenticationRequest : IRequest
+    public abstract class AuthRequest : IRequest
     {
         [JsonProperty(@"device_id")]
         public string DeviceId { get; protected set; }
@@ -32,17 +32,17 @@ namespace Matrix.Api.ClientServer
         public RequestKind RequestKind { get; }
         public Uri Path { get; }
         public IEnumerable<byte> Content { get; }
-        public AuthenticationRequest? Authentication { get; } = null;
+        public AuthRequest? Auth { get; } = null;
 
-        public AuthenticationRequest()
+        public AuthRequest()
         {
             Path = new Uri(@"/_matrix/client/r0/login", UriKind.Relative);
             RequestKind = RequestKind.Post;
         }
     }
 
-    public class PasswordAuthenticationRequest<TAuthenticationIdentifier> : AuthenticationRequest
-        where TAuthenticationIdentifier : IAuthenticationIdentifier
+    public class PasswordAuthRequest<TAuthenticationIdentifier> : AuthRequest
+        where TAuthenticationIdentifier : IAuthIdentifier
     {
         [JsonProperty(@"identifier")]
         public TAuthenticationIdentifier AuthenticationIdentifier { get; }
@@ -59,10 +59,10 @@ namespace Matrix.Api.ClientServer
         [JsonProperty(@"address")]
         public string? Address { get; }
 
-        public PasswordAuthenticationRequest(TAuthenticationIdentifier authenticationIdentifier, string password)
+        public PasswordAuthRequest(TAuthenticationIdentifier authenticationIdentifier, string password)
         {
             if (authenticationIdentifier == null) throw new ArgumentNullException(nameof(authenticationIdentifier));
-            if (authenticationIdentifier.GetType() == typeof(PhoneAuthenticationIdentifier))
+            if (authenticationIdentifier.GetType() == typeof(PhoneAuthIdentifier))
                 throw new ArgumentException(@"Password authentication may use only User or ThirdParty identifiers.");
 
             AuthenticationIdentifier = authenticationIdentifier;
@@ -70,12 +70,12 @@ namespace Matrix.Api.ClientServer
         }
     }
 
-    public class TokenAuthenticationRequest : AuthenticationRequest
+    public class TokenAuthRequest : AuthRequest
     {
         [JsonProperty(@"token")]
         public string AuthenticationToken { get; }
 
-        public TokenAuthenticationRequest(string authenticationToken)
+        public TokenAuthRequest(string authenticationToken)
         {
             AuthenticationToken = authenticationToken;
         }
@@ -86,7 +86,7 @@ namespace Matrix.Api.ClientServer
         }
     }
 
-    public class AuthenticationResponse : IResponse
+    public class AuthResponse : IResponse
     {
         // Non-interactive
         [JsonProperty(@"user_id")]
