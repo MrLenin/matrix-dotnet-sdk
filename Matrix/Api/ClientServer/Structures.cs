@@ -92,10 +92,10 @@ namespace Matrix.Api.ClientServer
 
         public interface IStrippedState
         {
-            [JsonProperty(@"content")] public IStateContent Content { get; set; }
-            [JsonProperty(@"state_key")] public string StateKey { get; set; }
-            [JsonProperty(@"sender")] public string Sender { get; set; }
-            [JsonProperty(@"type")] public EventKind EventKind { get; set; }
+            [JsonProperty(@"content")] IStateContent Content { get; set; }
+            [JsonProperty(@"state_key")] string StateKey { get; set; }
+            [JsonProperty(@"sender")] string Sender { get; set; }
+            [JsonProperty(@"type")] EventKind EventKind { get; set; }
         }
 
         public class StrippedState<TStateEventContent> : IStrippedState

@@ -55,35 +55,35 @@ namespace Matrix.Json
         }
     }
 
-    public class GuestAccessKindJsonConverter : JsonConverter<GuestAccessKind>
+    public class GuestAccessKindJsonConverter : JsonConverter<GuestAccess>
     {
-        public override void WriteJson(JsonWriter writer, GuestAccessKind value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, GuestAccess value, JsonSerializer serializer)
         {
             writer.WriteValue(value.ToJsonString());
         }
 
-        public override GuestAccessKind ReadJson(JsonReader reader, Type objectType, GuestAccessKind existingValue, bool hasExistingValue,
+        public override GuestAccess ReadJson(JsonReader reader, Type objectType, GuestAccess existingValue, bool hasExistingValue,
             JsonSerializer serializer)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (!(reader.Value is string stringValue)) throw new NullReferenceException(@"Failed to read guest_access property.");
-            return stringValue.ToGuestAccessKind();
+            return stringValue.ToGuestAccess();
         }
     }
 
-    public class HistoryVisibilityKindJsonConverter : JsonConverter<HistoryVisibilityKind>
+    public class HistoryVisibilityKindJsonConverter : JsonConverter<HistoryVisibility>
     {
-        public override void WriteJson(JsonWriter writer, HistoryVisibilityKind value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, HistoryVisibility value, JsonSerializer serializer)
         {
             writer.WriteValue(value.ToJsonString());
         }
 
-        public override HistoryVisibilityKind ReadJson(JsonReader reader, Type objectType, HistoryVisibilityKind existingValue, bool hasExistingValue,
+        public override HistoryVisibility ReadJson(JsonReader reader, Type objectType, HistoryVisibility existingValue, bool hasExistingValue,
             JsonSerializer serializer)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (!(reader.Value is string stringValue)) throw new NullReferenceException(@"Failed to read history_visibility property.");
-            return stringValue.ToHistoryVisibilityKind();
+            return stringValue.ToHistoryVisibility();
         }
     }
 
@@ -99,7 +99,7 @@ namespace Matrix.Json
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (!(reader.Value is string stringValue)) throw new NullReferenceException(@"Failed to read join_rule property.");
-            return stringValue.ToJoinRuleKind();
+            return stringValue.ToJoinRule();
         }
     }
 
@@ -135,19 +135,19 @@ namespace Matrix.Json
         }
     }
 
-    public class PresenceStatusJsonConverter : JsonConverter<PresenceStatus>
+    public class PresenceStatusJsonConverter : JsonConverter<PresenceState>
     {
-        public override void WriteJson(JsonWriter writer, PresenceStatus value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, PresenceState value, JsonSerializer serializer)
         {
             writer.WriteValue(value.ToJsonString());
         }
 
-        public override PresenceStatus ReadJson(JsonReader reader, Type objectType, PresenceStatus existingValue, bool hasExistingValue,
+        public override PresenceState ReadJson(JsonReader reader, Type objectType, PresenceState existingValue, bool hasExistingValue,
             JsonSerializer serializer)
         {
             if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (!(reader.Value is string stringValue)) throw new NullReferenceException(@"Failed to read presence property.");
-            return stringValue.ToPresenceStatus();
+            return stringValue.ToPresenceState();
         }
     }
 

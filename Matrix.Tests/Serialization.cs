@@ -306,7 +306,7 @@ namespace Matrix.Tests
             Assert.That(@event.Content, Is.TypeOf<RoomGuestAccessContent>());
             var stateEvent = @event as StateEvent<RoomGuestAccessContent>;
             Assert.That(stateEvent, Is.Not.Null);
-            Assert.That(stateEvent.Content.GuestAccessKind, Is.EqualTo(GuestAccessKind.CanJoin));
+            Assert.That(stateEvent.Content.GuestAccess, Is.EqualTo(GuestAccess.CanJoin));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
             Assert.That(stateEvent.OriginServerTimestamp, Is.EqualTo(1432735824653));
             Assert.That(stateEvent.RoomId, Is.EqualTo(@"!jEsUZKDJdhlrceRyVU:example.org"));
@@ -343,7 +343,7 @@ namespace Matrix.Tests
             Assert.That(@event.Content, Is.TypeOf<RoomHistoryVisibilityContent>());
             var stateEvent = @event as StateEvent<RoomHistoryVisibilityContent>;
             Assert.That(stateEvent, Is.Not.Null);
-            Assert.That(stateEvent.Content.HistoryVisibilityKind, Is.EqualTo(HistoryVisibilityKind.Shared));
+            Assert.That(stateEvent.Content.HistoryVisibility, Is.EqualTo(HistoryVisibility.Shared));
             Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
             Assert.That(stateEvent.OriginServerTimestamp, Is.EqualTo(1432735824653));
             Assert.That(stateEvent.RoomId, Is.EqualTo(@"!jEsUZKDJdhlrceRyVU:example.org"));

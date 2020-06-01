@@ -21,7 +21,7 @@ namespace Matrix.Api.ClientServer.EventContent
         [JsonProperty(@"displayname")]
         public string DisplayName { get; }
         [JsonProperty(@"presence")]
-        public PresenceStatus PresenceStatus { get; }
+        public PresenceState PresenceState { get; }
         [JsonProperty(@"currently_active")]
         public bool CurrentlyActive { get; }
         [JsonProperty(@"status_msg")]
@@ -150,12 +150,12 @@ namespace Matrix.Api.ClientServer.StateContent
     public class RoomGuestAccessContent : IStateContent
     {
         [JsonProperty(@"guest_access")]
-        public GuestAccessKind GuestAccessKind { get; set; } = GuestAccessKind.Forbidden;
+        public GuestAccess GuestAccess { get; set; } = GuestAccess.Forbidden;
     }
 
     public class RoomHistoryVisibilityContent : IStateContent
     {
-        [JsonProperty(@"history_visibility")] public HistoryVisibilityKind HistoryVisibilityKind { get; set; }
+        [JsonProperty(@"history_visibility")] public HistoryVisibility HistoryVisibility { get; set; }
     }
 
     public class RoomJoinRulesContent : IStateContent

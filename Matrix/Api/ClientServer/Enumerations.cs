@@ -82,13 +82,13 @@ namespace Matrix.Api.ClientServer
             Typing
         }
 
-        public enum GuestAccessKind
+        public enum GuestAccess
         {
             CanJoin,
             Forbidden
         }
 
-        public enum HistoryVisibilityKind
+        public enum HistoryVisibility
         {
             Invited,
             Joined,
@@ -126,7 +126,7 @@ namespace Matrix.Api.ClientServer
             Video
         }
 
-        public enum PresenceStatus
+        public enum PresenceState
         {
             Online,
             Offline,
@@ -233,24 +233,24 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static string ToJsonString(this GuestAccessKind guestAccessKind)
+            public static string ToJsonString(this GuestAccess guestAccess)
             {
-                return guestAccessKind switch
+                return guestAccess switch
                 {
-                    GuestAccessKind.CanJoin => @"can_join",
-                    GuestAccessKind.Forbidden => @"forbidden",
+                    GuestAccess.CanJoin => @"can_join",
+                    GuestAccess.Forbidden => @"forbidden",
                     _ => throw new InvalidCastException()
                 };
             }
 
-            public static string ToJsonString(this HistoryVisibilityKind historyVisibilityKind)
+            public static string ToJsonString(this HistoryVisibility historyVisibility)
             {
-                return historyVisibilityKind switch
+                return historyVisibility switch
                 {
-                    HistoryVisibilityKind.Invited => @"invited",
-                    HistoryVisibilityKind.Joined => @"joined",
-                    HistoryVisibilityKind.Shared => @"shared",
-                    HistoryVisibilityKind.WorldReadable => @"world_readable",
+                    HistoryVisibility.Invited => @"invited",
+                    HistoryVisibility.Joined => @"joined",
+                    HistoryVisibility.Shared => @"shared",
+                    HistoryVisibility.WorldReadable => @"world_readable",
                     _ => throw new InvalidCastException()
                 };
             }
@@ -297,13 +297,13 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static string ToJsonString(this PresenceStatus presenceStatus)
+            public static string ToJsonString(this PresenceState presenceState)
             {
-                return presenceStatus switch
+                return presenceState switch
                 {
-                    PresenceStatus.Online => @"online",
-                    PresenceStatus.Offline => @"offline",
-                    PresenceStatus.Idle => @"unavailable",
+                    PresenceState.Online => @"online",
+                    PresenceState.Offline => @"offline",
+                    PresenceState.Idle => @"unavailable",
                 _ => throw new InvalidCastException()
                 };
             }
@@ -401,29 +401,29 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static GuestAccessKind ToGuestAccessKind(this string guestAccessKind)
+            public static GuestAccess ToGuestAccess(this string guestAccessKind)
             {
                 return guestAccessKind switch
                 {
-                    @"can_join" => GuestAccessKind.CanJoin,
-                    @"forbidden" => GuestAccessKind.Forbidden,
+                    @"can_join" => GuestAccess.CanJoin,
+                    @"forbidden" => GuestAccess.Forbidden,
                     _ => throw new InvalidCastException()
                 };
             }
 
-            public static HistoryVisibilityKind ToHistoryVisibilityKind(this string historyVisibilityKind)
+            public static HistoryVisibility ToHistoryVisibility(this string historyVisibilityKind)
             {
                 return historyVisibilityKind switch
                 {
-                    @"invited" => HistoryVisibilityKind.Invited,
-                    @"joined" => HistoryVisibilityKind.Joined,
-                    @"shared" => HistoryVisibilityKind.Shared,
-                    @"world_readable" => HistoryVisibilityKind.WorldReadable,
+                    @"invited" => HistoryVisibility.Invited,
+                    @"joined" => HistoryVisibility.Joined,
+                    @"shared" => HistoryVisibility.Shared,
+                    @"world_readable" => HistoryVisibility.WorldReadable,
                     _ => throw new InvalidCastException()
                 };
             }
 
-            public static JoinRule ToJoinRuleKind(this string joinRule)
+            public static JoinRule ToJoinRule(this string joinRule)
             {
                 return joinRule switch
                 {
@@ -465,13 +465,13 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static PresenceStatus ToPresenceStatus(this string presenceStatus)
+            public static PresenceState ToPresenceState(this string presenceStatus)
             {
                 return presenceStatus switch
                 {
-                    @"online" => PresenceStatus.Online,
-                    @"offline" => PresenceStatus.Offline,
-                    @"unavailable" => PresenceStatus.Idle,
+                    @"online" => PresenceState.Online,
+                    @"offline" => PresenceState.Offline,
+                    @"unavailable" => PresenceState.Idle,
                     _ => throw new InvalidCastException()
                 };
             }
