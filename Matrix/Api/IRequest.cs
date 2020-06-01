@@ -5,6 +5,8 @@ using System.Runtime.Serialization;
 using Matrix.Api.ClientServer;
 using Matrix.Api.ClientServer.Enumerations;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Api
 {
     public interface IRequest
@@ -13,7 +15,7 @@ namespace Matrix.Api
         Uri Path { get; }
         IEnumerable<byte> Content { get; }
 
-        [DataMember(Name = @"auth")]
+        [JsonProperty(@"auth")]
         AuthenticationRequest? Authentication { get; }
     }
 }

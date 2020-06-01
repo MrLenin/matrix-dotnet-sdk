@@ -6,13 +6,15 @@ using System.Runtime.Serialization;
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.Versions;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Api.ClientServer
 {
     public class VersionsResponse : IResponse
     {
-        [DataMember(Name = @"versions")]
+        [JsonProperty(@"versions")]
         public IEnumerable<ClientServerVersion> ApiVersions { get; set; }
-        [DataMember(Name = @"unstable_features")]
+        [JsonProperty(@"unstable_features")]
         public IDictionary<string, bool> UnstableFeatures { get; set; }
 
         public VersionsResponse()

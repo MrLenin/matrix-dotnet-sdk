@@ -5,15 +5,17 @@ using System.Runtime.Serialization;
 
 using Matrix.Api.ClientServer.Enumerations;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Api
 {
     public interface IResponse
     {
-        [DataMember(Name = @"errcode")]
+        [JsonProperty(@"errcode")]
         ErrorCode ErrorCode { get; set; }
-        [DataMember(Name = @"error")]
+        [JsonProperty(@"error")]
         string ErrorMessage { get; set; }
-        [DataMember(Name = @"retry_after_ms")]
+        [JsonProperty(@"retry_after_ms")]
         uint RetryAfterMilliseconds { get; set; }
         HttpStatusCode HttpStatusCode { get; set; }
     }

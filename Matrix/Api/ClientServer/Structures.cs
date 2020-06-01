@@ -3,8 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
 using Matrix.Api.ClientServer.StateEventContent;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Matrix.Api.ClientServer
 {
@@ -12,16 +16,16 @@ namespace Matrix.Api.ClientServer
     {
         public struct AudioInfo
         {
-            [DataMember(Name = @"duration")] public int Duration { get; set; }
-            [DataMember(Name = @"mimetype")] public string MimeType { get; set; }
-            [DataMember(Name = @"size")] public int DataSize { get; set; }
+            [JsonProperty(@"duration")] public int Duration { get; set; }
+            [JsonProperty(@"mimetype")] public string MimeType { get; set; }
+            [JsonProperty(@"size")] public int DataSize { get; set; }
         }
 
         public struct DiscoveryInfo
         {
-            [DataMember(Name = @"m.homeserver")] public IDictionary<string, string> Homeserver { get; }
+            [JsonProperty(@"m.homeserver")] public IDictionary<string, string> Homeserver { get; }
 
-            [DataMember(Name = @"m.identity_server")]
+            [JsonProperty(@"m.identity_server")]
             public IDictionary<string, string> IdentityServer { get; }
 
             public IDictionary<string, IDictionary<string, string>> CustomProperties { get; }
@@ -29,83 +33,94 @@ namespace Matrix.Api.ClientServer
 
         public struct FileInfo
         {
-            [DataMember(Name = @"mimetype")] public string MimeType { get; set; }
-            [DataMember(Name = @"size")] public int DataSize { get; set; }
-            [DataMember(Name = @"thumbnail_url")] public Uri? ThumbnailUrl { get; set; }
-            [DataMember(Name = @"thumbnail_file")] public object? EncryptedThumbnailFile { get; set; }
-            [DataMember(Name = @"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
+            [JsonProperty(@"mimetype")] public string MimeType { get; set; }
+            [JsonProperty(@"size")] public int DataSize { get; set; }
+            [JsonProperty(@"thumbnail_url")] public Uri? ThumbnailUrl { get; set; }
+            [JsonProperty(@"thumbnail_file")] public object? EncryptedThumbnailFile { get; set; }
+            [JsonProperty(@"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
         }
 
         public struct ImageInfo
         {
-            [DataMember(Name = @"h")] public uint Height { get; set; }
-            [DataMember(Name = @"w")] public uint Width { get; set; }
-            [DataMember(Name = @"mimetype")] public string MimeType { get; set; }
-            [DataMember(Name = @"size")] public uint DataSize { get; set; }
-            [DataMember(Name = @"thumbnail_url")] public Uri ThumbnailUrl { get; set; }
-            [DataMember(Name = @"thumbnail_file")] public object? ThumbnailFile { get; set; }
-            [DataMember(Name = @"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
+            [JsonProperty(@"h")] public uint Height { get; set; }
+            [JsonProperty(@"w")] public uint Width { get; set; }
+            [JsonProperty(@"mimetype")] public string MimeType { get; set; }
+            [JsonProperty(@"size")] public uint DataSize { get; set; }
+            [JsonProperty(@"thumbnail_url")] public Uri ThumbnailUrl { get; set; }
+            [JsonProperty(@"thumbnail_file")] public object? ThumbnailFile { get; set; }
+            [JsonProperty(@"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
         }
 
         public struct LocationInfo
         {
-            [DataMember(Name = @"thumbnail_url")] public Uri ThumbnailUrl { get; set; }
-            [DataMember(Name = @"thumbnail_file")] public object? EncryptedThumbnailFile { get; set; }
-            [DataMember(Name = @"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
+            [JsonProperty(@"thumbnail_url")] public Uri ThumbnailUrl { get; set; }
+            [JsonProperty(@"thumbnail_file")] public object? EncryptedThumbnailFile { get; set; }
+            [JsonProperty(@"thumbnail_info")] public ThumbnailInfo ThumbnailInfo { get; set; }
         }
 
         public struct ThumbnailInfo
         {
-            [DataMember(Name = @"h")] public uint Height { get; set; }
-            [DataMember(Name = @"w")] public uint Width { get; set; }
-            [DataMember(Name = @"mimetype")] public string MimeType { get; set; }
-            [DataMember(Name = @"size")] public uint DataSize { get; set; }
-        }
-
-        public struct NotificationKeywordLevels
-        {
-            [DataMember(Name = @"room")] public int RoomKeywordLevel { get; set; }
-
-            public IEnumerable<KeyValuePair<string, int>> AdditionalKeywordLevels { get; set; }
+            [JsonProperty(@"h")] public uint Height { get; set; }
+            [JsonProperty(@"w")] public uint Width { get; set; }
+            [JsonProperty(@"mimetype")] public string MimeType { get; set; }
+            [JsonProperty(@"size")] public uint DataSize { get; set; }
         }
 
         public struct PublicKeys
         {
-            [DataMember(Name = @"key_validity_url")]
+            [JsonProperty(@"key_validity_url")]
             public Uri KeyValidityUrl { get; set; }
 
-            [DataMember(Name = @"public_key")] public string PublicKey { get; set; }
+            [JsonProperty(@"public_key")] public string PublicKey { get; set; }
         }
 
         public struct RoomPredecessor
         {
-            [DataMember(Name = @"room_id")] public string RoomId { get; set; }
-            [DataMember(Name = @"event_id")] public string EventId { get; set; }
+            [JsonProperty(@"room_id")] public string RoomId { get; set; }
+            [JsonProperty(@"event_id")] public string EventId { get; set; }
         }
 
-        public class StrippedState<TEventContent>
-            where TEventContent : class, IEventContent
+        public interface IStrippedState
         {
-            [DataMember(Name = @"content")] public TEventContent Content { get; }
-            [DataMember(Name = @"state_key")] public string StateKey { get; set; }
-            [DataMember(Name = @"sender")] public string Sender { get; set; }
+            [JsonProperty(@"content")] public IStateEventContent Content { get; set; }
+            [JsonProperty(@"state_key")] public string StateKey { get; set; }
+            [JsonProperty(@"sender")] public string Sender { get; set; }
+            [JsonProperty(@"type")] public EventKind EventKind { get; set; }
+        }
+
+        public class StrippedState<TStateEventContent> : IStrippedState
+            where TStateEventContent : class, IStateEventContent
+        {
+            public TStateEventContent Content { get; set; }
+
+            IStateEventContent IStrippedState.Content
+            {
+                get => Content;
+                set => Content = (TStateEventContent) value;
+            }
+
+            public string StateKey { get; set; }
+            public string Sender { get; set; }
+            public EventKind EventKind { get; set; }
         }
 
         public struct ThirdPartyInvite
         {
-            [DataMember(Name = @"display_name")] public string DisplayName { get; set; }
-            [DataMember(Name = @"signed")] public object SignedContent { get; set; }
+            [JsonProperty(@"display_name")] public string DisplayName { get; set; }
+            [JsonProperty(@"signed")] public object SignedContent { get; set; }
         }
 
-        public struct UnsignedData
+        public class UnsignedData
         {
-            [DataMember(Name = @"invite_room_state")]
-            public IEnumerable<StrippedState<MembershipEventContent>> InviteRoomStates { get; set; }
+            [JsonProperty(@"age")] public int? Age { get; set; }
+            [JsonProperty(@"invite_room_state")] public IEnumerable<IStrippedState>? InviteRoomStates { get; set; }
+            [JsonProperty(@"redacted_because")] public string? RedactedInResponseTo { get; set; }
+            [JsonProperty(@"transaction_id")] public string? TransactionId { get; set; }
         }
 
         public class UserAuthenticationIdentifier : IAuthenticationIdentifier
         {
-            [DataMember(Name = @"user")] public string UserId { get; set; }
+            [JsonProperty(@"user")] public string UserId { get; set; }
 
             public UserAuthenticationIdentifier() => UserId = "";
             public UserAuthenticationIdentifier(string userId) => UserId = userId;
@@ -118,8 +133,8 @@ namespace Matrix.Api.ClientServer
 
         public class ThirdPartyAuthenticationIdentifier : IAuthenticationIdentifier
         {
-            [DataMember(Name = @"medium`")] public string Medium { get; }
-            [DataMember(Name = @"address")] public string Address { get; }
+            [JsonProperty(@"medium`")] public string Medium { get; }
+            [JsonProperty(@"address")] public string Address { get; }
 
             public ThirdPartyAuthenticationIdentifier(string medium, string address)
             {
@@ -135,8 +150,8 @@ namespace Matrix.Api.ClientServer
 
         public class PhoneAuthenticationIdentifier : IAuthenticationIdentifier
         {
-            [DataMember(Name = @"country")] public string Country { get; }
-            [DataMember(Name = @"phone")] public string PhoneNumber { get; }
+            [JsonProperty(@"country")] public string Country { get; }
+            [JsonProperty(@"phone")] public string PhoneNumber { get; }
 
             public PhoneAuthenticationIdentifier(string country, string phoneNumber)
             {

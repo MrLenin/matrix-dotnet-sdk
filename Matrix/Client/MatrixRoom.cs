@@ -12,8 +12,7 @@ using Newtonsoft.Json;
 
 namespace Matrix.Client
 {
-    public delegate void RoomEventDelegate(MatrixRoom room, RoomEvent roomEvent);
-    public delegate void RoomMessageEventDelegate(MatrixRoom room, IRoomMessageEventContent roomMessageEventContent);
+    public delegate void RoomEventDelegate(MatrixRoom room, IEvent roomEvent);
 
     public delegate void MatrixRoomChangeDelegate();
 
@@ -50,14 +49,14 @@ namespace Matrix.Client
         public string CanonicalAlias { get; private set; }
         public IEnumerable<string> Aliases { get; private set; }
 
-        public JoinRuleKind JoinRule { get; private set; }
+        public JoinRule JoinRule { get; private set; }
         public MatrixMRoomPowerLevels PowerLevels { get; private set; }
 
         /// <summary>
         /// Occurs when a m.room.message is received.
         /// <remarks>This will include your own messages</remarks>
         /// </summary>
-        public event RoomMessageEventDelegate OnMessage;
+        public event RoomEventDelegate OnMessage;
 
         public event MatrixRoomChangeDelegate OnEphemeralChanged;
         public event MatrixRoomTypingDelegate OnTypingChanged;
@@ -75,7 +74,7 @@ namespace Matrix.Client
         /// <summary>
         /// Fires when any room message is received.
         /// </summary>
-        //public event RoomEventDelegate OnEvent;
+        public event RoomEventDelegate OnEvent;
 
         /// <summary>
         /// Don't fire OnMessage if the message exceeds this age limit (in milliseconds). Set to -1 to ignore.
@@ -150,102 +149,84 @@ namespace Matrix.Client
         /// If a Room receives a new event, process it in here.
         /// </summary>
         /// <param name="roomEvent">New event</param>
-        public void FeedEvent(RoomEvent roomEvent)
+        public void FeedEvent(IEvent @event)
         {
-            if (roomEvent == null)
-                throw new ArgumentNullException(nameof(roomEvent));
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
 
-            if (roomEvent.Content == null)
+            if (@event.Content == null)
                 return; // We can't operate on this
-            if (roomEvent.GetType() == typeof(StateEvent))
+
+            switch (@event)
             {
-                var roomStateEvent = roomEvent as StateEvent;
-                switch (roomStateEvent.EventKind)
-                {
-                    case EventKind.RoomAvatar:
-                        break;
-                    case EventKind.RoomCanonicalAlias:
-                        var canonicalAliasEventContent = (CanonicalAliasEventContent)roomStateEvent.Content;
-                        CanonicalAlias = canonicalAliasEventContent.Alias;
-                        Aliases = canonicalAliasEventContent.AlternateAliases;
-                        break;
+                case StateEvent<AvatarEventContent> avatarStateEvent:
+                    break;
+                case StateEvent<CanonicalAliasEventContent> canonicalAliasStateEvent:
+                    CanonicalAlias = canonicalAliasStateEvent.Content.Alias;
+                    Aliases = canonicalAliasStateEvent.Content.AlternateAliases;
+                    break;
 
-                    case EventKind.RoomCreate:
-                        var createEventContent = (CreateEventContent)roomStateEvent.Content;
-                        Creator = createEventContent.Creator;
-                        ShouldFederate = createEventContent.Federate;
-                        break;
+                case StateEvent<CreateEventContent> createStateEvent:
+                    Creator = createStateEvent.Content.Creator;
+                    ShouldFederate = createStateEvent.Content.Federate;
+                    break;
 
-                    case EventKind.RoomGuestAccess:
-                        break;
-                    case EventKind.RoomHistoryVisibility:
-                        break;
+                case StateEvent<GuestAccessEventContent> guestAccessStateEvent:
+                    break;
+                case StateEvent<HistoryVisibilityEventContent> historyVisibilityStateEvent:
+                    break;
 
-                    case EventKind.RoomJoinRules:
-                        var joinRulesEventContent = (JoinRulesEventContent)roomStateEvent.Content;
-                        JoinRule = joinRulesEventContent.JoinRuleKind;
-                        break;
+                case StateEvent<JoinRuleEventContent> joinRuleStateEvent:
+                    JoinRule = joinRuleStateEvent.Content.JoinRule;
+                    break;
 
-                    case EventKind.RoomMembership:
-                        var membershipContent = (MembershipEventContent) roomStateEvent.Content;
-
-                        if (!_api.Sync.IsInitialSync)
+                case StateEvent<MembershipEventContent> membershipStateEvent:
+                    if (!_api.Sync.IsInitialSync)
+                    {
+                        //Handle new join,leave etc
+                        RoomMembershipEventDelegate eventDelegate = null;
+                        switch (membershipStateEvent.Content.MembershipState)
                         {
-                            //Handle new join,leave etc
-                            RoomMembershipEventDelegate eventDelegate = null;
-                            switch (membershipContent.MembershipState)
-                            {
-                                case MembershipState.Invite:
-                                    eventDelegate = OnUserInvited;
-                                    break;
-                                case MembershipState.Join:
-                                    eventDelegate = Members.ContainsKey(roomStateEvent.StateKey)
-                                        ? OnUserChange
-                                        : OnUserJoined;
-                                    break;
-                                case MembershipState.Leave:
-                                    eventDelegate = OnUserLeft;
-                                    break;
-                                case MembershipState.Ban:
-                                    eventDelegate = OnUserBanned;
-                                    break;
-                                case MembershipState.Knock:
-                                    break;
-                                default:
-                                    throw new IndexOutOfRangeException(nameof(membershipContent.MembershipState));
-                            }
-
-                            eventDelegate?.Invoke(roomStateEvent.StateKey, membershipContent);
+                            case MembershipState.Invite:
+                                eventDelegate = OnUserInvited;
+                                break;
+                            case MembershipState.Join:
+                                eventDelegate = Members.ContainsKey(membershipStateEvent.StateKey)
+                                    ? OnUserChange
+                                    : OnUserJoined;
+                                break;
+                            case MembershipState.Leave:
+                                eventDelegate = OnUserLeft;
+                                break;
+                            case MembershipState.Ban:
+                                eventDelegate = OnUserBanned;
+                                break;
+                            case MembershipState.Knock:
+                                break;
+                            default:
+                                throw new IndexOutOfRangeException(nameof(membershipStateEvent.Content.MembershipState));
                         }
 
-                        Members[roomStateEvent.StateKey] = membershipContent;
-                        break;
+                        eventDelegate?.Invoke(membershipStateEvent.StateKey, membershipStateEvent.Content);
+                    }
 
-                    case EventKind.RoomName:
-                        break;
-                    case EventKind.RoomPinnedEvents:
-                        break;
-                    case EventKind.RoomPowerLevels:
-                        break;
-                    case EventKind.RoomServerAcl:
-                        break;
-                    case EventKind.RoomThirdPartyInvite:
-                        break;
-                    case EventKind.RoomTombstone:
-                        break;
-                    case EventKind.RoomTopic:
-                        break;
-                }
-            }
-            else
-            {
-                switch (roomEvent.EventKind)
-                {
-                    case EventKind.RoomMessage:
-                        break;
-                    case EventKind.RoomRedaction:
-                        break;
-                }
+                    Members[membershipStateEvent.StateKey] = membershipStateEvent.Content;
+                    break;
+
+                case StateEvent<NameEventContent> nameStateEvent:
+                    break;
+                case StateEvent<PinnedEventsEventContent> pinnedEventsStateEvent:
+                    break;
+                case StateEvent<PowerLevelsEventContent> powerLevelsStateEvent:
+                    break;
+                case StateEvent<ServerAclEventContent> serverAclStateEvent:
+                    break;
+                case StateEvent<ThirdPartyInviteEventContent> thirdPartyInviteStateEvent:
+                    break;
+                case StateEvent<TombstoneEventContent> tombstoneStateEvent:
+                    break;
+                case StateEvent<TopicEventContent> topicStateEvent:
+                    break;
             }
 //            if (t == typeof(MatrixMRoomCreate))
 //            {
@@ -284,7 +265,7 @@ namespace Matrix.Client
 //                        }
 //            }
 
-            //OnEvent?.Invoke(this, roomEvent);
+            OnEvent?.Invoke(this, @event);
         }
 
 

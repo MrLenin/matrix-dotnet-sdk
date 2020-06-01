@@ -3,17 +3,24 @@ using System.Runtime.Serialization;
 
 using Matrix.Api.ClientServer.Enumerations;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Api.ClientServer.Events
 {
     public class ReceiptEvent : IEvent
     {
-        [DataMember(Name = @"room_id")]
+        [JsonProperty(@"room_id")]
         public string RoomId { get; }
 
-        [DataMember(Name = @"content")]
-        public ReceiptEventContent Content { get; }
-        IEventContent IEvent.Content => Content;
+        [JsonProperty(@"content")]
+        public ReceiptEventContent Content { get; set; }
         public EventKind EventKind { get; set; }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (ReceiptEventContent) value;
+        }
 
         public static string ToJsonString()
         {

@@ -62,7 +62,7 @@ namespace Matrix.Api.ClientServer
             RoomCreate,
             RoomGuestAccess,
             RoomHistoryVisibility,
-            RoomJoinRules,
+            RoomJoinRule,
             RoomMembership,
             RoomMessage,
             RoomName,
@@ -90,7 +90,7 @@ namespace Matrix.Api.ClientServer
             WorldReadable
         }
 
-        public enum JoinRuleKind
+        public enum JoinRule
         {
             Public,
             Knock,
@@ -124,9 +124,7 @@ namespace Matrix.Api.ClientServer
         {
             Online,
             Offline,
-            Unavailable,
-            FreeForChat,
-            Hidden
+            Idle
         }
 
         public enum RequestKind
@@ -203,7 +201,7 @@ namespace Matrix.Api.ClientServer
                     EventKind.RoomCreate => @"m.room.create",
                     EventKind.RoomGuestAccess => @"m.room.guest_access",
                     EventKind.RoomHistoryVisibility => @"m.room.history_visibility",
-                    EventKind.RoomJoinRules => @"m.room.join_rules",
+                    EventKind.RoomJoinRule => @"m.room.join_rules",
                     EventKind.RoomMembership => @"m.room.member",
                     EventKind.RoomMessage => @"m.room.message",
                     EventKind.RoomName => @"m.room.name",
@@ -241,14 +239,14 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static string ToJsonString(this JoinRuleKind joinRule)
+            public static string ToJsonString(this JoinRule joinRule)
             {
                 return joinRule switch
                 {
-                    JoinRuleKind.Invite => @"invite",
-                    JoinRuleKind.Knock => @"knock",
-                    JoinRuleKind.Private => @"private",
-                    JoinRuleKind.Public => @"public",
+                    JoinRule.Invite => @"invite",
+                    JoinRule.Knock => @"knock",
+                    JoinRule.Private => @"private",
+                    JoinRule.Public => @"public",
                     _ => throw new InvalidCastException()
                 };
             }
@@ -280,6 +278,17 @@ namespace Matrix.Api.ClientServer
                     MessageKind.Text => @"m.text",
                     MessageKind.Video => @"m.video",
                     _ => throw new InvalidCastException()
+                };
+            }
+
+            public static string ToJsonString(this PresenceStatus presenceStatus)
+            {
+                return presenceStatus switch
+                {
+                    PresenceStatus.Online => @"online",
+                    PresenceStatus.Offline => @"offline",
+                    PresenceStatus.Idle => @"unavailable",
+                _ => throw new InvalidCastException()
                 };
             }
 
@@ -339,9 +348,9 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static EventKind ToEventType(this string eventType)
+            public static EventKind ToEventKind(this string eventKind)
             {
-                return eventType switch
+                return eventKind switch
                 {
                     @"m.presence" => EventKind.Presence,
                     @"m.receipt" => EventKind.Receipt,
@@ -350,7 +359,7 @@ namespace Matrix.Api.ClientServer
                     @"m.room.create" => EventKind.RoomCreate,
                     @"m.room.guest_access" => EventKind.RoomGuestAccess,
                     @"m.room.history_visibility" => EventKind.RoomHistoryVisibility,
-                    @"m.room.join_rules" => EventKind.RoomJoinRules,
+                    @"m.room.join_rules" => EventKind.RoomJoinRule,
                     @"m.room.member" => EventKind.RoomMembership,
                     @"m.room.message" => EventKind.RoomMessage,
                     @"m.room.name" => EventKind.RoomName,
@@ -362,6 +371,81 @@ namespace Matrix.Api.ClientServer
                     @"m.room.tombstone" => EventKind.RoomTombstone,
                     @"m.room.topic" => EventKind.RoomTopic,
                     @"m.typing" => EventKind.Typing,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static GuestAccessKind ToGuestAccessKind(this string guestAccessKind)
+            {
+                return guestAccessKind switch
+                {
+                    @"can_join" => GuestAccessKind.CanJoin,
+                    @"forbidden" => GuestAccessKind.Forbidden,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static HistoryVisibilityKind ToHistoryVisibilityKind(this string historyVisibilityKind)
+            {
+                return historyVisibilityKind switch
+                {
+                    @"invited" => HistoryVisibilityKind.Invited,
+                    @"joined" => HistoryVisibilityKind.Joined,
+                    @"shared" => HistoryVisibilityKind.Shared,
+                    @"world_readable" => HistoryVisibilityKind.WorldReadable,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static JoinRule ToJoinRuleKind(this string joinRule)
+            {
+                return joinRule switch
+                {
+                    @"invite" => JoinRule.Invite,
+                    @"knock" => JoinRule.Knock,
+                    @"private" => JoinRule.Private,
+                    @"public" => JoinRule.Public,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static MembershipState ToMembershipState(this string membershipState)
+            {
+                return membershipState switch
+                {
+                    @"ban" => MembershipState.Ban,
+                    @"invite" => MembershipState.Invite,
+                    @"join" => MembershipState.Join,
+                    @"knock" => MembershipState.Knock,
+                    @"leave" => MembershipState.Leave,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static MessageKind ToMessageKind(this string messageKind)
+            {
+                return messageKind switch
+                {
+                    @"m.audio" => MessageKind.Audio,
+                    @"m.emote" => MessageKind.Emote,
+                    @"m.file" => MessageKind.File,
+                    @"m.image" => MessageKind.Image,
+                    @"m.location" => MessageKind.Location,
+                    @"m.notice" => MessageKind.Notice,
+                    @"m.server_notice" => MessageKind.ServerNotice,
+                    @"m.text" => MessageKind.Text,
+                    @"m.video" => MessageKind.Video,
+                    _ => throw new InvalidCastException()
+                };
+            }
+
+            public static PresenceStatus ToPresenceStatus(this string presenceStatus)
+            {
+                return presenceStatus switch
+                {
+                    @"online" => PresenceStatus.Online,
+                    @"offline" => PresenceStatus.Offline,
+                    @"unavailable" => PresenceStatus.Idle,
                     _ => throw new InvalidCastException()
                 };
             }

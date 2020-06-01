@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 
 using Matrix.Api;
-using Matrix.Api.SpecificationContexts;
 using Matrix.Api.Versions;
 using Matrix.Properties;
 

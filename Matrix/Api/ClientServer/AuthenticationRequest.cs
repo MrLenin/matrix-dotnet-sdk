@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Structures;
 
+using Newtonsoft.Json;
+
 namespace Matrix.Api.ClientServer
 {
     public interface IAuthenticationIdentifier
@@ -18,13 +20,13 @@ namespace Matrix.Api.ClientServer
 
     public abstract class AuthenticationRequest : IRequest
     {
-        [DataMember(Name = @"device_id")]
+        [JsonProperty(@"device_id")]
         public string DeviceId { get; protected set; }
-        [DataMember(Name = @"initial_device_display_name")]
+        [JsonProperty(@"initial_device_display_name")]
         public string DeviceDisplayName { get; protected set; }
 
         // User-interactive authentication - should move into own type?
-        [DataMember(Name = @"session")]
+        [JsonProperty(@"session")]
         public string SessionId { get; protected set; }
 
         public RequestKind RequestKind { get; }
@@ -42,19 +44,19 @@ namespace Matrix.Api.ClientServer
     public class PasswordAuthenticationRequest<TAuthenticationIdentifier> : AuthenticationRequest
         where TAuthenticationIdentifier : IAuthenticationIdentifier
     {
-        [DataMember(Name = @"identifier")]
+        [JsonProperty(@"identifier")]
         public TAuthenticationIdentifier AuthenticationIdentifier { get; }
-        [DataMember(Name = @"password")]
+        [JsonProperty(@"password")]
         public string Password { get; }
 
         [Obsolete(@"Deprecated in favor of User Identifiers r0.4.0")]
-        [DataMember(Name = @"user")]
+        [JsonProperty(@"user")]
         public string? UserId { get; }
         [Obsolete(@"Deprecated in favor of User Identifiers r0.4.0")]
-        [DataMember(Name = @"medium")]
+        [JsonProperty(@"medium")]
         public string? Medium { get; }
         [Obsolete(@"Deprecated in favor of User Identifiers r0.4.0")]
-        [DataMember(Name = @"address")]
+        [JsonProperty(@"address")]
         public string? Address { get; }
 
         public PasswordAuthenticationRequest(TAuthenticationIdentifier authenticationIdentifier, string password)
@@ -70,7 +72,7 @@ namespace Matrix.Api.ClientServer
 
     public class TokenAuthenticationRequest : AuthenticationRequest
     {
-        [DataMember(Name = @"token")]
+        [JsonProperty(@"token")]
         public string AuthenticationToken { get; }
 
         public TokenAuthenticationRequest(string authenticationToken)
@@ -87,29 +89,29 @@ namespace Matrix.Api.ClientServer
     public class AuthenticationResponse : IResponse
     {
         // Non-interactive
-        [DataMember(Name = @"user_id")]
+        [JsonProperty(@"user_id")]
         public string UserId { get; }
-        [DataMember(Name = @"access_token")]
+        [JsonProperty(@"access_token")]
         public string AccessToken { get; }
-        [DataMember(Name = @"device_id")]
+        [JsonProperty(@"device_id")]
         public string DeviceId { get; }
-        [DataMember(Name = @"well_known")]
+        [JsonProperty(@"well_known")]
         public DiscoveryInfo DiscoveryInfo { get; }
         
         [Obsolete(@"Api use deprecated: r0.4.0")]
-        [DataMember(Name = @"home_server")]
+        [JsonProperty(@"home_server")]
         public string Homeserver { get; }
 
         // User-interactive and non-interactive
-        [DataMember(Name = @"flows")]
+        [JsonProperty(@"flows")]
         public IEnumerable<AuthenticationKind> AuthenticationMethods { get; }
 
         // User-interactive authentication - should move into own type?
-        [DataMember(Name = @"completed")]
+        [JsonProperty(@"completed")]
         public IEnumerable<string> CompletedStages { get; }
-        [DataMember(Name = @"params")]
+        [JsonProperty(@"params")]
         public Dictionary<string, KeyValuePair<string, string>> Parameters { get; }
-        [DataMember(Name = @"session")]
+        [JsonProperty(@"session")]
         public string SessionId { get; }
 
         public ErrorCode ErrorCode { get; set; }

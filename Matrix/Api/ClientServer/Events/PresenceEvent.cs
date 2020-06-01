@@ -2,34 +2,41 @@
 using System.Runtime.Serialization;
 
 using Matrix.Api.ClientServer.Enumerations;
+using Matrix.Api.ClientServer.StateEventContent;
+
+using Newtonsoft.Json;
 
 namespace Matrix.Api.ClientServer.Events
 {
     public class PresenceEventContent : IEventContent
     {
-        [DataMember(Name = @"last_active_ago")]
+        [JsonProperty(@"last_active_ago")]
         public long LastActiveAgo { get; }
-        [DataMember(Name = @"avatar_url")]
+        [JsonProperty(@"avatar_url")]
         public Uri AvatarUrl { get; }
-        [DataMember(Name = @"displayname")]
+        [JsonProperty(@"displayname")]
         public string DisplayName { get; }
-        [DataMember(Name = @"presence")]
+        [JsonProperty(@"presence")]
         public PresenceStatus PresenceStatus { get; }
-        [DataMember(Name = @"currently_active")]
+        [JsonProperty(@"currently_active")]
         public bool CurrentlyActive { get; }
-        [DataMember(Name = @"status_msg")]
+        [JsonProperty(@"status_msg")]
         public string StatusMessage { get; }
     }
 
     public class PresenceEvent : IEvent
     {
-        [DataMember(Name = @"sender")]
+        [JsonProperty(@"sender")]
         public string Sender { get; }
 
-        [DataMember(Name = @"content")]
-        public PresenceEventContent Content { get; }
-        IEventContent IEvent.Content => Content;
+        [JsonProperty(@"content")]
+        public PresenceEventContent Content { get; set; }
         public EventKind EventKind { get; set; }
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (PresenceEventContent) value;
+        }
 
         public static string ToJsonString()
         {

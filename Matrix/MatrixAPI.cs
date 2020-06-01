@@ -49,7 +49,7 @@ namespace Matrix
         public DeviceApi Device { get; }
         public MediaApi Media { get; }
         public ProfileApi Profile { get; }
-        public SyncApi Sync { get; }
+        public virtual SyncApi Sync { get; }
         public RoomDirectoryApi RoomDirectory { get; }
 
         private VersionsContext _versions;

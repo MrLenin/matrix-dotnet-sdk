@@ -17,7 +17,7 @@ namespace Matrix.Structures
 
     public class MatrixSyncEvents
     {
-        public IEnumerable<RoomEvent> Events { get; set; }
+        public IEnumerable<IEvent> Events { get; set; }
     }
 
     public class MatrixSyncRooms

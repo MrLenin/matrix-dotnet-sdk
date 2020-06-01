@@ -137,7 +137,8 @@ namespace Matrix.Client
                 matrixRoom = _rooms[roomId];
             }
 
-            joined.State.Events.ToList().ForEach( x => { matrixRoom.FeedEvent(x); });
+            joined.State.Events.OfType<RoomEvent>().ToList().ForEach(
+                x => { matrixRoom.FeedEvent(x); });
             joined.Timeline.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
             matrixRoom.SetEphemeral(joined.Ephemeral);
         }

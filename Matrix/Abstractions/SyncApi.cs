@@ -30,7 +30,7 @@ namespace Matrix.Abstractions
         public SyncApi(MatrixApi matrixApi) =>
             _matrixApi = matrixApi;
 
-        public string Token
+        public virtual string Token
         {
             get => _token;
             set

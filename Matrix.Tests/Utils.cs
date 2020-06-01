@@ -2,24 +2,32 @@ using System;
 using Moq;
 using Matrix.Structures;
 using Matrix;
+using Matrix.Api.ClientServer;
+using Matrix.Api.ClientServer.Events;
 
 namespace Matrix.Tests
 {
     public class Utils
     {
-        public static MatrixEvent MockEvent(
-            MatrixEventContent content,
+        public static IStateEvent<T> MockStateEvent<T>(
+            IStateEvent<T> mockEvent,
+            string stateKey,
+            int age = 0)
+        where T: class, IStateEventContent
+        {
+            mockEvent.StateKey = stateKey;
+            mockEvent.UnsignedData.Age = age;
+            return mockEvent;
+        }
+
+        public static IRoomEvent<T> MockRoomEvent<T>(
+            IRoomEvent<T> mockEvent,
             string stateKey = null,
             int age = 0)
+            where T : class, IRoomEventContent
         {
-            var ev = new MatrixEvent
-            {
-                Content = content
-            };
-
-            if (stateKey != null) ev.StateKey = stateKey;
-            ev.Age = age;
-            return ev;
+            mockEvent.UnsignedData.Age = age;
+            return mockEvent;
         }
 
         public static Mock<MatrixApi> MockApi()
@@ -35,7 +43,7 @@ namespace Matrix.Tests
             mock.Setup(f => f.Room.SendState(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                It.IsAny<MatrixRoomStateEvent>(),
+                It.IsAny<IStateEventContent>(),
                 It.IsAny<string>())
             );
             return mock;

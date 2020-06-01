@@ -7,6 +7,8 @@ using JsonSubTypes;
 using Matrix.Api.ClientServer.Enumerations;
 using Matrix.Api.ClientServer.Events;
 using Matrix.Api.ClientServer.RoomEventContent;
+using Matrix.Api.ClientServer.StateEventContent;
+using Matrix.Api.ClientServer.Structures;
 
 using Newtonsoft.Json;
 
@@ -14,68 +16,165 @@ namespace Matrix.Api.ClientServer.Events
 {
     public interface IEventContent
     {
-
     }
 
     public interface IRoomEventContent : IEventContent
     {
-
     }
 
-    public interface IRoomMessageEventContent : IRoomEventContent
+    public interface IMessageEventContent : IRoomEventContent
     {
-        [DataMember(Name = @"body")]
-        string MessageBody { get; set; }
-        [DataMember(Name = @"msgtype")]
-        MessageKind MessageKind { get; }
+        [JsonProperty(@"body")] string MessageBody { get; set; }
+        [JsonProperty(@"msgtype")] MessageKind MessageKind { get; }
     }
 
     public interface IStateEventContent : IRoomEventContent
     {
-
     }
 
     public interface IEvent
     {
-        IEventContent Content { get; }
-        [DataMember(Name = @"type")]
-        EventKind EventKind { get; set; }
+        IEventContent Content { get; set; }
+
+        [JsonProperty(@"type")] EventKind EventKind { get; set; }
     }
 
-    public class RoomEvent : IEvent
+    public interface IRoomEvent<T> : IEvent
+        where T : class, IRoomEventContent
     {
-        [DataMember(Name = @"event_id")]
-        public string EventId { get; }
-        [DataMember(Name = @"sender")]
-        public string Sender { get; }
-        [DataMember(Name = @"origin_server_ts")]
-        public int OriginServerTimestamp { get; }
-        [DataMember(Name = @"unsigned")]
-        public object UnsignedData { get; }
-        [DataMember(Name = @"room_id")]
-        public string RoomId { get; }
+        [JsonProperty(@"event_id")] string EventId { get; set; }
+        [JsonProperty(@"sender")] string Sender { get; set; }
+        [JsonProperty(@"origin_server_ts")] long OriginServerTimestamp { get; set; }
+        [JsonProperty(@"unsigned")] UnsignedData UnsignedData { get; set; }
+        [JsonProperty(@"room_id")] string RoomId { get; set; }
 
-        [DataMember(Name = @"content")]
-        public virtual IRoomEventContent Content { get; }
-        IEventContent IEvent.Content => (IEventContent)Content;
+        [JsonProperty(@"content")] new T Content { get; set; }
+    }
+
+    public interface IStateEvent<T> : IRoomEvent<T>
+        where T : class, IStateEventContent
+    {
+        [JsonProperty(@"state_key")] string StateKey { get; set; }
+        [JsonProperty(@"prev_content")] T? PrevContent { get; set; }
+    }
+
+    public class RoomEvent<TRoomEventContent> : IRoomEvent<TRoomEventContent>
+        where TRoomEventContent : class, IRoomEventContent
+    {
+        public string EventId { get; set; }
+        public string Sender { get; set; }
+        public long OriginServerTimestamp { get; set; }
+        public UnsignedData UnsignedData { get; set; }
+        public string RoomId { get; set; }
+
+        public static implicit operator RoomEvent<TRoomEventContent>(MessageRoomEvent messageEvent) => new RoomEvent<TRoomEventContent>(messageEvent);
+
+        public RoomEvent() {}
+
+        private RoomEvent(MessageRoomEvent roomEvent)
+        {
+            if (roomEvent == null) throw new ArgumentNullException(nameof(roomEvent));
+            if (roomEvent.Content.GetType() != typeof(TRoomEventContent))
+                throw new ArgumentException($@"Argument does not wrap correct type '{typeof(TRoomEventContent)}'", nameof(roomEvent));
+
+            EventKind = roomEvent.EventKind;
+            EventId = roomEvent.EventId;
+            Sender = roomEvent.Sender;
+            OriginServerTimestamp = roomEvent.OriginServerTimestamp;
+            UnsignedData = roomEvent.UnsignedData;
+            RoomId = roomEvent.RoomId;
+            Content = (TRoomEventContent)roomEvent.Content;
+        }
+
+        public TRoomEventContent Content { get; set; }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (TRoomEventContent) value;
+        }
+
         public EventKind EventKind { get; set; }
     }
 
-    public class StateEvent : RoomEvent
+    public class StateEvent<TStateEventContent> : IStateEvent<TStateEventContent>
+        where TStateEventContent : class, IStateEventContent
     {
-        [DataMember(Name = @"state_key")]
-        public string StateKey { get; }
-        [DataMember(Name = @"prev_content")]
-        public IStateEventContent? PrevContent { get; }
+        public string EventId { get; set; }
+        public string Sender { get; set; }
+        public long OriginServerTimestamp { get; set; }
+        public UnsignedData UnsignedData { get; set; }
+        public string RoomId { get; set; }
+        public string StateKey { get; set; }
+        public TStateEventContent? PrevContent { get; set; }
 
-        [DataMember(Name = @"content")]
-        public new IStateEventContent Content { get; set; }
+        public TStateEventContent Content { get; set; }
+
+        TStateEventContent IRoomEvent<TStateEventContent>.Content
+        {
+            get => Content;
+            set => Content = value;
+        }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (TStateEventContent) value;
+        }
+
+        public EventKind EventKind { get; set; }
     }
 
+    public sealed class RoomEvent : RoomEvent<IRoomEventContent>
+    { }
 
-    public class RoomRedactionEvent : RoomEvent
+    public sealed class StateEvent : StateEvent<IStateEventContent>
+    { }
+
+    public sealed class RedactionRoomEvent : IRoomEvent<RedactionEventContent>
     {
-        [DataMember(Name = @"redacts")]
+        [JsonProperty(@"redacts")]
         public string RedactedEventId { get; set; }
+
+        public string EventId { get; set; }
+        public string Sender { get; set; }
+        public long OriginServerTimestamp { get; set; }
+        public UnsignedData UnsignedData { get; set; }
+        public string RoomId { get; set; }
+        public RedactionEventContent Content { get; set; }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (RedactionEventContent) value;
+        }
+
+        public EventKind EventKind { get; set; }
+    }
+
+    public sealed class MessageRoomEvent : IRoomEvent<IMessageEventContent>
+    {
+        public string EventId { get; set; }
+        public string Sender { get; set; }
+        public long OriginServerTimestamp { get; set; }
+        public UnsignedData UnsignedData { get; set; }
+        public string RoomId { get; set; }
+
+
+        public IMessageEventContent Content { get; set; }
+
+        IMessageEventContent IRoomEvent<IMessageEventContent>.Content
+        {
+            get => Content;
+            set => Content = value;
+        }
+
+        IEventContent IEvent.Content
+        {
+            get => Content;
+            set => Content = (IMessageEventContent) value;
+        }
+
+        public EventKind EventKind { get; set; }
     }
 }

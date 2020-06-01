@@ -225,11 +225,11 @@ namespace Matrix.Api
             {
                 return roomVersion switch
                     {
-                    @"v1" => RoomsVersion.V1,
-                    @"v2" => RoomsVersion.V2,
-                    @"v3" => RoomsVersion.V3,
-                    @"v4" => RoomsVersion.V4,
-                    @"v5" => RoomsVersion.V5,
+                    @"1" => RoomsVersion.V1,
+                    @"2" => RoomsVersion.V2,
+                    @"3" => RoomsVersion.V3,
+                    @"4" => RoomsVersion.V4,
+                    @"5" => RoomsVersion.V5,
                     _ => throw new InvalidCastException()
                     };
             }
