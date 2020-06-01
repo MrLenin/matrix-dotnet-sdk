@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Matrix.Client;
-using Matrix.Json;
 using Matrix.Structures;
 
 namespace Matrix.AppService

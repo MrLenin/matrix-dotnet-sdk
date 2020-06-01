@@ -15,7 +15,7 @@ using Matrix.Api.ClientServer.Events;
 using Matrix.Api.ClientServer.RoomContent;
 using Matrix.Api.ClientServer.StateContent;
 using Matrix.Api.ClientServer.Structures;
-using Matrix.Json;
+using Matrix.Backends.JsonConverters;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
