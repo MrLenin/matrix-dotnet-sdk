@@ -81,15 +81,15 @@ namespace Matrix.Backends
                 .SerializeDiscriminatorProperty()
                 .Build());
 
-            _jsonSerializer.Converters.Add(new AuthenticationKindJsonConverter());
+            _jsonSerializer.Converters.Add(new AuthKindJsonConverter());
             _jsonSerializer.Converters.Add(new ErrorCodeJsonConverter());
             _jsonSerializer.Converters.Add(new EventKindJsonConverter());
-            _jsonSerializer.Converters.Add(new GuestAccessKindJsonConverter());
-            _jsonSerializer.Converters.Add(new HistoryVisibilityKindJsonConverter());
-            _jsonSerializer.Converters.Add(new JoinRuleKindJsonConverter());
+            _jsonSerializer.Converters.Add(new GuestAccessJsonConverter());
+            _jsonSerializer.Converters.Add(new HistoryVisibilityJsonConverter());
+            _jsonSerializer.Converters.Add(new JoinRuleJsonConverter());
             _jsonSerializer.Converters.Add(new MembershipStateJsonConverter());
             _jsonSerializer.Converters.Add(new MessageKindJsonConverter());
-            _jsonSerializer.Converters.Add(new PresenceStatusJsonConverter());
+            _jsonSerializer.Converters.Add(new PresenceStateJsonConverter());
             _jsonSerializer.Converters.Add(new ClientServerVersionJsonConverter());
             _jsonSerializer.Converters.Add(new RoomsVersionsJsonConverter());
 
@@ -136,8 +136,8 @@ namespace Matrix.Backends
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
                 .Of(typeof(IRequest), @"type")
-                .RegisterSubtype(typeof(PasswordAuthRequest<>), AuthenticationKind.Password.ToJsonString())
-                .RegisterSubtype(typeof(TokenAuthRequest), AuthenticationKind.Token.ToJsonString())
+                .RegisterSubtype(typeof(PasswordAuthRequest<>), AuthKind.Password.ToJsonString())
+                .RegisterSubtype(typeof(TokenAuthRequest), AuthKind.Token.ToJsonString())
                 .SerializeDiscriminatorProperty()
                 .Build());
 

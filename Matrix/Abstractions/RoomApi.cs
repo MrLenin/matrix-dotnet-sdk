@@ -139,7 +139,7 @@ namespace Matrix.Abstractions
         }
 
         [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-rooms-roomid-state")]
-        public IEnumerable<StateEvent> GetState(string roomId)
+        public IEnumerable<IStateEvent> GetState(string roomId)
         {
             _matrixApi.ThrowIfNotSupported();
 

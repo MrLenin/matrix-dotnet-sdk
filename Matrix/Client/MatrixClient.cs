@@ -63,8 +63,8 @@ namespace Matrix.Client
             try
             {
                 Api.VersionsEndpoint.RequestVersions();
-                Api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
-                Api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
+                //Api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
+                //Api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
             }
             catch (MatrixException e)
             {
@@ -91,18 +91,18 @@ namespace Matrix.Client
         public MatrixClient(MatrixApi api)
         {
             Api = api ?? throw new ArgumentNullException(nameof(api));
-            api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
-            api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
+            //api.Sync.OnSyncJoinEvent += MatrixClient_OnEvent;
+            //api.Sync.OnSyncInviteEvent += MatrixClient_OnInvite;
         }
 
         /// <summary>
         /// Gets the sync token from the API.
         /// </summary>
         /// <returns>The sync token.</returns>
-        public string GetSyncToken()
-        {
-            return Api.Sync.Token;
-        }
+        //public string GetSyncToken()
+        //{
+        //    return Api.Sync.Token;
+        //}
 
         /// <summary>
         /// Gets the access token from the API.
@@ -137,7 +137,7 @@ namespace Matrix.Client
                 matrixRoom = _rooms[roomId];
             }
 
-            joined.State.Events.OfType<RoomEvent>().ToList().ForEach(
+            joined.State.Events.OfType<IRoomEvent>().ToList().ForEach(
                 x => { matrixRoom.FeedEvent(x); });
             joined.Timeline.Events.ToList().ForEach(x => { matrixRoom.FeedEvent(x); });
             matrixRoom.SetEphemeral(joined.Ephemeral);
@@ -165,9 +165,9 @@ namespace Matrix.Client
         /// <param name="syncToken"> If you stored the sync token before, you can set it for the API here</param>
         public void StartSync(string syncToken = "")
         {
-            Api.Sync.Token = syncToken;
-            Api.Sync.ClientSync();
-            Api.Sync.Start();
+            //Api.Sync.Token = syncToken;
+            //Api.Sync.ClientSync();
+            //Api.Sync.Start();
         }
 
         /// <summary>
@@ -179,11 +179,11 @@ namespace Matrix.Client
         /// <param name="token">Access Token</param>
         public void LoginWithToken(string token)
         {
-            var request = new TokenAuthRequest(token);
-            var response = Api.LoginEndpoint.Login<AuthResponse>(request);
-            // Error testing goes here
-            Api.Sync.ClientSync();
-            Api.Sync.Start();
+            //var request = new TokenAuthRequest(token);
+            //var response = Api.LoginEndpoint.Login<AuthResponse>(request);
+            //// Error testing goes here
+            //Api.Sync.ClientSync();
+            //Api.Sync.Start();
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace Matrix.Client
         {
             if (!disposing) return;
 
-            Api.Sync.Stop();
+            //Api.Sync.Stop();
         }
 
         public void Dispose()

@@ -5,7 +5,7 @@ namespace Matrix.Api.ClientServer
 {
     namespace Enumerations
     {
-        public enum AuthenticationKind
+        public enum AuthKind
         {
             Password,
             ReCaptcha,
@@ -61,6 +61,7 @@ namespace Matrix.Api.ClientServer
 
         public enum EventKind
         {
+            Custom,
             Presence,
             Receipt,
             RoomAvatar,
@@ -79,6 +80,7 @@ namespace Matrix.Api.ClientServer
             RoomThirdPartyInvite,
             RoomTombstone,
             RoomTopic,
+            Tag,
             Typing
         }
 
@@ -142,17 +144,17 @@ namespace Matrix.Api.ClientServer
 
         public static class EnumerationExtensions
         {
-            public static string ToJsonString(this AuthenticationKind authenticationKind)
+            public static string ToJsonString(this AuthKind authKind)
             {
-                return authenticationKind switch
+                return authKind switch
                 {
-                    AuthenticationKind.Password => @"m.login.password",
-                    AuthenticationKind.ReCaptcha => @"m.login.recaptcha",
-                    AuthenticationKind.OAuth2 => @"m.login.oauth2",
-                    AuthenticationKind.EmailIdentity => @"m.login.email.identity",
-                    AuthenticationKind.Msisdn => @"m.login.msisdn",
-                    AuthenticationKind.Token => @"m.login.token",
-                    AuthenticationKind.Dummy => @"m.login.dummy",
+                    AuthKind.Password => @"m.login.password",
+                    AuthKind.ReCaptcha => @"m.login.recaptcha",
+                    AuthKind.OAuth2 => @"m.login.oauth2",
+                    AuthKind.EmailIdentity => @"m.login.email.identity",
+                    AuthKind.Msisdn => @"m.login.msisdn",
+                    AuthKind.Token => @"m.login.token",
+                    AuthKind.Dummy => @"m.login.dummy",
                     _ => throw new InvalidCastException()
                 };
             }
@@ -210,6 +212,7 @@ namespace Matrix.Api.ClientServer
             {
                 return eventKind switch
                 {
+                    EventKind.Custom => @"custom.event",
                     EventKind.Presence => @"m.presence",
                     EventKind.Receipt => @"m.receipt",
                     EventKind.RoomAvatar => @"m.room.avatar",
@@ -228,6 +231,7 @@ namespace Matrix.Api.ClientServer
                     EventKind.RoomThirdPartyInvite => @"m.room.third_party_invite",
                     EventKind.RoomTombstone => @"m.room.tombstone",
                     EventKind.RoomTopic => @"m.room.topic",
+                    EventKind.Tag => @"m.tag",
                     EventKind.Typing => @"m.typing",
                     _ => throw new InvalidCastException()
                 };
@@ -308,17 +312,17 @@ namespace Matrix.Api.ClientServer
                 };
             }
 
-            public static AuthenticationKind ToAuthenticationKind(this string authenticationMethod)
+            public static AuthKind ToAuthKind(this string authenticationMethod)
             {
                 return authenticationMethod switch
                 {
-                    @"m.login.password" => AuthenticationKind.Password,
-                    @"m.login.recaptcha" => AuthenticationKind.ReCaptcha,
-                    @"m.login.oauth2" => AuthenticationKind.OAuth2,
-                    @"m.login.email.identity" => AuthenticationKind.EmailIdentity,
-                    @"m.login.msisdn" => AuthenticationKind.Msisdn,
-                    @"m.login.token" => AuthenticationKind.Token,
-                    @"m.login.dummy" => AuthenticationKind.Dummy,
+                    @"m.login.password" => AuthKind.Password,
+                    @"m.login.recaptcha" => AuthKind.ReCaptcha,
+                    @"m.login.oauth2" => AuthKind.OAuth2,
+                    @"m.login.email.identity" => AuthKind.EmailIdentity,
+                    @"m.login.msisdn" => AuthKind.Msisdn,
+                    @"m.login.token" => AuthKind.Token,
+                    @"m.login.dummy" => AuthKind.Dummy,
                     _ => throw new InvalidCastException()
                 };
             }
@@ -396,8 +400,9 @@ namespace Matrix.Api.ClientServer
                     @"m.room.third_party_invite" => EventKind.RoomThirdPartyInvite,
                     @"m.room.tombstone" => EventKind.RoomTombstone,
                     @"m.room.topic" => EventKind.RoomTopic,
+                    @"m.tag" => EventKind.Tag,
                     @"m.typing" => EventKind.Typing,
-                    _ => throw new InvalidCastException()
+                    _ => EventKind.Custom
                 };
             }
 

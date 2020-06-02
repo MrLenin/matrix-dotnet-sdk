@@ -76,11 +76,13 @@ namespace Matrix.Api.ClientServer
 
         public struct ReceiptedEvent
         {
+            [JsonProperty(@"m.read")]
             public Dictionary<string, Receipt> ReceiptedUsers { get; private set; }
         }
 
         public struct Receipt
         {
+            [JsonProperty(@"ts")]
             public long TimeStamp { get; set; }
         }
 
@@ -182,6 +184,137 @@ namespace Matrix.Api.ClientServer
             public static string ToJsonString()
             {
                 return @"m.id.phone";
+            }
+        }
+
+        public struct RoomSummary
+        {
+            [JsonProperty(@"m.heroes")]
+            public IEnumerable<string> Heroes { get; set; }
+            [JsonProperty(@"m.joined_member_count")]
+            public int JoinedMemberCount { get; set; }
+            [JsonProperty(@"m.invited_member_count")]
+            public int InvitedMemberCount { get; set; }
+        }
+
+        public struct RoomEphemeral
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IEvent> Events { get; set; }
+        }
+
+        public struct UnreadNotificationCount
+        {
+            [JsonProperty(@"highlight_count")]
+            public int HighlightCount { get; set; }
+            [JsonProperty(@"notification_count")]
+            public int NotificationCount { get; set; }
+        }
+
+        public struct JoinedRoom
+        {
+            [JsonProperty(@"summary")]
+            public RoomSummary Summary { get; set; }
+            [JsonProperty(@"state")]
+            public State State { get; set; }
+            [JsonProperty(@"timeline")]
+            public Timeline Timeline { get; set; }
+            [JsonProperty(@"ephemeral")]
+            public RoomEphemeral Ephemeral { get; set; }
+            [JsonProperty(@"account_data")]
+            public AccountData AccountData { get; set; }
+            [JsonProperty(@"unread_notifications")]
+            public UnreadNotificationCount UnreadNotificationCount { get; set; }
+        }
+
+        public struct InviteState
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IStrippedState> Events { get; set; }
+        }
+
+        public struct InvitedRoom
+        {
+            [JsonProperty(@"invite_state")]
+            public InviteState State { get; set; }
+        }
+
+        public struct State
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IStateEvent> Events { get; set; }
+        }
+
+        public struct Timeline
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IRoomEvent> Events { get; set; }
+            [JsonProperty(@"limited")]
+            public bool Limited { get; set; }
+            [JsonProperty(@"prev_batch")]
+            public string PrevBatch { get; set; }
+        }
+
+        public struct PresenceData
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IEvent> Events { get; set; }
+        }
+
+        public struct AccountData
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IEvent> Events { get; set; }
+        }
+
+        public struct LeftRoom
+        {
+            [JsonProperty(@"state")]
+            public State State { get; set; }
+            [JsonProperty(@"timeline")]
+            public Timeline Timeline { get; set; }
+            [JsonProperty(@"account_data")]
+            public AccountData AccountData { get; set; }
+        }
+
+        public struct ToDeviceData
+        {
+            [JsonProperty(@"events")]
+            public IEnumerable<IEvent> Events { get; set; }
+        }
+
+        public struct DeviceLists
+        {
+            [JsonProperty(@"changed")]
+            public IEnumerable<string> Changed { get; set; }
+            [JsonProperty(@"left")]
+            public IEnumerable<string> Left { get; set; }
+        }
+
+        public struct SyncRooms
+        {
+            [JsonProperty(@"join")]
+            public IDictionary<string, JoinedRoom> JoinedRooms { get; set; }
+            [JsonProperty(@"invite")]
+            public IDictionary<string, InvitedRoom> InvitedRooms { get; set; }
+            [JsonProperty(@"leave")]
+            public IDictionary<string, LeftRoom> LeftRooms { get; set; }
+        }
+
+        public struct RoomTag
+        {
+            private double _order;
+
+            [JsonProperty(@"order")]
+            public double Order
+            {
+                get => _order;
+                set
+                {
+                    if (value > 1.0) _order = 1.0;
+                    else if (value < 0.0) _order = 0.0;
+                    else _order = value;
+                }
             }
         }
     }

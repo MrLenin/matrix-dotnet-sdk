@@ -6,6 +6,7 @@ using JsonSubTypes;
 using Matrix.Api;
 using Matrix.Api.ClientServer;
 using Matrix.Api.ClientServer.Enumerations;
+using Matrix.Api.ClientServer.EventContent;
 using Matrix.Api.ClientServer.Events;
 using Matrix.Api.ClientServer.RoomContent;
 using Matrix.Api.ClientServer.StateContent;
@@ -17,6 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
 
 namespace Matrix.Tests
 {
@@ -31,8 +33,16 @@ namespace Matrix.Tests
 
             _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
                 .Of(typeof(IEvent), @"type")
-                .RegisterSubtype(typeof(PresenceEvent), PresenceEvent.ToJsonString())
-                .RegisterSubtype(typeof(ReceiptEvent), ReceiptEvent.ToJsonString())
+                .RegisterSubtype(typeof(PresenceEvent), EventKind.Presence.ToJsonString())
+                .RegisterSubtype(typeof(ReceiptEvent), EventKind.Receipt.ToJsonString())
+                .RegisterSubtype(typeof(TagEvent), EventKind.Tag.ToJsonString())
+                .RegisterSubtype(typeof(TypingEvent), EventKind.Typing.ToJsonString())
+                .SetFallbackSubtype(typeof(FallbackEvent))
+                .SerializeDiscriminatorProperty()
+                .Build());
+
+            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+                .Of(typeof(IRoomEvent), @"type")
                 .RegisterSubtype(typeof(StateEvent<RoomAvatarContent>), EventKind.RoomAvatar.ToJsonString())
                 .RegisterSubtype(typeof(StateEvent<RoomCanonicalAliasContent>), EventKind.RoomCanonicalAlias.ToJsonString())
                 .RegisterSubtype(typeof(StateEvent<RoomCreateContent>), EventKind.RoomCreate.ToJsonString())
@@ -84,15 +94,15 @@ namespace Matrix.Tests
                 .SerializeDiscriminatorProperty()
                 .Build());
 
-            _jsonSerializer.Converters.Add(new AuthenticationKindJsonConverter());
+            _jsonSerializer.Converters.Add(new AuthKindJsonConverter());
             _jsonSerializer.Converters.Add(new ErrorCodeJsonConverter());
             _jsonSerializer.Converters.Add(new EventKindJsonConverter());
-            _jsonSerializer.Converters.Add(new GuestAccessKindJsonConverter());
-            _jsonSerializer.Converters.Add(new HistoryVisibilityKindJsonConverter());
-            _jsonSerializer.Converters.Add(new JoinRuleKindJsonConverter());
+            _jsonSerializer.Converters.Add(new GuestAccessJsonConverter());
+            _jsonSerializer.Converters.Add(new HistoryVisibilityJsonConverter());
+            _jsonSerializer.Converters.Add(new JoinRuleJsonConverter());
             _jsonSerializer.Converters.Add(new MembershipStateJsonConverter());
             _jsonSerializer.Converters.Add(new MessageKindJsonConverter());
-            _jsonSerializer.Converters.Add(new PresenceStatusJsonConverter());
+            _jsonSerializer.Converters.Add(new PresenceStateJsonConverter());
             _jsonSerializer.Converters.Add(new ClientServerVersionJsonConverter());
             _jsonSerializer.Converters.Add(new RoomsVersionsJsonConverter());
 
@@ -101,44 +111,44 @@ namespace Matrix.Tests
             //    .RegisterSubtypeWithProperty(typeof(PresenceContent), @"presence")
             //    .Build());
 
-            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
-                .Of(typeof(IRoomContent))
-                .RegisterSubtypeWithProperty(typeof(RedactionContent), @"reason")
-                .Build());
+            //_jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+            //    .Of(typeof(IRoomContent))
+            //    .RegisterSubtypeWithProperty(typeof(RedactionContent), @"reason")
+            //    .Build());
 
-            _jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
-                .Of(typeof(IStateContent))
-                .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alias")
-                .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alt_aliases")
-                .RegisterSubtypeWithProperty(typeof(RoomAvatarContent), @"url")
-                .RegisterSubtypeWithProperty(typeof(RoomCreateContent), @"creator")
-                .RegisterSubtypeWithProperty(typeof(RoomGuestAccessContent), @"guest_access")
-                .RegisterSubtypeWithProperty(typeof(RoomHistoryVisibilityContent), @"history_visibility")
-                .RegisterSubtypeWithProperty(typeof(RoomJoinRulesContent), @"join_rule")
-                .RegisterSubtypeWithProperty(typeof(RoomMembershipContent), @"membership")
-                .RegisterSubtypeWithProperty(typeof(RoomNameContent), @"name")
-                .RegisterSubtypeWithProperty(typeof(RoomPinnedEventsContent), @"pinned")
-                .RegisterSubtypeWithProperty(typeof(RedactionContent), @"redacts")
-                .RegisterSubtypeWithProperty(typeof(RoomThirdPartyInviteContent), @"key_validity_url")
-                .RegisterSubtypeWithProperty(typeof(RoomTombstoneContent), @"replacement_room")
-                .RegisterSubtypeWithProperty(typeof(RoomTopicContent), @"topic")
-                .Build());
+            //_jsonSerializer.Converters.Add(JsonSubtypesWithPropertyConverterBuilder
+            //    .Of(typeof(IStateContent))
+            //    .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alias")
+            //    .RegisterSubtypeWithProperty(typeof(RoomCanonicalAliasContent), @"alt_aliases")
+            //    .RegisterSubtypeWithProperty(typeof(RoomAvatarContent), @"url")
+            //    .RegisterSubtypeWithProperty(typeof(RoomCreateContent), @"creator")
+            //    .RegisterSubtypeWithProperty(typeof(RoomGuestAccessContent), @"guest_access")
+            //    .RegisterSubtypeWithProperty(typeof(RoomHistoryVisibilityContent), @"history_visibility")
+            //    .RegisterSubtypeWithProperty(typeof(RoomJoinRulesContent), @"join_rule")
+            //    .RegisterSubtypeWithProperty(typeof(RoomMembershipContent), @"membership")
+            //    .RegisterSubtypeWithProperty(typeof(RoomNameContent), @"name")
+            //    .RegisterSubtypeWithProperty(typeof(RoomPinnedEventsContent), @"pinned")
+            //    .RegisterSubtypeWithProperty(typeof(RedactionContent), @"redacts")
+            //    .RegisterSubtypeWithProperty(typeof(RoomThirdPartyInviteContent), @"key_validity_url")
+            //    .RegisterSubtypeWithProperty(typeof(RoomTombstoneContent), @"replacement_room")
+            //    .RegisterSubtypeWithProperty(typeof(RoomTopicContent), @"topic")
+            //    .Build());
 
-            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
-                .Of(typeof(IRequest), @"type")
-                .RegisterSubtype(typeof(PasswordAuthRequest<>), AuthenticationKind.Password.ToJsonString())
-                .RegisterSubtype(typeof(TokenAuthRequest), AuthenticationKind.Token.ToJsonString())
-                .SerializeDiscriminatorProperty()
-                .Build());
+            //_jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+            //    .Of(typeof(IRequest), @"type")
+            //    .RegisterSubtype(typeof(PasswordAuthRequest<>), AuthKind.Password.ToJsonString())
+            //    .RegisterSubtype(typeof(TokenAuthRequest), AuthKind.Token.ToJsonString())
+            //    .SerializeDiscriminatorProperty()
+            //    .Build());
 
-            _jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
-                .Of(typeof(IAuthIdentifier), @"type")
-                .RegisterSubtype(typeof(UserAuthIdentifier), UserAuthIdentifier.ToJsonString())
-                .RegisterSubtype(typeof(ThirdPartyAuthIdentifier),
-                    ThirdPartyAuthIdentifier.ToJsonString())
-                .RegisterSubtype(typeof(PhoneAuthIdentifier), PhoneAuthIdentifier.ToJsonString())
-                .SerializeDiscriminatorProperty()
-                .Build());
+            //_jsonSerializer.Converters.Add(JsonSubtypesConverterBuilder
+            //    .Of(typeof(IAuthIdentifier), @"type")
+            //    .RegisterSubtype(typeof(UserAuthIdentifier), UserAuthIdentifier.ToJsonString())
+            //    .RegisterSubtype(typeof(ThirdPartyAuthIdentifier),
+            //        ThirdPartyAuthIdentifier.ToJsonString())
+            //    .RegisterSubtype(typeof(PhoneAuthIdentifier), PhoneAuthIdentifier.ToJsonString())
+            //    .SerializeDiscriminatorProperty()
+            //    .Build());
         }
 
         [Test]
@@ -166,7 +176,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomAvatar));
             Assert.That(@event.Content, Is.Not.Null);
@@ -212,7 +222,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomCanonicalAlias));
             Assert.That(@event.Content, Is.Not.Null);
@@ -256,7 +266,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomCreate));
             Assert.That(@event.Content, Is.Not.Null);
@@ -298,7 +308,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomGuestAccess));
             Assert.That(@event.Content, Is.Not.Null);
@@ -335,7 +345,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomHistoryVisibility));
             Assert.That(@event.Content, Is.Not.Null);
@@ -372,7 +382,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomJoinRule));
             Assert.That(@event.Content, Is.Not.Null);
@@ -429,7 +439,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMembership));
             Assert.That(@event.Content, Is.Not.Null);
@@ -503,7 +513,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMembership));
             Assert.That(@event.Content, Is.Not.Null);
@@ -553,7 +563,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomName));
             Assert.That(@event.Content, Is.Not.Null);
@@ -592,7 +602,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomPinnedEvents));
             Assert.That(@event.Content, Is.Not.Null);
@@ -645,7 +655,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomPowerLevels));
             Assert.That(@event.Content, Is.Not.Null);
@@ -703,7 +713,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomServerAcl));
             Assert.That(@event.Content, Is.Not.Null);
@@ -751,7 +761,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomThirdPartyInvite));
             Assert.That(@event.Content, Is.Not.Null);
@@ -800,7 +810,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomTombstone));
             Assert.That(@event.Content, Is.Not.Null);
@@ -838,7 +848,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomTopic));
             Assert.That(@event.Content, Is.Not.Null);
@@ -877,7 +887,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomMessage));
             Assert.That(@event.Content, Is.Not.Null);
@@ -916,7 +926,7 @@ namespace Matrix.Tests
     }
 }";
             using var jsonReader = new JTokenReader(JToken.Parse(json));
-            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            var @event = _jsonSerializer.Deserialize<IRoomEvent>(jsonReader);
             Assert.That(@event, Is.Not.Null);
             Assert.That(@event.EventKind, Is.EqualTo(EventKind.RoomRedaction));
             Assert.That(@event.Content, Is.Not.Null);
@@ -932,6 +942,250 @@ namespace Matrix.Tests
             Assert.That(stateEvent.Sender, Is.EqualTo(@"@example:example.org"));
             Assert.That(stateEvent.UnsignedData, Is.Not.Null);
             Assert.That(stateEvent.UnsignedData.Age, Is.EqualTo(1234));
+        }
+
+        [Test]
+        public void PresenceEventTest()
+        {
+            const string json =
+@"{
+    ""content"": {
+        ""avatar_url"": ""mxc://localhost/wefuiwegh8742w"",
+        ""last_active_ago"": 2478593,
+        ""presence"": ""online"",
+        ""currently_active"": false,
+        ""status_msg"": ""Making cupcakes""
+    },
+    ""type"": ""m.presence"",
+    ""sender"": ""@example:localhost""
+}";
+            using var jsonReader = new JTokenReader(JToken.Parse(json));
+            var @event = _jsonSerializer.Deserialize<IEvent>(jsonReader);
+            Assert.That(@event, Is.Not.Null);
+            Assert.That(@event.EventKind, Is.EqualTo(EventKind.Presence));
+            Assert.That(@event.Content, Is.Not.Null);
+            Assert.That(@event.Content, Is.InstanceOf<IEventContent>());
+            Assert.That(@event.Content, Is.TypeOf<PresenceContent>());
+            var stateEvent = @event as PresenceEvent;
+            Assert.That(stateEvent, Is.Not.Null);
+            Assert.That(stateEvent.Content.AvatarUrl, Is.EqualTo(new Uri(@"mxc://localhost/wefuiwegh8742w")));
+            Assert.That(stateEvent.Content.LastActiveAgo, Is.EqualTo(2478593));
+            Assert.That(stateEvent.Content.PresenceState, Is.EqualTo(PresenceState.Online));
+            Assert.That(stateEvent.Content.CurrentlyActive, Is.False);
+            Assert.That(stateEvent.Content.StatusMessage, Is.EqualTo(@"Making cupcakes"));
+            Assert.That(stateEvent.Sender, Is.EqualTo(@"@example:localhost"));
+        }
+
+        [Test]
+        public void SyncResponseTest()
+        {
+            const string json =
+@"{
+    ""next_batch"": ""s72595_4483_1934"",
+    ""presence"": {
+        ""events"": [
+            {
+                ""content"": {
+                    ""avatar_url"": ""mxc://localhost/wefuiwegh8742w"",
+                    ""last_active_ago"": 2478593,
+                    ""presence"": ""online"",
+                    ""currently_active"": false,
+                    ""status_msg"": ""Making cupcakes""
+                },
+                ""type"": ""m.presence"",
+                ""sender"": ""@example:localhost""
+            }
+        ]
+    },
+    ""account_data"": {
+        ""events"": [
+            {
+                ""type"": ""org.example.custom.config"",
+                ""content"": {
+                    ""custom_config_key"": ""custom_config_value""
+                }
+            }
+        ]
+    },
+    ""rooms"": {
+        ""join"": {
+            ""!726s6s6q:example.com"": {
+                ""summary"": {
+                    ""m.heroes"": [
+                        ""@alice:example.com"",
+                        ""@bob:example.com""
+                    ],
+                    ""m.joined_member_count"": 2,
+                    ""m.invited_member_count"": 0
+                },
+                ""state"": {
+                ""events"": [
+                    {
+                        ""content"": {
+                            ""membership"": ""join"",
+                            ""avatar_url"": ""mxc://example.org/SEsfnsuifSDFSSEF"",
+                            ""displayname"": ""Alice Margatroid""
+                        },
+                        ""type"": ""m.room.member"",
+                        ""event_id"": ""$143273582443PhrSn:example.org"",
+                        ""room_id"": ""!726s6s6q:example.com"",
+                        ""sender"": ""@example:example.org"",
+                        ""origin_server_ts"": 1432735824653,
+                        ""unsigned"": {
+                            ""age"": 1234
+                        },
+                        ""state_key"": ""@alice:example.org""
+                    }
+                ]
+            },
+            ""timeline"": {
+                ""events"": [
+                    {
+                        ""content"": {
+                            ""membership"": ""join"",
+                            ""avatar_url"": ""mxc://example.org/SEsfnsuifSDFSSEF"",
+                            ""displayname"": ""Alice Margatroid""
+                        },
+                        ""type"": ""m.room.member"",
+                        ""event_id"": ""$143273582443PhrSn:example.org"",
+                        ""room_id"": ""!726s6s6q:example.com"",
+                        ""sender"": ""@example:example.org"",
+                        ""origin_server_ts"": 1432735824653,
+                        ""unsigned"": {
+                            ""age"": 1234
+                        },
+                        ""state_key"": ""@alice:example.org""
+                    },
+                    {
+                        ""content"": {
+                            ""body"": ""This is an example text message"",
+                            ""msgtype"": ""m.text"",
+                            ""format"": ""org.matrix.custom.html"",
+                            ""formatted_body"": ""<b>This is an example text message</b>""
+                        },
+                        ""type"": ""m.room.message"",
+                        ""event_id"": ""$143273582443PhrSn:example.org"",
+                        ""room_id"": ""!726s6s6q:example.com"",
+                        ""sender"": ""@example:example.org"",
+                        ""origin_server_ts"": 1432735824653,
+                        ""unsigned"": {
+                            ""age"": 1234
+                        }
+                    }
+                ],
+                ""limited"": true,
+                ""prev_batch"": ""t34-23535_0_0""
+            },
+            ""ephemeral"": {
+                ""events"": [
+                    {
+                        ""content"": {
+                            ""user_ids"": [
+                                ""@alice:matrix.org"",
+                                ""@bob:example.com""
+                            ]
+                        },
+                        ""type"": ""m.typing"",
+                        ""room_id"": ""!jEsUZKDJdhlrceRyVU:example.org""
+                    }
+                ]
+            },
+            ""account_data"": {
+                ""events"": [
+                    {
+                        ""content"": {
+                            ""tags"": {
+                                ""u.work"": {
+                                    ""order"": 0.9
+                                }
+                            }
+                        },
+                        ""type"": ""m.tag""
+                    },
+                    {
+                        ""type"": ""org.example.custom.room.config"",
+                        ""content"": {
+                            ""custom_config_key"": ""custom_config_value""
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    ""invite"": {
+        ""!696r7674:example.com"": {
+            ""invite_state"": {
+                ""events"": [
+                    {
+                        ""sender"": ""@alice:example.com"",
+                        ""type"": ""m.room.name"",
+                        ""state_key"": """",
+                        ""content"": {
+                            ""name"": ""My Room Name""
+                        }
+                    },
+                    {
+                        ""sender"": ""@alice:example.com"",
+                        ""type"": ""m.room.member"",
+                        ""state_key"": ""@bob:example.com"",
+                        ""content"": {
+                            ""membership"": ""invite""
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    ""leave"": {}
+  }
+}";
+            using var jsonReader = new JTokenReader(JToken.Parse(json));
+            var @event = _jsonSerializer.Deserialize<SyncResponse>(jsonReader);
+            Assert.That(@event, Is.Not.Null);
+            Assert.That(@event.NextBatch, Is.EqualTo(@"s72595_4483_1934"));
+            Assert.That(@event.AccountData.Events, Is.Not.Empty);
+            Assert.That(@event.AccountData.Events.Count(), Is.EqualTo(1));
+            Assert.That(@event.AccountData.Events.First().EventKind, Is.EqualTo(EventKind.Custom));
+            var customEvent = @event.AccountData.Events.First() as FallbackEvent;
+            Assert.That(customEvent, Is.Not.Null);
+            Assert.That(customEvent.EventName, Is.EqualTo(@"org.example.custom.config"));
+            Assert.That(customEvent.Content.ContainsKey("custom_config_key"), Is.True);
+            Assert.That(customEvent.Content["custom_config_key"], Is.EqualTo(@"custom_config_value"));
+            Assert.That(@event.NextBatch, Is.EqualTo(@"s72595_4483_1934"));
+            Assert.That(@event.PresenceUpdates.Events, Is.Not.Empty);
+            Assert.That(@event.PresenceUpdates.Events.Count(), Is.EqualTo(1));
+            // are these always presence events? could probably aid deserialization if so
+            // Schema/spec just says "Event"
+            Assert.That(@event.PresenceUpdates.Events.First().EventKind, Is.EqualTo(EventKind.Presence));
+            var presenceEvent = @event.PresenceUpdates.Events.First() as PresenceEvent;
+            Assert.That(presenceEvent, Is.Not.Null);
+            Assert.That(presenceEvent.Sender, Is.EqualTo(@"@example:localhost"));
+            Assert.That(presenceEvent.Content.AvatarUrl, Is.EqualTo(new Uri(@"mxc://localhost/wefuiwegh8742w")));
+            Assert.That(presenceEvent.Content.CurrentlyActive, Is.False);
+            Assert.That(presenceEvent.Content.LastActiveAgo, Is.EqualTo(2478593));
+            Assert.That(presenceEvent.Content.PresenceState, Is.EqualTo(PresenceState.Online));
+            Assert.That(presenceEvent.Content.StatusMessage, Is.EqualTo(@"Making cupcakes"));
+            Assert.That(@event.RoomUpdates.JoinedRooms, Is.Not.Empty);
+            Assert.That(@event.RoomUpdates.JoinedRooms.ContainsKey(@"!726s6s6q:example.com"));
+            var joinedRoom = @event.RoomUpdates.JoinedRooms[@"!726s6s6q:example.com"];
+            Assert.That(joinedRoom.Summary.Heroes, Is.Not.Empty);
+            Assert.That(joinedRoom.Summary.Heroes, Is.EqualTo(new string[] {"@alice:example.com", "@bob:example.com"}));
+            Assert.That(joinedRoom.Summary.InvitedMemberCount, Is.Zero);
+            Assert.That(joinedRoom.Summary.JoinedMemberCount, Is.EqualTo(2));
+            Assert.That(joinedRoom.State.Events, Is.Not.Empty);
+            Assert.That(joinedRoom.State.Events.First().EventKind, Is.EqualTo(EventKind.RoomMembership));
+            Assert.That(joinedRoom.State.Events.First().Content, Is.TypeOf<RoomMembershipContent>());
+            var stateEvent = joinedRoom.State.Events.First() as StateEvent<RoomMembershipContent>;
+            Assert.That(stateEvent, Is.Not.Null);
+            Assert.That(stateEvent.Content, Is.Not.Null);
+            Assert.That(stateEvent.EventId, Is.EqualTo(@"$143273582443PhrSn:example.org"));
+            Assert.That(stateEvent.RoomId, Is.EqualTo(@"!726s6s6q:example.com"));
+            Assert.That(stateEvent.Sender, Is.EqualTo(@"@example:example.org"));
+            Assert.That(stateEvent.OriginServerTimestamp, Is.EqualTo(1432735824653));
+            Assert.That(stateEvent.UnsignedData.Age, Is.EqualTo(1234));
+            Assert.That(stateEvent.Content.MembershipState, Is.EqualTo(MembershipState.Join));
+            Assert.That(stateEvent.Content.DisplayName, Is.EqualTo(@"Alice Margatroid"));
+            Assert.That(stateEvent.Content.AvatarUrl, Is.EqualTo(new Uri("mxc://example.org/SEsfnsuifSDFSSEF")));
         }
     }
 }

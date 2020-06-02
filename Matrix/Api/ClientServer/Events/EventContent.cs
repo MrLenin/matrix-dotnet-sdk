@@ -15,22 +15,35 @@ namespace Matrix.Api.ClientServer.EventContent
     public class PresenceContent : IEventContent
     {
         [JsonProperty(@"last_active_ago")]
-        public long LastActiveAgo { get; }
+        public long LastActiveAgo { get; set; }
         [JsonProperty(@"avatar_url")]
-        public Uri AvatarUrl { get; }
+        public Uri AvatarUrl { get; set; }
         [JsonProperty(@"displayname")]
-        public string DisplayName { get; }
+        public string DisplayName { get; set; }
         [JsonProperty(@"presence")]
-        public PresenceState PresenceState { get; }
+        public PresenceState PresenceState { get; set; }
         [JsonProperty(@"currently_active")]
-        public bool CurrentlyActive { get; }
+        public bool CurrentlyActive { get; set; }
         [JsonProperty(@"status_msg")]
-        public string StatusMessage { get; }
+        public string StatusMessage { get; set; }
     }
 
     public class ReceiptContent : IEventContent
     {
+        [JsonProperty(@"status_msg")]
         public Dictionary<string, ReceiptedEvent> ReceiptedEvents { get; set; }
+    }
+
+    public class TagContent : IEventContent
+    {
+        [JsonProperty(@"tags")]
+        public IDictionary<string, RoomTag> Tags { get; set; }
+    }
+
+    public class TypingContent : IEventContent
+    {
+        [JsonProperty(@"user_ids")]
+        public IEnumerable<string> UserIds { get; set; }
     }
 }
 

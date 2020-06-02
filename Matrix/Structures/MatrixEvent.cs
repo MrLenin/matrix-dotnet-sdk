@@ -54,7 +54,7 @@ namespace Matrix.Structures
     {
         public bool Limited { get; set; }
         public string PrevBatch { get; set; }
-        public IEnumerable<RoomEvent> Events { get; set; }
+        public IEnumerable<IRoomEvent> Events { get; set; }
     }
 
     public static class MatrixEventType

@@ -41,11 +41,11 @@ namespace Matrix.Api.ClientServer
         }
     }
 
-    public class PasswordAuthRequest<TAuthenticationIdentifier> : AuthRequest
-        where TAuthenticationIdentifier : IAuthIdentifier
+    public class PasswordAuthRequest<TAuthIdentifier> : AuthRequest
+        where TAuthIdentifier : IAuthIdentifier
     {
         [JsonProperty(@"identifier")]
-        public TAuthenticationIdentifier AuthenticationIdentifier { get; }
+        public TAuthIdentifier AuthIdentifier { get; }
         [JsonProperty(@"password")]
         public string Password { get; }
 
@@ -59,13 +59,13 @@ namespace Matrix.Api.ClientServer
         [JsonProperty(@"address")]
         public string? Address { get; }
 
-        public PasswordAuthRequest(TAuthenticationIdentifier authenticationIdentifier, string password)
+        public PasswordAuthRequest(TAuthIdentifier authIdentifier, string password)
         {
-            if (authenticationIdentifier == null) throw new ArgumentNullException(nameof(authenticationIdentifier));
-            if (authenticationIdentifier.GetType() == typeof(PhoneAuthIdentifier))
+            if (authIdentifier == null) throw new ArgumentNullException(nameof(authIdentifier));
+            if (authIdentifier.GetType() == typeof(PhoneAuthIdentifier))
                 throw new ArgumentException(@"Password authentication may use only User or ThirdParty identifiers.");
 
-            AuthenticationIdentifier = authenticationIdentifier;
+            AuthIdentifier = authIdentifier;
             Password = password;
         }
     }
@@ -73,11 +73,11 @@ namespace Matrix.Api.ClientServer
     public class TokenAuthRequest : AuthRequest
     {
         [JsonProperty(@"token")]
-        public string AuthenticationToken { get; }
+        public string AuthToken { get; }
 
-        public TokenAuthRequest(string authenticationToken)
+        public TokenAuthRequest(string authToken)
         {
-            AuthenticationToken = authenticationToken;
+            AuthToken = authToken;
         }
 
         public static string ToJsonString()
@@ -104,7 +104,7 @@ namespace Matrix.Api.ClientServer
 
         // User-interactive and non-interactive
         [JsonProperty(@"flows")]
-        public IEnumerable<AuthenticationKind> AuthenticationMethods { get; }
+        public IEnumerable<AuthKind> AuthKinds { get; }
 
         // User-interactive authentication - should move into own type?
         [JsonProperty(@"completed")]
@@ -114,9 +114,9 @@ namespace Matrix.Api.ClientServer
         [JsonProperty(@"session")]
         public string SessionId { get; }
 
-        public ErrorCode ErrorCode { get; set; }
-        public string ErrorMessage { get; set; }
-        public uint RetryAfterMilliseconds { get; set; }
+        public ErrorCode? ErrorCode { get; set; }
+        public string? ErrorMessage { get; set; }
+        public long? RetryAfterMilliseconds { get; set; }
         public HttpStatusCode HttpStatusCode { get; set; }
     }
 }

@@ -12,11 +12,11 @@ namespace Matrix.Api
     public interface IResponse
     {
         [JsonProperty(@"errcode")]
-        ErrorCode ErrorCode { get; set; }
+        ErrorCode? ErrorCode { get; set; }
         [JsonProperty(@"error")]
-        string ErrorMessage { get; set; }
+        string? ErrorMessage { get; set; }
         [JsonProperty(@"retry_after_ms")]
-        uint RetryAfterMilliseconds { get; set; }
+        long? RetryAfterMilliseconds { get; set; }
         HttpStatusCode HttpStatusCode { get; set; }
     }
 }

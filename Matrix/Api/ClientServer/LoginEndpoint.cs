@@ -18,14 +18,14 @@ namespace Matrix.Api.ClientServer
         }
 
         [MatrixSpec(ClientServerVersion.R001, "get-matrix-client-r0-login")]
-        private IEnumerable<AuthenticationKind> RequestAuthenticationKinds()
+        private IEnumerable<AuthKind> RequestAuthenticationKinds()
         {
             _matrixApi.ThrowIfNotSupported();
 
             var response =  _matrixApi.Backend.
                 Request<AuthResponse>(_apiPath, false);
             // Error testing goes here
-            return response.AuthenticationMethods;
+            return response.AuthKinds;
         }
 
         [MatrixSpec(ClientServerVersion.R001, "post-matrix-client-r0-login")]

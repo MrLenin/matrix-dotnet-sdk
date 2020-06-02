@@ -49,7 +49,7 @@ namespace Matrix
         public DeviceApi Device { get; }
         public MediaApi Media { get; }
         public ProfileApi Profile { get; }
-        public virtual SyncApi Sync { get; }
+        public virtual SyncEndpoint Sync { get; }
         public RoomDirectoryApi RoomDirectory { get; }
 
         private VersionsContext _versions;
@@ -72,7 +72,7 @@ namespace Matrix
             Device = new DeviceApi(this);
             Media = new MediaApi(this);
             Profile = new ProfileApi(this);
-            Sync = new SyncApi(this);
+            Sync = new SyncEndpoint(this);
             RoomDirectory = new RoomDirectoryApi(this);
         }
 
@@ -94,7 +94,7 @@ namespace Matrix
             Device = new DeviceApi(this);
             Media = new MediaApi(this);
             Profile = new ProfileApi(this);
-            Sync = new SyncApi(this);
+            Sync = new SyncEndpoint(this);
             RoomDirectory = new RoomDirectoryApi(this);
         }
 
@@ -114,7 +114,7 @@ namespace Matrix
             Device = new DeviceApi(this);
             Media = new MediaApi(this);
             Profile = new ProfileApi(this);
-            Sync = new SyncApi(this);
+            Sync = new SyncEndpoint(this);
             RoomDirectory = new RoomDirectoryApi(this);
         }
 

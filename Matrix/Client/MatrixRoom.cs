@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Matrix.Client
 {
-    public delegate void RoomEventDelegate(MatrixRoom room, IEvent roomEvent);
+    public delegate void RoomEventDelegate(MatrixRoom room, IRoomEvent roomEvent);
 
     public delegate void MatrixRoomChangeDelegate();
 
@@ -150,15 +150,15 @@ namespace Matrix.Client
         /// If a Room receives a new event, process it in here.
         /// </summary>
         /// <param name="roomEvent">New event</param>
-        public void FeedEvent(IEvent @event)
+        public void FeedEvent(IRoomEvent roomEvent)
         {
-            if (@event == null)
-                throw new ArgumentNullException(nameof(@event));
+            if (roomEvent == null)
+                throw new ArgumentNullException(nameof(roomEvent));
 
-            if (@event.Content == null)
+            if (roomEvent.Content == null)
                 return; // We can't operate on this
 
-            switch (@event)
+            switch (roomEvent)
             {
                 case StateEvent<RoomAvatarContent> avatarStateEvent:
                     break;
@@ -182,36 +182,36 @@ namespace Matrix.Client
                     break;
 
                 case StateEvent<RoomMembershipContent> membershipStateEvent:
-                    if (!_api.Sync.IsInitialSync)
-                    {
-                        //Handle new join,leave etc
-                        RoomMembershipEventDelegate eventDelegate = null;
-                        switch (membershipStateEvent.Content.MembershipState)
-                        {
-                            case MembershipState.Invite:
-                                eventDelegate = OnUserInvited;
-                                break;
-                            case MembershipState.Join:
-                                eventDelegate = Members.ContainsKey(membershipStateEvent.StateKey)
-                                    ? OnUserChange
-                                    : OnUserJoined;
-                                break;
-                            case MembershipState.Leave:
-                                eventDelegate = OnUserLeft;
-                                break;
-                            case MembershipState.Ban:
-                                eventDelegate = OnUserBanned;
-                                break;
-                            case MembershipState.Knock:
-                                break;
-                            default:
-                                throw new IndexOutOfRangeException(nameof(membershipStateEvent.Content.MembershipState));
-                        }
+                    //if (!_api.Sync.IsInitialSync)
+                    //{
+                    //    //Handle new join,leave etc
+                    //    RoomMembershipEventDelegate eventDelegate = null;
+                    //    switch (membershipStateEvent.Content.MembershipState)
+                    //    {
+                    //        case MembershipState.Invite:
+                    //            eventDelegate = OnUserInvited;
+                    //            break;
+                    //        case MembershipState.Join:
+                    //            eventDelegate = Members.ContainsKey(membershipStateEvent.StateKey)
+                    //                ? OnUserChange
+                    //                : OnUserJoined;
+                    //            break;
+                    //        case MembershipState.Leave:
+                    //            eventDelegate = OnUserLeft;
+                    //            break;
+                    //        case MembershipState.Ban:
+                    //            eventDelegate = OnUserBanned;
+                    //            break;
+                    //        case MembershipState.Knock:
+                    //            break;
+                    //        default:
+                    //            throw new IndexOutOfRangeException(nameof(membershipStateEvent.Content.MembershipState));
+                    //    }
 
-                        eventDelegate?.Invoke(membershipStateEvent.StateKey, membershipStateEvent.Content);
-                    }
+                    //    eventDelegate?.Invoke(membershipStateEvent.StateKey, membershipStateEvent.Content);
+                    //}
 
-                    Members[membershipStateEvent.StateKey] = membershipStateEvent.Content;
+                    //Members[membershipStateEvent.StateKey] = membershipStateEvent.Content;
                     break;
 
                 case StateEvent<RoomNameContent> nameStateEvent:
@@ -266,7 +266,7 @@ namespace Matrix.Client
 //                        }
 //            }
 
-            OnEvent?.Invoke(this, @event);
+            OnEvent?.Invoke(this, roomEvent);
         }
 
 
@@ -464,7 +464,7 @@ namespace Matrix.Client
         public IStateContent GetStateEvent(string type)
         {
             var evContent = _api.Room.GetStateType(Id, type);
-            var fakeEvent = new StateEvent() {Content = evContent};
+            var fakeEvent = new StateEvent<IStateContent>() {Content = evContent};
             FeedEvent(fakeEvent);
             return evContent;
         }

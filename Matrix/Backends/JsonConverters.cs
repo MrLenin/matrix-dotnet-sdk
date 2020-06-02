@@ -9,21 +9,21 @@ namespace Matrix.Backends
 {
     namespace JsonConverters
     {
-        public class AuthenticationKindJsonConverter : JsonConverter<AuthenticationKind>
+        public class AuthKindJsonConverter : JsonConverter<AuthKind>
         {
-            public override void WriteJson(JsonWriter writer, AuthenticationKind value, JsonSerializer serializer)
+            public override void WriteJson(JsonWriter writer, AuthKind value, JsonSerializer serializer)
             {
                 writer.WriteValue(value.ToJsonString());
             }
 
-            public override AuthenticationKind ReadJson(JsonReader reader, Type objectType,
-                AuthenticationKind existingValue, bool hasExistingValue,
+            public override AuthKind ReadJson(JsonReader reader, Type objectType,
+                AuthKind existingValue, bool hasExistingValue,
                 JsonSerializer serializer)
             {
                 if (reader == null) throw new ArgumentNullException(nameof(reader));
                 if (!(reader.Value is string stringValue))
                     throw new NullReferenceException(@"Failed to read authentication type property.");
-                return stringValue.ToAuthenticationKind();
+                return stringValue.ToAuthKind();
             }
         }
 
@@ -63,7 +63,7 @@ namespace Matrix.Backends
             }
         }
 
-        public class GuestAccessKindJsonConverter : JsonConverter<GuestAccess>
+        public class GuestAccessJsonConverter : JsonConverter<GuestAccess>
         {
             public override void WriteJson(JsonWriter writer, GuestAccess value, JsonSerializer serializer)
             {
@@ -81,7 +81,7 @@ namespace Matrix.Backends
             }
         }
 
-        public class HistoryVisibilityKindJsonConverter : JsonConverter<HistoryVisibility>
+        public class HistoryVisibilityJsonConverter : JsonConverter<HistoryVisibility>
         {
             public override void WriteJson(JsonWriter writer, HistoryVisibility value, JsonSerializer serializer)
             {
@@ -99,7 +99,7 @@ namespace Matrix.Backends
             }
         }
 
-        public class JoinRuleKindJsonConverter : JsonConverter<JoinRule>
+        public class JoinRuleJsonConverter : JsonConverter<JoinRule>
         {
             public override void WriteJson(JsonWriter writer, JoinRule value, JsonSerializer serializer)
             {
@@ -153,7 +153,7 @@ namespace Matrix.Backends
             }
         }
 
-        public class PresenceStatusJsonConverter : JsonConverter<PresenceState>
+        public class PresenceStateJsonConverter : JsonConverter<PresenceState>
         {
             public override void WriteJson(JsonWriter writer, PresenceState value, JsonSerializer serializer)
             {

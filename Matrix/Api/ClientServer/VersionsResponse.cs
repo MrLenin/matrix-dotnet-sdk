@@ -19,15 +19,14 @@ namespace Matrix.Api.ClientServer
 
         public VersionsResponse()
         {
-            ErrorCode = ErrorCode.None;
             HttpStatusCode = HttpStatusCode.OK;
             ApiVersions = new List<ClientServerVersion>();
             UnstableFeatures = new Dictionary<string, bool>();
         }
 
-        public ErrorCode ErrorCode { get; set; }
-        public string ErrorMessage { get; set; }
-        public uint RetryAfterMilliseconds { get; set; }
+        public ErrorCode? ErrorCode { get; set; }
+        public string? ErrorMessage { get; set; }
+        public long? RetryAfterMilliseconds { get; set; }
         public HttpStatusCode HttpStatusCode { get; set; }
     }
 
